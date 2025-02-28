@@ -4,8 +4,8 @@ using SadRogue.Primitives.GridViews;
 namespace Roguish;
 internal class MapGenerator
 {
-    private ISettableGridView<bool> _wallFloorValues { get; init; }
-    public bool Walkable(int x, int y) => _wallFloorValues[x, y];
+    public ISettableGridView<bool> WallFloorValues { get; init; }
+    public bool Walkable(int x, int y) => WallFloorValues[x, y];
 
     public MapGenerator(int width, int height)
     {
@@ -18,7 +18,7 @@ internal class MapGenerator
 
         });
 
-        _wallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
+        WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
     }
 
     public MapGenerator() : this(RootScreen.GetRootScreen().Width, RootScreen.GetRootScreen().Height) {}

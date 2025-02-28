@@ -1,4 +1,5 @@
-﻿using SadConsole.Host;
+﻿using GoRogue.Pathing;
+using SadConsole.Host;
 using Game = SadConsole.Game;
 
 namespace Roguish;
@@ -8,6 +9,25 @@ public class RootScreen : ScreenObject
     private ScreenSurface _mainSurface;
     public int Width => _mainSurface.Width;
     public int Height => _mainSurface.Height;
+
+    static ColoredGlyph pathVert = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xB3);
+    static ColoredGlyph pathHoriz = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xC4);
+    static ColoredGlyph pathUR = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xBF);
+    static ColoredGlyph pathUL = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xDA);
+    static ColoredGlyph pathLR = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xD9);
+    static ColoredGlyph pathLL = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xC0);
+
+    private static Dictionary<int, ColoredGlyph> mpIndexToGlyph = new Dictionary<int, ColoredGlyph>()
+    {
+        {3, pathLL},
+        {5, pathVert},
+        {9, pathLR},
+        {6, pathUL},
+        {10, pathHoriz},
+        {12, pathUR},
+    };
+
+
 
     public RootScreen()
     {
@@ -24,6 +44,11 @@ public class RootScreen : ScreenObject
         Children.Add(_mainSurface);
         if (GameSettings.FResizeHook)
         {
+            // Resizing causes some weird gunk occasionally around the edges where the window is being resized into.
+            // Suspicious that this is a MonoGame issue since there are some videos demonstrating similar behavior with
+            // pure MonoGame.  Generally it can be reproed by making the window slightly smaller (less than a character)
+            // and then dragging it larger.  Not sure what it is but pretty sure it's in MonoGame or perhaps SadConsole.
+            // See some of the GIF examples here: https://docs.flatredball.com/gum/code/monogame/resizing-the-game-window
             Game.Instance.MonoGameInstance.Window.ClientSizeChanged += Game_WindowResized;
         }
 
@@ -57,10 +82,16 @@ public class RootScreen : ScreenObject
         _mainSurface.IsDirty = true;
     }
 
+    private void DrawGlyph(ColoredGlyph glyph, Point pt)
+    {
+        DrawGlyph(glyph, pt.X, pt.Y);
+    }
 
     private void FillSurface()
     {
-        var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, '\u2591');
+        var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);//'\u2591');
+        var pathStart = new ColoredGlyph(Color.Green, Color.Green, '\u2591');
+        var pathEnd = new ColoredGlyph(Color.Red, Color.Red, '\u2591');
 
         _mainSurface.Fill(new Rectangle(0, 0, Width, Height), GameSettings.ForeColor, GameSettings.ClearColor, 0, Mirror.None);
         var gen = new MapGenerator();
@@ -75,7 +106,50 @@ public class RootScreen : ScreenObject
                 }
             }
         }
+
+        var yStartFirst = Enumerable.Range(0, Height - 1).First(y => gen.Walkable(1, y));
+        var yStartLast = Enumerable.Range(1, Height - 1).Reverse().First(y => gen.Walkable(Width - 2, y));
+        var ptStart = new Point(1, yStartFirst);
+        var ptEnd = new Point(Width - 2, yStartLast);
+        var aStar = new AStar(gen.WallFloorValues, Distance.Manhattan);
+        var path = aStar.ShortestPath(ptStart, ptEnd);
+        if (path != null)
+        {
+            var pathSteps = path.Steps.ToArray();
+            DrawGlyph(pathStart, ptStart);
+            DrawGlyph(pathEnd, ptEnd);
+            InscribePath(ptStart, pathSteps[0], pathSteps[1]);
+            for (var i = 1; i <  pathSteps.Length - 1; i++)
+            {
+                InscribePath(pathSteps[i - 1], pathSteps[i], pathSteps[i + 1]);
+            }
+        }
     }
+
+    private void InscribePath(Point prev, Point cur, Point next)
+    {
+        var index = ConnectValue(cur, prev) | ConnectValue(cur, next);
+        DrawGlyph(mpIndexToGlyph[index], cur);
+    }
+
+    private int ConnectValue(Point pt, Point ptConnect)
+    {
+        // Connection points (with pt at the center):
+        //     1
+        //    +-+
+        //   8| |2
+        //    +-+
+        //     4
+        if (pt.X == ptConnect.X)
+        {
+            return pt.Y < ptConnect.Y ? 4 : 1;
+        }
+        else
+        {
+            return pt.X < ptConnect.X ? 2 : 8;
+        }
+    }
+
 
     private static RootScreen _rsSingleton = null;
     public static RootScreen GetRootScreen()
