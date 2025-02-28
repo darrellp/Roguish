@@ -1,6 +1,7 @@
 ﻿using GoRogue.Pathing;
 using SadConsole.Host;
 using Game = SadConsole.Game;
+// ReSharper disable IdentifierTypo
 
 namespace Roguish;
 
@@ -10,14 +11,16 @@ public class RootScreen : ScreenObject
     public int Width => _mainSurface.Width;
     public int Height => _mainSurface.Height;
 
-    static ColoredGlyph pathVert = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xB3);
-    static ColoredGlyph pathHoriz = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xC4);
-    static ColoredGlyph pathUR = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xBF);
-    static ColoredGlyph pathUL = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xDA);
-    static ColoredGlyph pathLR = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xD9);
-    static ColoredGlyph pathLL = new ColoredGlyph(Color.Red, GameSettings.ClearColor, 0xC0);
+    // ReSharper disable InconsistentNaming
+    private static ColoredGlyph pathVert = new(Color.Red, GameSettings.ClearColor, 0xBA);
+    private static ColoredGlyph pathHoriz = new(Color.Red, GameSettings.ClearColor, 0xCD);
+    private static ColoredGlyph pathUR = new(Color.Red, GameSettings.ClearColor, 0xBB);
+    private static ColoredGlyph pathUL = new(Color.Red, GameSettings.ClearColor, 0xC9);
+    private static ColoredGlyph pathLR = new(Color.Red, GameSettings.ClearColor, 0xBC);
+    private static ColoredGlyph pathLL = new(Color.Red, GameSettings.ClearColor, 0xC8);
+    // ReSharper restore InconsistentNaming
 
-    private static Dictionary<int, ColoredGlyph> mpIndexToGlyph = new Dictionary<int, ColoredGlyph>()
+    private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new Dictionary<int, ColoredGlyph>()
     {
         {3, pathLL},
         {5, pathVert},
@@ -91,7 +94,7 @@ public class RootScreen : ScreenObject
     {
         var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);//'\u2591');
         var pathStart = new ColoredGlyph(Color.Green, Color.Green, '\u2591');
-        var pathEnd = new ColoredGlyph(Color.Red, Color.Red, '\u2591');
+        var pathEnd = new ColoredGlyph(Color.Red, Color.Blue, '\u2591');
 
         _mainSurface.Fill(new Rectangle(0, 0, Width, Height), GameSettings.ForeColor, GameSettings.ClearColor, 0, Mirror.None);
         var gen = new MapGenerator();
@@ -129,7 +132,7 @@ public class RootScreen : ScreenObject
     private void InscribePath(Point prev, Point cur, Point next)
     {
         var index = ConnectValue(cur, prev) | ConnectValue(cur, next);
-        DrawGlyph(mpIndexToGlyph[index], cur);
+        DrawGlyph(_mpIndexToGlyph[index], cur);
     }
 
     private int ConnectValue(Point pt, Point ptConnect)
@@ -151,7 +154,7 @@ public class RootScreen : ScreenObject
     }
 
 
-    private static RootScreen _rsSingleton = null;
+    private static RootScreen _rsSingleton;
     public static RootScreen GetRootScreen()
     {
         if (_rsSingleton == null)
