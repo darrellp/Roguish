@@ -1,4 +1,5 @@
 ﻿using GoRogue.MapGeneration;
+using SadConsole.StringParser;
 using SadRogue.Primitives.GridViews;
 
 namespace Roguish;
@@ -15,7 +16,8 @@ internal class MapGenerator
         generator.ConfigAndGenerateSafe(gen =>
         {
             gen.AddSteps(DefaultAlgorithms.DungeonMazeMapSteps());
-
+            //gen.AddSteps(DefaultAlgorithms.BasicRandomRoomsMapSteps());
+            //gen.AddSteps(DefaultAlgorithms.CellularAutomataGenerationSteps());
         });
 
         WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");

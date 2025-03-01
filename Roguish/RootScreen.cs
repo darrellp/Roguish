@@ -110,10 +110,34 @@ public class RootScreen : ScreenObject
             }
         }
 
-        var yStartFirst = Enumerable.Range(0, Height - 1).First(y => gen.Walkable(1, y));
-        var yStartLast = Enumerable.Range(1, Height - 1).Reverse().First(y => gen.Walkable(Width - 2, y));
-        var ptStart = new Point(1, yStartFirst);
-        var ptEnd = new Point(Width - 2, yStartLast);
+        var fFoundStart = false;
+        var fFoundEnd = false;
+        var ptStart = new Point();
+        var ptEnd = new Point();
+        for (var iX = 0; iX < Width; iX++)
+        {
+            for (var iY = 0; iY < Height; iY++)
+            {
+                if (!fFoundStart && gen.Walkable(iX, iY))
+                {
+                    ptStart = new Point(iX, iY);
+                    fFoundStart = true;
+                }
+                if (!fFoundEnd && gen.Walkable(Width - 1 - iX, Height - 1 - iY))
+                {
+                    ptEnd = new Point(Width - 1 - iX, Height - 1 - iY);
+                    fFoundEnd = true;
+                }
+                if (fFoundStart && fFoundEnd)
+                {
+                    break;
+                }
+            }
+            if (fFoundStart && fFoundEnd)
+            {
+                break;
+            }
+        }
         var aStar = new AStar(gen.WallFloorValues, Distance.Manhattan);
         var path = aStar.ShortestPath(ptStart, ptEnd);
         if (path != null)
@@ -135,7 +159,7 @@ public class RootScreen : ScreenObject
         DrawGlyph(_mpIndexToGlyph[index], cur);
     }
 
-    private int ConnectValue(Point pt, Point ptConnect)
+    private static int ConnectValue(Point pt, Point ptConnect)
     {
         // Connection points (with pt at the center):
         //     1
