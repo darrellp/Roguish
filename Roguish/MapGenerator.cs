@@ -15,9 +15,10 @@ internal class MapGenerator
         // and generate the map.
         generator.ConfigAndGenerateSafe(gen =>
         {
-            gen.AddSteps(DefaultAlgorithms.DungeonMazeMapSteps());
+            //gen.AddSteps(DefaultAlgorithms.DungeonMazeMapSteps());
             //gen.AddSteps(DefaultAlgorithms.BasicRandomRoomsMapSteps());
             //gen.AddSteps(DefaultAlgorithms.CellularAutomataGenerationSteps());
+            gen.AddStep(new RoomGenDAP());
         });
 
         WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
