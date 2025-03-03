@@ -84,7 +84,8 @@ namespace Roguish.Map_Generation
                 connectedCell = connectedCells[connectedCellIndex];
 
                 // Get the totally unconnected neighbors it's not connected with
-                var unconnectedNeighbors = UnconnectedNeighbors(connectedCell).ToList();
+                var unconnectedNeighbors = UnconnectedNeighbors(connectedCell)
+                    .Where(pt => !isConnected[pt.X, pt.Y]).ToList();
 
                 // Are there any such neighbors?
                 if (unconnectedNeighbors.Count != 0)
@@ -126,7 +127,7 @@ namespace Roguish.Map_Generation
         internal void AddRandomConnections(int connectionCount, GridConnections connections)
         {
             // For the number of random connections to be added
-            for (int iConnection = 0; iConnection < connectionCount; iConnection++)
+            for (var iConnection = 0; iConnection < connectionCount; iConnection++)
             {
                 // Add a random connection...
                 connections.MakeRandomConnection();

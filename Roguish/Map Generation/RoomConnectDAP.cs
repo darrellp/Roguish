@@ -24,6 +24,8 @@ namespace Roguish.Map_Generation
         public string? WallFloorComponentTag;
         public string? RectRoomsComponentTag;
         public string? TunnelsComponentTag;
+        public string? AreasComponentTag;
+
         public int PctMergeChance = 50;
         private GenerationContext _context;
         private GridConnections _connections;
@@ -41,7 +43,8 @@ namespace Roguish.Map_Generation
 
         public RoomConnectDAP(string? name = null, string? wallFloorComponentTag = "WallFloor",
             string? tunnelsComponentTag = "Tunnels",
-            string? rectRoomsComponentTag = "RectRooms")
+            string? rectRoomsComponentTag = "RectRooms",
+            string? areasComponentTag = "Areas")
             : base(name,
                 (typeof(IGridView<bool>), wallFloorComponentTag),
                 (typeof(RectangularRoom[][]), rectRoomsComponentTag))
@@ -49,6 +52,7 @@ namespace Roguish.Map_Generation
             WallFloorComponentTag = wallFloorComponentTag;
             RectRoomsComponentTag = rectRoomsComponentTag;
             TunnelsComponentTag = tunnelsComponentTag;
+            AreasComponentTag = areasComponentTag;
         }
 
         protected override IEnumerator<object?> OnPerform(GenerationContext context)
@@ -87,6 +91,14 @@ namespace Roguish.Map_Generation
 
             // Do any cleanup
             //PostProcess(map);
+
+            var areas = new HashSet<Area>(_roomAreas.Values).ToArray();
+            context.GetFirstOrNew<Area[]>(
+                () => areas,
+                AreasComponentTag
+            );
+
+
 
             yield return null;
         }
@@ -130,7 +142,6 @@ namespace Roguish.Map_Generation
         /// Names are named as though dir was vertical and dirOther horizontal. Darrellp, 9/22/2011. 
         /// </remarks>
         ///
-        /// <param name="map">			The map. </param>
         /// <param name="topRoom">		The top room. </param>
         /// <param name="bottomRoom">	The bottom room. </param>
         /// <param name="dir">			The dir. </param>
@@ -170,14 +181,6 @@ namespace Roguish.Map_Generation
                 currentLocation = currentLocation.Set(dir, topRoomsBottom + 1);
                 _wallFloor[currentLocation] = true;
                 currentLocation = currentLocation.Set(dir, topRoomsBottom);
-
-                //currentLocation[dirOther] = iCol;
-                //map[currentLocation].Terrain = TerrainType.Floor;
-                //groomTop[currentLocation] = floorChar;
-                //currentLocation[dir] = topRoomsBottom + 1;
-                //map[currentLocation].Terrain = TerrainType.Floor;
-                //groomTop[currentLocation] = floorChar;
-                //currentLocation[dir] = topRoomsBottom;
             }
         }
 
@@ -200,19 +203,14 @@ namespace Roguish.Map_Generation
             GetEntrances(roomTop, roomBottom, dir, out topEntrance, out bottomEntrance);
 
             // Allocate the generic room
-            int genericWidth = Math.Abs(topEntrance.X - bottomEntrance.X) + 1;
-            int genericHeight = Math.Abs(topEntrance.Y - bottomEntrance.Y) + 1;
-            int genericLeft = Math.Min(topEntrance.X, bottomEntrance.X);
-            int genericBottom = Math.Min(topEntrance.Y, bottomEntrance.Y);
-            Point genericLocation = new Point(genericLeft, genericBottom);
             Area corridorArea = new Area();
 
             // Excavate a connection between the two rooms
             CreateBend(dir, topEntrance, bottomEntrance, corridorArea);
 
             // Put the exits in the appropriate generic rooms
-            Area groomTop = _roomAreas[roomTop];
-            Area groomBottom = _roomAreas[roomBottom];
+            //Area groomTop = _roomAreas[roomTop];
+            //Area groomBottom = _roomAreas[roomBottom];
 
 
             //// Should we put a door in the top room?

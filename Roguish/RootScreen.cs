@@ -13,12 +13,12 @@ public class RootScreen : ScreenObject
     public int Height => _mainSurface.Height;
 
     // ReSharper disable InconsistentNaming
-    private static ColoredGlyph pathVert = new(Color.Red, GameSettings.ClearColor, 0xBA);
-    private static ColoredGlyph pathHoriz = new(Color.Red, GameSettings.ClearColor, 0xCD);
-    private static ColoredGlyph pathUR = new(Color.Red, GameSettings.ClearColor, 0xBB);
-    private static ColoredGlyph pathUL = new(Color.Red, GameSettings.ClearColor, 0xC9);
-    private static ColoredGlyph pathLR = new(Color.Red, GameSettings.ClearColor, 0xBC);
-    private static ColoredGlyph pathLL = new(Color.Red, GameSettings.ClearColor, 0xC8);
+    private static ColoredGlyph pathVert = new(Color.Red, Color.Yellow, 0xBA);
+    private static ColoredGlyph pathHoriz = new(Color.Red, Color.Yellow, 0xCD);
+    private static ColoredGlyph pathUR = new(Color.Red, Color.Yellow, 0xBB);
+    private static ColoredGlyph pathUL = new(Color.Red, Color.Yellow, 0xC9);
+    private static ColoredGlyph pathLR = new(Color.Red, Color.Yellow, 0xBC);
+    private static ColoredGlyph pathLL = new(Color.Red, Color.Yellow, 0xC8);
     // ReSharper restore InconsistentNaming
 
     private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new Dictionary<int, ColoredGlyph>()
@@ -93,7 +93,8 @@ public class RootScreen : ScreenObject
 
     private void FillSurface()
     {
-        var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);//'\u2591');
+        var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);
+        var areaAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Chocolate, 0x00);
         var pathStart = new ColoredGlyph(Color.Green, Color.Green, '\u2591');
         var pathEnd = new ColoredGlyph(Color.Red, Color.Blue, '\u2591');
 
@@ -108,6 +109,14 @@ public class RootScreen : ScreenObject
                 {
                     DrawGlyph(wallAppearance, iX, iY);
                 }
+            }
+        }
+
+        foreach (var area in gen.Areas)
+        {
+            foreach (var pos in area.AsEnumerable())
+            {
+                DrawGlyph(areaAppearance, pos);
             }
         }
 

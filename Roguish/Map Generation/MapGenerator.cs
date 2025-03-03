@@ -5,6 +5,7 @@ namespace Roguish.Map_Generation;
 internal class MapGenerator
 {
     public ISettableGridView<bool> WallFloorValues { get; init; }
+    public Area[] Areas { get; init; }
     public bool Walkable(int x, int y) => WallFloorValues[x, y];
 
     public MapGenerator(int width, int height)
@@ -17,11 +18,12 @@ internal class MapGenerator
             //gen.AddSteps(DefaultAlgorithms.DungeonMazeMapSteps());
             //gen.AddSteps(DefaultAlgorithms.BasicRandomRoomsMapSteps());
             //gen.AddSteps(DefaultAlgorithms.CellularAutomataGenerationSteps());
-            gen.AddStep(new RoomGenDAP() { MinRoomHeight = 3});
-            gen.AddStep(new RoomConnectDAP());
+            gen.AddStep(new RoomGenDAP() { MinRoomHeight = 5});
+            gen.AddStep(new RoomConnectDAP() {PctMergeChance = 30});
         });
 
         WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
+        Areas = generator.Context.GetFirst<Area[]>($"Areas");
     }
 
     public MapGenerator() : this(RootScreen.GetRootScreen().Width, RootScreen.GetRootScreen().Height) {}

@@ -133,8 +133,10 @@ namespace Roguish.Map_Generation
 
                     // currentWidth and currentHeight here represent the width/height of the supergrid cell - not the room.
                     var room = CreateRoomInCell(superGridLocation, gridLocation, currentWidth, currentHeight);
-
-                    foreach (var tileGridPos in room.rect.Positions())
+                    var rect = room.rect;
+                    rect = rect.WithSize(rect.Width - 2, rect.Height - 2)
+                        .WithPosition(rect.Position + new Point(1, 1));
+                    foreach (var tileGridPos in rect.Positions())
                     {
                         wallFloor[tileGridPos] = true;
                     }
