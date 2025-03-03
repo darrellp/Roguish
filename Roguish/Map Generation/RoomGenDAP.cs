@@ -1,31 +1,22 @@
 ﻿using GoRogue.MapGeneration;
-using GoRogue.MapGeneration.ContextComponents;
 using GoRogue.Random;
 using SadRogue.Primitives.GridViews;
 using ShaiRandom.Generators;
 
-namespace Roguish
+namespace Roguish.Map_Generation
 {
-    class RectangularRoom
-    {
-        public Rectangle Position;
-        public Point SuperGridCell;
-    }
-
     internal class RoomGenDAP : GenerationStep
     {
-        public readonly int SuperCellWidth = 20;
-        public readonly int SuperCellHeight = 10;
-        public readonly int MinRoomWidth = 5;
-        public readonly int MinRoomHeight = 5;
-        public readonly int PctMergeChance = 50;
-        public readonly int PctDoorChance = 50;
-        public readonly string? WallFloorComponentTag;
-        public readonly string? RectRoomsComponentTag;
-
+        public int SuperCellWidth = 20;
+        public int SuperCellHeight = 10;
+        public int MinRoomWidth = 5;
+        public int MinRoomHeight = 5;
+        public string? WallFloorComponentTag;
+        public string? RectRoomsComponentTag;
 
         public IEnhancedRandom RNG = GlobalRandom.DefaultRNG;
 
+        // ReSharper disable once ConvertToPrimaryConstructor
         public RoomGenDAP(string? name = null, string? wallFloorComponentTag = "WallFloor", string? rectRoomsComponentTag = "RectRooms")
             : base(name)
         {
@@ -48,31 +39,17 @@ namespace Roguish
             if (MinRoomHeight <= 0)
                 throw new InvalidConfigurationException(this, nameof(MinRoomHeight),
                     $"The value must be greater than zero.");
-            if (PctMergeChance <= 0)
-                throw new InvalidConfigurationException(this, nameof(PctMergeChance),
-                    $"The value must be greater than zero.");
-            if (PctDoorChance <= 0)
-                throw new InvalidConfigurationException(this, nameof(PctDoorChance),
-                    $"The value must be greater than zero.");
-            if (PctMergeChance >= 100)
-                throw new InvalidConfigurationException(this, nameof(PctMergeChance),
-                    $"The value must be less than 100.");
-            if (PctDoorChance >= 100)
-                throw new InvalidConfigurationException(this, nameof(PctDoorChance),
-                    $"The value must be less than 100.");
 
             var wallFloor = new ArrayView<bool>(context.Width, context.Height);
             var rooms = LocateRooms(context, wallFloor);
 
 
             // Get or create/add a wall-floor context component
-            // var wallFloorContext = context.GetFirstOrNew<ISettableGridView<bool>>(
             context.GetFirstOrNew<ISettableGridView<bool>>(
                 () => wallFloor,
                 WallFloorComponentTag
             );
 
-            // var roomsContext = context.GetFirstOrNew(
             context.GetFirstOrNew(
                 () => rooms,
                 RectRoomsComponentTag
@@ -85,9 +62,8 @@ namespace Roguish
         /// <summary>	Locates the rooms on the map. </summary>
         /// 
         /// <remarks>	Darrellp, 9/19/2011. </remarks>
-        /// <param name="context"></param>
-        /// <param name="wallFloor"></param>
-        /// <param name="map">	The map to be excavated. </param>
+        /// <param name="context">Map info</param>
+        /// <param name="wallFloor">GridView to draw floor on</param>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         private RectangularRoom[][] LocateRooms(GenerationContext context, ArrayView<bool> wallFloor)
         {
@@ -158,7 +134,7 @@ namespace Roguish
                     // currentWidth and currentHeight here represent the width/height of the supergrid cell - not the room.
                     var room = CreateRoomInCell(superGridLocation, gridLocation, currentWidth, currentHeight);
 
-                    foreach (var tileGridPos in room.Position.Positions())
+                    foreach (var tileGridPos in room.rect.Positions())
                     {
                         wallFloor[tileGridPos] = true;
                     }
@@ -205,7 +181,7 @@ namespace Roguish
             // Return newly created room
             RectangularRoom room = new RectangularRoom()
             {
-                Position = rc,
+                rect = rc,
                 SuperGridCell = superGridLocation,
             };
 

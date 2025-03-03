@@ -1,4 +1,5 @@
 ﻿using GoRogue.Pathing;
+using Roguish.Map_Generation;
 using SadConsole.Host;
 using Game = SadConsole.Game;
 // ReSharper disable IdentifierTypo
