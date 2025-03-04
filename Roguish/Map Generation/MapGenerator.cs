@@ -23,7 +23,7 @@ internal class MapGenerator
         });
 
         WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
-        Areas = generator.Context.GetFirst<Area[]>($"Areas");
+        Areas = generator.Context.GetFirst<Area[]>("Areas");
     }
 
     public MapGenerator() : this(RootScreen.GetRootScreen().Width, RootScreen.GetRootScreen().Height) {}

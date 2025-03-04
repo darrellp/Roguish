@@ -1,9 +1,6 @@
-﻿using System.Data.Common;
-using GoRogue.MapGeneration;
-using SadConsole.UI.Controls;
+﻿// ReSharper disable IdentifierTypo
 
-// ReSharper disable IdentifierTypo
-
+// ReSharper disable InvalidXmlDocComment
 namespace Roguish
 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,8 +124,8 @@ namespace Roguish
         ///             
         ///             Darrellp, 8/25/2016. </remarks>
         ///
-        /// <param name="mapWidth">     Width of the map. </param>
-        /// <param name="mapHeight">    Height of the map. </param>
+        /// <param name="width">     Width of the map. </param>
+        /// <param name="height">    Height of the map. </param>
         ///
         /// <returns>   An IEnumerable&lt;HVPoint&gt; of neighbors </returns>
         ////////////////////////////////////////////////////////////////////////////////////////////////////

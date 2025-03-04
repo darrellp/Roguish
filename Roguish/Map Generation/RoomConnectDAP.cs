@@ -1,20 +1,7 @@
-﻿using GoRogue.GameFramework;
-using GoRogue.MapGeneration;
-using GoRogue.MapGeneration.ContextComponents;
+﻿using GoRogue.MapGeneration;
 using GoRogue.Random;
-using SadConsole.UI.Controls;
 using SadRogue.Primitives.GridViews;
 using ShaiRandom.Generators;
-using System.Diagnostics;
-using static Roguish.Map_Generation.RoomGenDAP;
-
-enum Wall
-{
-    Left,
-    Right,
-    Top,
-    Bottom
-}
 
 namespace Roguish.Map_Generation
 {
@@ -27,13 +14,12 @@ namespace Roguish.Map_Generation
         public string? AreasComponentTag;
 
         public int PctMergeChance = 50;
-        private GenerationContext _context;
-        private GridConnections _connections;
-        private GridConnections _merges;
+        private GridConnections? _connections;
+        private GridConnections? _merges;
 
-        private ISettableGridView<bool> _wallFloor;
-        RectangularRoom[][] _rooms;
-        private Dictionary<RectangularRoom, Area> _roomAreas = new();
+        private ISettableGridView<bool>? _wallFloor;
+        RectangularRoom[][] _rooms = [];
+        private Dictionary<RectangularRoom, Area> _roomAreas;
 
         private int SuperGridWidth => _rooms.Length;
         private int SuperGridHeight => _rooms[0].Length;
@@ -53,6 +39,8 @@ namespace Roguish.Map_Generation
             RectRoomsComponentTag = rectRoomsComponentTag;
             TunnelsComponentTag = tunnelsComponentTag;
             AreasComponentTag = areasComponentTag;
+
+            _roomAreas = new Dictionary<RectangularRoom, Area>();
         }
 
         protected override IEnumerator<object?> OnPerform(GenerationContext context)
@@ -63,8 +51,8 @@ namespace Roguish.Map_Generation
             _roomAreas = new Dictionary<RectangularRoom, Area>();
 
             // Create our connections objects
-            _connections = new GridConnections(SuperGridWidth, SuperGridHeight, context);
-            _merges = new GridConnections(SuperGridWidth, SuperGridHeight, context);
+            _connections = new GridConnections(SuperGridWidth, SuperGridHeight);
+            _merges = new GridConnections(SuperGridWidth, SuperGridHeight);
 
             foreach (var room in _rooms.SelectMany(roomRow => roomRow))
             {
@@ -93,12 +81,10 @@ namespace Roguish.Map_Generation
             //PostProcess(map);
 
             var areas = new HashSet<Area>(_roomAreas.Values).ToArray();
-            context.GetFirstOrNew<Area[]>(
+            context.GetFirstOrNew(
                 () => areas,
                 AreasComponentTag
             );
-
-
 
             yield return null;
         }
@@ -107,22 +93,20 @@ namespace Roguish.Map_Generation
         /// <summary>	Excavate all corridors on the map. </summary>
         ///
         /// <remarks>	Darrellp, 9/20/2011. </remarks>
-        ///
-        /// <param name="map">	The map to be excavated. </param>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         private void ExcavateRoomConnections()
         {
             // For every connection
-            foreach (var info in _connections.Connections.Where(ci => ci.IsConnected))
+            foreach (var info in _connections!.Connections.Where(ci => ci.IsConnected))
             {
                 // Get the pertinent information
-                Point location1 = info.Location;
-                Point location2 = info.Location.NextLarger(info.Dir);
-                RectangularRoom room1 = RoomAt(location1);
-                RectangularRoom room2 = RoomAt(location2);
+                var location1 = info.Location;
+                var location2 = info.Location.NextLarger(info.Dir);
+                var room1 = RoomAt(location1)!;
+                var room2 = RoomAt(location2)!;
 
                 // Are the rooms to be merged?
-                if (_merges.IsConnected(location1, location2))
+                if (_merges!.IsConnected(location1, location2))
                 {
                     // merge them
                     ExcavateMerge(room1, room2, info.Dir);
@@ -177,9 +161,9 @@ namespace Roguish.Map_Generation
             {
                 // Clear out the two walls of the abutting rooms
                 currentLocation = currentLocation.Set(dirOther, iCol);
-                _wallFloor[currentLocation] = true;
+                _wallFloor![currentLocation] = true;
                 currentLocation = currentLocation.Set(dir, topRoomsBottom + 1);
-                _wallFloor[currentLocation] = true;
+                _wallFloor![currentLocation] = true;
                 currentLocation = currentLocation.Set(dir, topRoomsBottom);
             }
         }
@@ -189,18 +173,14 @@ namespace Roguish.Map_Generation
         ///
         /// <remarks>	Variables named from the perspective of dir being vertical.  Darrellp, 9/18/2011. </remarks>
         ///
-        /// <param name="map">			The map to be excavated. </param>
         /// <param name="roomTop">		The first room. </param>
         /// <param name="roomBottom">	The second room. </param>
         /// <param name="dir">			The direction to excavate in. </param>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         private void ExcavateCorridor(RectangularRoom roomTop, RectangularRoom roomBottom, Dir dir)
         {
-            // Locals
-            Point bottomEntrance, topEntrance;
-
             // Get the entrances to each room
-            GetEntrances(roomTop, roomBottom, dir, out topEntrance, out bottomEntrance);
+            GetEntrances(roomTop, roomBottom, dir, out var topEntrance, out var bottomEntrance);
 
             // Allocate the generic room
             Area corridorArea = new Area();
@@ -233,7 +213,6 @@ namespace Roguish.Map_Generation
         ///
         /// <remarks>	Variables named from the perspective that dir is vertical Darrellp, 9/19/2011. </remarks>
         ///
-        /// <param name="map">				The map to be excavated. </param>
         /// <param name="dir">				The direction the merge will take place in. </param>
         /// <param name="topEntrance">		The small coordinate entrance. </param>
         /// <param name="bottomEntrance">	The large coordinate entrance. </param>
@@ -268,7 +247,6 @@ namespace Roguish.Map_Generation
         /// though dir was vertical.  Darrellp, 9/18/2011. 
         /// </remarks>
         ///
-        /// <param name="map">			The map to be excavated. </param>
         /// <param name="startColumn">	The start perpindicular. </param>
         /// <param name="endColumn">	The end perpindicular. </param>
         /// <param name="startRow">		The start parallel. </param>
@@ -321,7 +299,7 @@ namespace Roguish.Map_Generation
             {
                 // Place our terrain
                 currentLocation = currentLocation.Set(dir, iRow);
-                _wallFloor[currentLocation] = true;
+                _wallFloor![currentLocation] = true;
                 groom.Add(currentLocation);
             }
         }
@@ -368,7 +346,6 @@ namespace Roguish.Map_Generation
         ///
         /// <remarks>	Darrellp, 9/19/2011. </remarks>
         ///
-        /// <param name="map">	The map to be excavated. </param>
         /// <param name="room">	The room to carve out of the map. </param>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         private void ExcavateRoom(RectangularRoom room)
@@ -380,7 +357,7 @@ namespace Roguish.Map_Generation
                 for (var iY = room.Top + 1; iY < room.Bottom; iY++)
                 {
                     // Place the appropriate terrain
-                    _wallFloor[iX, iY] = true;
+                    _wallFloor![iX, iY] = true;
                 }
             }
         }
@@ -393,10 +370,10 @@ namespace Roguish.Map_Generation
         private void DetermineRoomConnections()
         {
             // Connect all the grid cells
-            _connections.ConnectCells();
+            _connections!.ConnectCells();
 
             // Add some random connections
-            _connections.AddRandomConnections(Math.Min(_rooms.Length, _rooms[0].Length), _connections);
+            _connections!.AddRandomConnections(Math.Min(_rooms.Length, _rooms[0].Length), _connections);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -410,7 +387,7 @@ namespace Roguish.Map_Generation
         private void DetermineRoomMerges()
         {
             // For each connection
-            foreach (var connectionInfo in _connections.Connections.Where(ci => ci.IsConnected))
+            foreach (var connectionInfo in _connections!.Connections.Where(ci => ci.IsConnected))
             {
                 // Is it a connection that we wish to merge?
                 if (_rng.NextInt(100) < PctMergeChance)
@@ -429,7 +406,7 @@ namespace Roguish.Map_Generation
         ///
         /// <remarks>	Darrellp, 9/30/2011. </remarks>
         ///
-        /// <param name="gridLocation">	The grid location. </param>
+        /// <param name="superGridLocation">	The grid location. </param>
         ///
         /// <returns>	true if it's in bounds, false if not. </returns>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -444,14 +421,6 @@ namespace Roguish.Map_Generation
 
         RectangularRoom? RoomAt(Point location)
         {
-            try
-            {
-                RectangularRoom? rm = WithinGrid(location) ? _rooms[location.X][location.Y] : null;
-            }
-            catch (Exception e)
-            {
-                System.Console.WriteLine(e);
-            }
             return WithinGrid(location) ? _rooms[location.X][location.Y] : null;
         }
 
@@ -470,8 +439,8 @@ namespace Roguish.Map_Generation
             var otherDir = PointExt.OtherDirection(dir);
 
             // Retrieve both rooms
-            var topRoom = RoomAt(topRoomsGridLocation);
-            var bottomRoom = RoomAt(bottomRoomsGridLocation);
+            var topRoom = RoomAt(topRoomsGridLocation)!;
+            var bottomRoom = RoomAt(bottomRoomsGridLocation)!;
 
             // Are the rooms unmergable?
             if (!CheckMergeForOverlap(topRoom, bottomRoom, otherDir))
@@ -527,7 +496,7 @@ namespace Roguish.Map_Generation
             _roomAreas[roomBottomNew] = roomBottomNew.ToArea();
 
             // Mark this in our merges structure
-            _merges.Connect(topRoomsGridLocation, bottomRoomsGridLocation);
+            _merges!.Connect(topRoomsGridLocation, bottomRoomsGridLocation);
         }
 
         private void SetRoomAt(Point superGridLocation, RectangularRoom room)

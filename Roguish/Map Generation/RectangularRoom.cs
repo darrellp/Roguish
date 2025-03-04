@@ -1,4 +1,5 @@
 ﻿using GoRogue.Random;
+// ReSharper disable IdentifierTypo
 
 namespace Roguish.Map_Generation;
 
@@ -13,43 +14,42 @@ internal enum Wall
 
 internal class RectangularRoom
 {
-    public Rectangle rect;
+    public Rectangle Rect;
     public Point SuperGridCell;
-    public Area? Area = null;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Gets the top row. </summary>
     ///
     /// <value>	The top row. </value>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    internal int Top => rect.Y;
+    internal int Top => Rect.Y;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Gets the left column. </summary>
     ///
     /// <value>	The left column. </value>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    internal int Left => rect.X;
+    internal int Left => Rect.X;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Gets the bottom row. </summary>
     ///
     /// <value>	The bottom row. </value>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    internal int Bottom => rect.Y + rect.Height - 1;
+    internal int Bottom => Rect.Y + Rect.Height - 1;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Gets the right column. </summary>
     ///
     /// <value>	The right column. </value>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    internal int Right => rect.X + rect.Width - 1;
+    internal int Right => Rect.X + Rect.Width - 1;
 
-    internal Point Location => rect.Position;
+    internal Point Location => Rect.Position;
 
     internal int Size(Dir dir)
     {
-        return dir == Dir.Horiz ? rect.Width : rect.Height;
+        return dir == Dir.Horiz ? Rect.Width : Rect.Height;
     }
 
     internal static RectangularRoom CreateUndirectional(Point location, int sizeInDir, int sizeInOtherDir, int superGridCoordInDir, int superGridCoordInOtherDir, Dir dir)
@@ -67,12 +67,12 @@ internal class RectangularRoom
             rc = new Rectangle(location.X, location.Y, sizeInDir, sizeInOtherDir);
             superGridCell = new Point(superGridCoordInDir, superGridCoordInOtherDir);
         }
-        return new RectangularRoom() { rect = rc, SuperGridCell = superGridCell }; ;
+        return new RectangularRoom() { Rect = rc, SuperGridCell = superGridCell };
     }
 
     public Area ToArea()
     {
-        return new Area { rect.Positions() };
+        return new Area { Rect.Positions() };
     }
 
     public int SmallCoord(Dir dir)

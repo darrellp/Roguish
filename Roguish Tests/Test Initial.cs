@@ -1,10 +1,8 @@
-﻿using TUnit.Core;
-using TUnit.Assertions;
-using TUnit.Assertions.Extensions;
-using Roguish;
+﻿using Roguish;
 
+namespace Roguish_Tests;
 
-public class Test_Initial
+public class TestInitial
 {
     [Test]
     [Arguments(1, 2, 3)]

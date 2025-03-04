@@ -5,6 +5,7 @@ using ShaiRandom.Generators;
 
 namespace Roguish.Map_Generation
 {
+    // ReSharper disable once InconsistentNaming
     internal class RoomGenDAP : GenerationStep
     {
         public int SuperCellWidth = 20;
@@ -14,7 +15,7 @@ namespace Roguish.Map_Generation
         public string? WallFloorComponentTag;
         public string? RectRoomsComponentTag;
 
-        public IEnhancedRandom RNG = GlobalRandom.DefaultRNG;
+        private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
 
         // ReSharper disable once ConvertToPrimaryConstructor
         public RoomGenDAP(string? name = null, string? wallFloorComponentTag = "WallFloor", string? rectRoomsComponentTag = "RectRooms")
@@ -29,16 +30,16 @@ namespace Roguish.Map_Generation
             // Validate Configuration
             if (SuperCellWidth <= 0)
                 throw new InvalidConfigurationException(this, nameof(SuperCellWidth),
-                    $"The value must be greater than zero.");
+                    "The value must be greater than zero.");
             if (SuperCellHeight <= 0)
                 throw new InvalidConfigurationException(this, nameof(SuperCellHeight),
-                    $"The value must be greater than zero.");
+                    "The value must be greater than zero.");
             if (MinRoomWidth <= 0)
                 throw new InvalidConfigurationException(this, nameof(MinRoomWidth),
-                    $"The value must be greater than zero.");
+                    "The value must be greater than zero.");
             if (MinRoomHeight <= 0)
                 throw new InvalidConfigurationException(this, nameof(MinRoomHeight),
-                    $"The value must be greater than zero.");
+                    "The value must be greater than zero.");
 
             var wallFloor = new ArrayView<bool>(context.Width, context.Height);
             var rooms = LocateRooms(context, wallFloor);
@@ -133,7 +134,7 @@ namespace Roguish.Map_Generation
 
                     // currentWidth and currentHeight here represent the width/height of the supergrid cell - not the room.
                     var room = CreateRoomInCell(superGridLocation, gridLocation, currentWidth, currentHeight);
-                    var rect = room.rect;
+                    var rect = room.Rect;
                     rect = rect.WithSize(rect.Width - 2, rect.Height - 2)
                         .WithPosition(rect.Position + new Point(1, 1));
                     foreach (var tileGridPos in rect.Positions())
@@ -170,20 +171,18 @@ namespace Roguish.Map_Generation
         private RectangularRoom CreateRoomInCell(Point superGridLocation, Point gridLocation, int cellWidth, int cellHeight)
         {
             // Locals
-            int startRow, startColumn, endRow, endColumn;
 
             // Determine start and end columns
-            RandomSpan(gridLocation.X + 1, gridLocation.X + cellWidth - 2, MinRoomWidth, out startColumn, out endColumn);
+            RandomSpan(gridLocation.X + 1, gridLocation.X + cellWidth - 2, MinRoomWidth, out var startColumn, out var endColumn);
 
             // Determine start and end rows
-            RandomSpan(gridLocation.Y + 1, gridLocation.Y + cellHeight - 2, MinRoomHeight, out startRow, out endRow);
-            var mapLocation = new Point(startColumn, startRow);
+            RandomSpan(gridLocation.Y + 1, gridLocation.Y + cellHeight - 2, MinRoomHeight, out var startRow, out var endRow);
             var rc = new Rectangle(startColumn, startRow, endColumn - startColumn + 1, endRow - startRow + 1);
 
             // Return newly created room
             RectangularRoom room = new RectangularRoom()
             {
-                rect = rc,
+                Rect = rc,
                 SuperGridCell = superGridLocation,
             };
 
@@ -212,13 +211,13 @@ namespace Roguish.Map_Generation
                 throw new InvalidConfigurationException(this, nameof(SuperCellWidth),
                     "Width isn't wide enough to make span in RandomSpan");
             }
-            var val1 = RNG.NextInt(start, end + 1);
-            var val2 = RNG.NextInt(start, end + 1);
+            var val1 = _rng.NextInt(start, end + 1);
+            var val2 = _rng.NextInt(start, end + 1);
 
             while (Math.Abs(val1 - val2) < minWidth)
             {
-                val1 = RNG.NextInt(start, end + 1);
-                val2 = RNG.NextInt(start, end + 1);
+                val1 = _rng.NextInt(start, end + 1);
+                val2 = _rng.NextInt(start, end + 1);
             }
             if (val1 < val2)
             {

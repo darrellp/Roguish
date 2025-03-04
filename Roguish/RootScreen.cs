@@ -1,5 +1,5 @@
 ﻿//#define DRAWPATH
-using GoRogue.Pathing;
+
 using Roguish.Map_Generation;
 using SadConsole.Host;
 using Game = SadConsole.Game;
@@ -23,7 +23,7 @@ public class RootScreen : ScreenObject
 
     // ReSharper restore InconsistentNaming
 
-    private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new Dictionary<int, ColoredGlyph>()
+    private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new()
     {
         {3, pathLL},
         {5, pathVert},
@@ -97,8 +97,6 @@ public class RootScreen : ScreenObject
     {
         var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);
         var areaAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Chocolate, 0x00);
-        var pathStart = new ColoredGlyph(Color.Green, Color.Green, '\u2591');
-        var pathEnd = new ColoredGlyph(Color.Red, Color.Blue, '\u2591');
 
         _mainSurface.Fill(new Rectangle(0, 0, Width, Height), GameSettings.ForeColor, GameSettings.ClearColor, 0, Mirror.None);
         var gen = new MapGenerator();
@@ -121,6 +119,10 @@ public class RootScreen : ScreenObject
                 DrawGlyph(areaAppearance, pos);
             }
         }
+
+#if DRAWPATH
+        var pathStart = new ColoredGlyph(Color.Green, Color.Green, '\u2591');
+        var pathEnd = new ColoredGlyph(Color.Red, Color.Blue, '\u2591');
 
         var fFoundStart = false;
         var fFoundEnd = false;
@@ -150,7 +152,6 @@ public class RootScreen : ScreenObject
                 break;
             }
         }
-#if DRAWPATH
         var aStar = new AStar(gen.WallFloorValues, Distance.Manhattan);
         var path = aStar.ShortestPath(ptStart, ptEnd);
         if (path != null)
@@ -192,7 +193,7 @@ public class RootScreen : ScreenObject
     }
 
 
-    private static RootScreen _rsSingleton;
+    private static RootScreen? _rsSingleton;
     public static RootScreen GetRootScreen()
     {
         if (_rsSingleton == null)

@@ -1,5 +1,4 @@
-﻿using GoRogue.MapGeneration;
-using GoRogue.Random;
+﻿using GoRogue.Random;
 using ShaiRandom.Generators;
 
 namespace Roguish.Map_Generation
@@ -11,10 +10,9 @@ namespace Roguish.Map_Generation
         private int _freeConnectionCount;
         private readonly int _superGridWidth;
         private readonly int _superGridHeight;
-        private GenerationContext _context;
 
         // ReSharper disable once InconsistentNaming
-        private IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
+        private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
 
         #region Internal Properties
         internal Point FirstRoomConnected { get; private set; }
@@ -24,9 +22,8 @@ namespace Roguish.Map_Generation
 
 
         #region Constructor
-        internal GridConnections(int superGridWidth, int superGridHeight, GenerationContext context)
+        internal GridConnections(int superGridWidth, int superGridHeight)
         {
-            _context = context;
             _superGridWidth = superGridWidth;
             _superGridHeight = superGridHeight;
             _connectsRight = new bool[superGridWidth - 1, superGridHeight];
@@ -139,7 +136,6 @@ namespace Roguish.Map_Generation
         ///
         /// <remarks>	Darrellp, 9/19/2011. </remarks>
         ///
-        /// <exception cref="RogueException">	Thrown when there are no remaining connections to be made. </exception>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         internal void MakeRandomConnection()
         {
@@ -221,10 +217,8 @@ namespace Roguish.Map_Generation
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         internal void Connect(Point pt1, Point pt2)
         {
-            bool fVertical;
-
             // Are they valid neighbors?
-            if (CheckCoordinates(ref pt1, ref pt2, out fVertical))
+            if (CheckCoordinates(ref pt1, ref pt2, out var fVertical))
             {
                 // If vertical
                 if (fVertical)
@@ -282,11 +276,10 @@ namespace Roguish.Map_Generation
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         internal bool IsConnected(Point pt1, Point pt2)
         {
-            bool fVertical;
             bool ret = false;
 
             // Are they valid neighbors?
-            if (CheckCoordinates(ref pt1, ref pt2, out fVertical))
+            if (CheckCoordinates(ref pt1, ref pt2, out var fVertical))
             {
                 // Choose the correct connection array based on fVertical
                 bool[,] connectArray = fVertical ? _connectsDown : _connectsRight;

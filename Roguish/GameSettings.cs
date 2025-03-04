@@ -15,9 +15,9 @@ internal static class GameSettings
 
     public static Builder SetupGame()
     {
-        SadConsole.Settings.AllowWindowResize = GameSettings.FAllowResize;
-        SadConsole.Settings.ResizeMode = ResizeMode;
-        SadConsole.Settings.ClearColor = ClearColor;
+        Settings.AllowWindowResize = GameSettings.FAllowResize;
+        Settings.ResizeMode = ResizeMode;
+        Settings.ClearColor = ClearColor;
 
         return new Builder()
                 .SetScreenSize(GameSettings.GameWidth, GameSettings.GameHeight)
