@@ -1,4 +1,5 @@
-﻿using GoRogue.Pathing;
+﻿//#define DRAWPATH
+using GoRogue.Pathing;
 using Roguish.Map_Generation;
 using SadConsole.Host;
 using Game = SadConsole.Game;
@@ -13,12 +14,13 @@ public class RootScreen : ScreenObject
     public int Height => _mainSurface.Height;
 
     // ReSharper disable InconsistentNaming
-    private static ColoredGlyph pathVert = new(Color.Red, Color.Yellow, 0xBA);
-    private static ColoredGlyph pathHoriz = new(Color.Red, Color.Yellow, 0xCD);
-    private static ColoredGlyph pathUR = new(Color.Red, Color.Yellow, 0xBB);
-    private static ColoredGlyph pathUL = new(Color.Red, Color.Yellow, 0xC9);
-    private static ColoredGlyph pathLR = new(Color.Red, Color.Yellow, 0xBC);
-    private static ColoredGlyph pathLL = new(Color.Red, Color.Yellow, 0xC8);
+    private static ColoredGlyph pathVert = new(Color.Red, Color.White, 0xBA);
+    private static ColoredGlyph pathHoriz = new(Color.Red, Color.White, 0xCD);
+    private static ColoredGlyph pathUR = new(Color.Red, Color.White, 0xBB);
+    private static ColoredGlyph pathUL = new(Color.Red, Color.White, 0xC9);
+    private static ColoredGlyph pathLR = new(Color.Red, Color.White, 0xBC);
+    private static ColoredGlyph pathLL = new(Color.Red, Color.White, 0xC8);
+
     // ReSharper restore InconsistentNaming
 
     private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new Dictionary<int, ColoredGlyph>()
@@ -148,6 +150,7 @@ public class RootScreen : ScreenObject
                 break;
             }
         }
+#if DRAWPATH
         var aStar = new AStar(gen.WallFloorValues, Distance.Manhattan);
         var path = aStar.ShortestPath(ptStart, ptEnd);
         if (path != null)
@@ -161,6 +164,7 @@ public class RootScreen : ScreenObject
                 InscribePath(pathSteps[i - 1], pathSteps[i], pathSteps[i + 1]);
             }
         }
+#endif
     }
 
     private void InscribePath(Point prev, Point cur, Point next)
