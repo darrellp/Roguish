@@ -1,7 +1,9 @@
 ﻿//#define DRAWPATH
 
+using GoRogue.Pathing;
 using Roguish.Map_Generation;
 using SadConsole.Host;
+using SadConsole.Input;
 using Game = SadConsole.Game;
 // ReSharper disable IdentifierTypo
 
@@ -9,7 +11,7 @@ namespace Roguish;
 
 public class RootScreen : ScreenObject
 {
-    private ScreenSurface _mainSurface;
+    private DungeonSurface _mainSurface;
     public int Width => _mainSurface.Width;
     public int Height => _mainSurface.Height;
 
@@ -25,22 +27,21 @@ public class RootScreen : ScreenObject
 
     private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new()
     {
-        {3, pathLL},
-        {5, pathVert},
-        {9, pathLR},
-        {6, pathUL},
-        {10, pathHoriz},
-        {12, pathUR},
+        { 3, pathLL },
+        { 5, pathVert },
+        { 9, pathLR },
+        { 6, pathUL },
+        { 10, pathHoriz },
+        { 12, pathUR },
     };
-
-
 
     public RootScreen()
     {
         _rsSingleton = this;
 
         // Create a surface that's the same size as the screen.
-        _mainSurface = new ScreenSurface(GameSettings.GameWidth, GameSettings.GameHeight);
+        _mainSurface = new DungeonSurface(GameSettings.DungeonWidth, GameSettings.DungeonHeight);
+        //_mainSurface = new ScreenSurface(GameSettings.DungeonWidth, GameSettings.DungeonHeight);
 
         FillSurface();
 
@@ -48,6 +49,7 @@ public class RootScreen : ScreenObject
         // and doesn't display anything itself. Since _mainSurface is going to be a child of it, _mainSurface
         // will be displayed.
         Children.Add(_mainSurface);
+
         if (GameSettings.FResizeHook)
         {
             // Resizing causes some weird gunk occasionally around the edges where the window is being resized into.
@@ -57,7 +59,6 @@ public class RootScreen : ScreenObject
             // See some of the GIF examples here: https://docs.flatredball.com/gum/code/monogame/resizing-the-game-window
             Game.Instance.MonoGameInstance.Window.ClientSizeChanged += Game_WindowResized;
         }
-
     }
 
     void Game_WindowResized(object? sender, EventArgs e)
@@ -70,7 +71,8 @@ public class RootScreen : ScreenObject
         chHeight = Math.Max(25, chHeight);
         var adjWidth = chWidth * rootConsole.FontSize.X;
         var adjHeight = chHeight * rootConsole.FontSize.Y;
-        if (adjWidth != Game.Instance.MonoGameInstance.Window.ClientBounds.Width || adjHeight != Game.Instance.MonoGameInstance.Window.ClientBounds.Height)
+        if (adjWidth != Game.Instance.MonoGameInstance.Window.ClientBounds.Width ||
+            adjHeight != Game.Instance.MonoGameInstance.Window.ClientBounds.Height)
         {
             // Adjust window size to be a multiple of font size
             var gdm = Global.GraphicsDeviceManager;
@@ -78,6 +80,7 @@ public class RootScreen : ScreenObject
             gdm.PreferredBackBufferHeight = adjHeight;
             gdm.ApplyChanges();
         }
+
         resizableSurface.Resize(chWidth, chHeight, false);
         FillSurface();
     }
@@ -93,12 +96,13 @@ public class RootScreen : ScreenObject
         DrawGlyph(glyph, pt.X, pt.Y);
     }
 
-    private void FillSurface()
+    public void FillSurface()
     {
         var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);
         var areaAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Chocolate, 0x00);
 
-        _mainSurface.Fill(new Rectangle(0, 0, Width, Height), GameSettings.ForeColor, GameSettings.ClearColor, 0, Mirror.None);
+        _mainSurface.Fill(new Rectangle(0, 0, Width, Height), GameSettings.ForeColor, GameSettings.ClearColor, 0,
+            Mirror.None);
         var gen = new MapGenerator();
 
         for (var iX = 0; iX < Width; iX++)
@@ -165,8 +169,8 @@ public class RootScreen : ScreenObject
                 InscribePath(pathSteps[i - 1], pathSteps[i], pathSteps[i + 1]);
             }
         }
-#endif
     }
+
 
     private void InscribePath(Point prev, Point cur, Point next)
     {
@@ -191,7 +195,9 @@ public class RootScreen : ScreenObject
             return pt.X < ptConnect.X ? 2 : 8;
         }
     }
-
+#else
+    }
+#endif
 
     private static RootScreen? _rsSingleton;
     public static RootScreen GetRootScreen()
