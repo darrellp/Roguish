@@ -2,7 +2,8 @@
 using SadConsole.Input;
 
 namespace Roguish;
-internal class DungeonSurface(GameSettings settings) : ScreenSurface(settings.DungeonWidth, settings.DungeonHeight)
+
+public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.DungeonWidth, settings.DungeonHeight)
 {
     protected override void OnMouseMove(MouseScreenObjectState state)
     {

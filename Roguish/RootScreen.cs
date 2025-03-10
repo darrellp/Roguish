@@ -32,10 +32,10 @@ public class RootScreen : ScreenObject
         { 12, pathUR },
     };
 
-    public RootScreen(GameSettings settings)
+    public RootScreen(GameSettings settings, DungeonSurface dungeonSurface)
     {
         // Create the dungeon surface
-        _dungeonSurface = Program.Kernel.Get<DungeonSurface>();
+        _dungeonSurface = dungeonSurface;
 
         // We can't FillSurface in the constructor because that will try to retrieve the singleton
         // RootScreen from IOC in the map generator which will cause an infinite recursive call and
