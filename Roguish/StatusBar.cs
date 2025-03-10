@@ -1,6 +1,7 @@
 ﻿using Ninject;
 using SadConsole.UI;
 using SadConsole.UI.Controls;
+// ReSharper disable IdentifierTypo
 
 namespace Roguish;
 
@@ -23,22 +24,21 @@ internal class StatusBar : ScreenSurface
 
         _lblPosition = new Label(pointWidth)
         {
-            Position = new Point(0, 0),
+            Position = new Point(),
             DisplayText = "Testing"
         };
         controls.Add(_lblPosition);
 
-        _btnRedraw = new(10, 1)
+        _btnRedraw = new(10)
         {
             Position = new Point(pointWidth + 3, 0),
             Text = "Redraw",
             FocusOnMouseClick = false,
         };
 
-        _btnRedraw.Click += (s, e) =>
+        _btnRedraw.Click += (_, _) =>
         {
             Program.Kernel.Get<RootScreen>().FillSurface();
-            controls.FocusedControl = null;
         };
         controls.Add(_btnRedraw);
         SadComponents.Add(controls);
@@ -46,13 +46,13 @@ internal class StatusBar : ScreenSurface
         ReportMousePos(new Point());
     }
 
-    private Point lastPosition = new Point(-1, -1);
+    private Point _lastPosition = new(-1, -1);
     public void ReportMousePos(Point ptMouse)
     {
-        if (ptMouse != lastPosition)
+        if (ptMouse != _lastPosition)
         {
-            lastPosition = ptMouse;
-            var text = String.Format(PositionFormat, ptMouse.X, ptMouse.Y);
+            _lastPosition = ptMouse;
+            var text = string.Format(PositionFormat, ptMouse.X, ptMouse.Y);
             _lblPosition.DisplayText = text;
         }
     }

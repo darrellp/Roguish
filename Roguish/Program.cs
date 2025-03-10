@@ -1,11 +1,9 @@
 ﻿using Roguish;
-using SadConsole.Configuration;
 using Ninject;
-using SadConsole.UI.Controls;
 
 internal class Program
 {
-    public static StandardKernel Kernel { get; } = new Ninject.StandardKernel();
+    public static StandardKernel Kernel { get; } = new();
 
     public static void Main(string[] args)
     {
@@ -13,7 +11,7 @@ internal class Program
         Settings.WindowTitle = "My SadConsole Game";
 
         var settings = Kernel.Get<GameSettings>();
-        Builder gameConfig = settings.SetupGame();
+        var gameConfig = settings.SetupGame();
 
         Game.Create(gameConfig);
         Game.Instance.Run();

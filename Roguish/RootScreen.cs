@@ -1,10 +1,8 @@
 ﻿//#define DRAWPATH
 
-using GoRogue.Pathing;
 using Ninject;
 using Roguish.Map_Generation;
 using SadConsole.Host;
-using SadConsole.Input;
 using Game = SadConsole.Game;
 // ReSharper disable IdentifierTypo
 
@@ -12,9 +10,9 @@ namespace Roguish;
 
 public class RootScreen : ScreenObject
 {
-    private DungeonSurface _mainSurface;
-    public int Width => _mainSurface.Width;
-    public int Height => _mainSurface.Height;
+    private DungeonSurface _dungeonSurface;
+    public int Width => _dungeonSurface.Width;
+    public int Height => _dungeonSurface.Height;
 
     // ReSharper disable InconsistentNaming
     private static ColoredGlyph pathVert = new(Color.Red, Color.White, 0xBA);
@@ -23,7 +21,6 @@ public class RootScreen : ScreenObject
     private static ColoredGlyph pathUL = new(Color.Red, Color.White, 0xC9);
     private static ColoredGlyph pathLR = new(Color.Red, Color.White, 0xBC);
     private static ColoredGlyph pathLL = new(Color.Red, Color.White, 0xC8);
-
     // ReSharper restore InconsistentNaming
 
     private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new()
@@ -38,15 +35,15 @@ public class RootScreen : ScreenObject
 
     public RootScreen(GameSettings settings)
     {
-        // Create a surface that's the same size as the screen.
-        _mainSurface = Program.Kernel.Get<DungeonSurface>();
+        // Create the dungeon surface
+        _dungeonSurface = Program.Kernel.Get<DungeonSurface>();
 
+        // We can't FillSurface in the constructor because that will try to retrieve the singleton
+        // RootScreen from IOC in the map generator which will cause an infinite recursive call and
+        // consequent stack overflow.  
         //FillSurface();
 
-        // Add _mainSurface as a child object of this one. This object, RootScreen, is a simple object
-        // and doesn't display anything itself. Since _mainSurface is going to be a child of it, _mainSurface
-        // will be displayed.
-        Children.Add(_mainSurface);
+        Children.Add(_dungeonSurface);
 
         if (settings.FResizeHook)
         {
@@ -59,9 +56,9 @@ public class RootScreen : ScreenObject
         }
     }
 
-    void Game_WindowResized(object? sender, EventArgs e)
+    private void Game_WindowResized(object? sender, EventArgs e)
     {
-        var rootConsole = _mainSurface;
+        var rootConsole = _dungeonSurface;
         var resizableSurface = (ICellSurfaceResize)rootConsole.Surface;
         var chWidth = Game.Instance.MonoGameInstance.Window.ClientBounds.Width / rootConsole.FontSize.X;
         chWidth = Math.Max(80, chWidth);
@@ -85,8 +82,8 @@ public class RootScreen : ScreenObject
 
     private void DrawGlyph(ColoredGlyph glyph, int x, int y)
     {
-        _mainSurface.SetCellAppearance(x, y, glyph);
-        _mainSurface.IsDirty = true;
+        _dungeonSurface.SetCellAppearance(x, y, glyph);
+        _dungeonSurface.IsDirty = true;
     }
 
     private void DrawGlyph(ColoredGlyph glyph, Point pt)
@@ -100,7 +97,7 @@ public class RootScreen : ScreenObject
         var wallAppearance = new ColoredGlyph(settings.ClearColor, Color.Black, 0x00);
         var areaAppearance = new ColoredGlyph(settings.ClearColor, Color.Chocolate, 0x00);
 
-        _mainSurface.Fill(new Rectangle(0, 0, Width, Height), settings.ForeColor, settings.ClearColor, 0,
+        _dungeonSurface.Fill(new Rectangle(0, 0, Width, Height), settings.ForeColor, settings.ClearColor, 0,
             Mirror.None);
         var gen = new MapGenerator();
 
