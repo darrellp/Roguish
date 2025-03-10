@@ -32,6 +32,10 @@ namespace Roguish
         {
         }
 
+        public DungeonSurface(GameSettings settings) : this(settings.DungeonWidth, settings.DungeonHeight)
+        {
+        }
+
         private readonly Point ptOffscreen = new Point(0, 0);
         private bool _offScreen = true;
         protected override void OnMouseMove(MouseScreenObjectState state)

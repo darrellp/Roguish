@@ -1,29 +1,30 @@
-﻿using SadConsole.Configuration;
+﻿using Ninject;
+using SadConsole.Configuration;
 
 namespace Roguish;
 
-internal static class GameSettings
+public class GameSettings
 {
     public static int GameWidth { get; }= 90;
     public static int GameHeight { get; }= 41;
 
-    public static int DungeonWidth { get; } = GameWidth;
-    public static int DungeonHeight { get; } = GameHeight - 1;
+    public int DungeonWidth { get; } = GameWidth;
+    public int DungeonHeight { get; } = GameHeight - 1;
 
-    public static bool FAllowResize { get; } = true;
-    public static bool FResizeHook = true;
-    public static Settings.WindowResizeOptions ResizeMode { get; } = Settings.WindowResizeOptions.None;
-    public static Color ClearColor = Color.BurlyWood;
-    public static Color ForeColor = Color.Black;
+    public bool FAllowResize { get; } = true;
+    public bool FResizeHook = true;
+    public Settings.WindowResizeOptions ResizeMode { get; } = Settings.WindowResizeOptions.None;
+    public Color ClearColor = Color.BurlyWood;
+    public Color ForeColor = Color.Black;
 
-    public static Builder SetupGame()
+    public Builder SetupGame()
     {
-        Settings.AllowWindowResize = GameSettings.FAllowResize;
+        Settings.AllowWindowResize = FAllowResize;
         Settings.ResizeMode = ResizeMode;
         Settings.ClearColor = ClearColor;
 
         return new Builder()
-                .SetScreenSize(GameSettings.GameWidth, GameSettings.GameHeight)
+                .SetScreenSize(GameWidth, GameHeight)
                 .OnStart(Start);
     }
 
@@ -32,7 +33,7 @@ internal static class GameSettings
         var container = new ScreenObject();
         container.UseMouse = false;
         Game.Instance.Screen = container;
-        var rs = new RootScreen();
+        var rs = Program.Kernel.Get<RootScreen>();
         container.Children.Add(rs);
         var sb = new StatusBar(GameWidth, 1);
         sb.Position = new Point(0, GameHeight - 1);

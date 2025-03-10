@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SadConsole.UI;
+﻿using SadConsole.UI;
 using SadConsole.UI.Controls;
 
 namespace Roguish;
@@ -20,9 +15,9 @@ internal class StatusBar : ScreenSurface
     public StatusBar(int width, int height) : base(width, height)
     {
         _sbSingleton = this;
-        ControlHost controls = new();
+        ControlHost controls = [];
 
-        var originString = String.Format(PositionFormat, 0, 0);
+        var originString = string.Format(PositionFormat, 0, 0);
         var pointWidth = originString.Length;
 
         _lblPosition = new Label(pointWidth)
@@ -46,17 +41,6 @@ internal class StatusBar : ScreenSurface
         };
         controls.Add(_btnRedraw);
         SadComponents.Add(controls);
-
-
-        if (GameSettings.FResizeHook)
-        {
-            // Resizing causes some weird gunk occasionally around the edges where the window is being resized into.
-            // Suspicious that this is a MonoGame issue since there are some videos demonstrating similar behavior with
-            // pure MonoGame.  Generally it can be reproed by making the window slightly smaller (less than a character)
-            // and then dragging it larger.  Not sure what it is but pretty sure it's in MonoGame or perhaps SadConsole.
-            // See some of the GIF examples here: https://docs.flatredball.com/gum/code/monogame/resizing-the-game-window
-            //Game.Instance.MonoGameInstance.Window.ClientSizeChanged += Game_WindowResized;
-        }
 
         ReportMousePos(new Point());
     }

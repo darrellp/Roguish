@@ -1,6 +1,7 @@
 ﻿//#define DRAWPATH
 
 using GoRogue.Pathing;
+using Ninject;
 using Roguish.Map_Generation;
 using SadConsole.Host;
 using SadConsole.Input;
@@ -35,12 +36,12 @@ public class RootScreen : ScreenObject
         { 12, pathUR },
     };
 
-    public RootScreen()
+    public RootScreen(GameSettings settings)
     {
         _rsSingleton = this;
 
         // Create a surface that's the same size as the screen.
-        _mainSurface = new DungeonSurface(GameSettings.DungeonWidth, GameSettings.DungeonHeight);
+        _mainSurface = Program.Kernel.Get<DungeonSurface>();
         //_mainSurface = new ScreenSurface(GameSettings.DungeonWidth, GameSettings.DungeonHeight);
 
         FillSurface();
@@ -50,7 +51,7 @@ public class RootScreen : ScreenObject
         // will be displayed.
         Children.Add(_mainSurface);
 
-        if (GameSettings.FResizeHook)
+        if (settings.FResizeHook)
         {
             // Resizing causes some weird gunk occasionally around the edges where the window is being resized into.
             // Suspicious that this is a MonoGame issue since there are some videos demonstrating similar behavior with
@@ -98,10 +99,11 @@ public class RootScreen : ScreenObject
 
     public void FillSurface()
     {
-        var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);
-        var areaAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Chocolate, 0x00);
+        var settings = Program.Kernel.Get<GameSettings>();
+        var wallAppearance = new ColoredGlyph(settings.ClearColor, Color.Black, 0x00);
+        var areaAppearance = new ColoredGlyph(settings.ClearColor, Color.Chocolate, 0x00);
 
-        _mainSurface.Fill(new Rectangle(0, 0, Width, Height), GameSettings.ForeColor, GameSettings.ClearColor, 0,
+        _mainSurface.Fill(new Rectangle(0, 0, Width, Height), settings.ForeColor, settings.ClearColor, 0,
             Mirror.None);
         var gen = new MapGenerator();
 
