@@ -37,7 +37,7 @@ internal class StatusBar : ScreenSurface
 
         _btnRedraw.Click += (_, _) =>
         {
-            Program.Kernel.Get<RootScreen>().FillSurface();
+            Program.Kernel.Get<DungeonSurface>().FillSurface();
         };
         controls.Add(_btnRedraw);
         SadComponents.Add(controls);

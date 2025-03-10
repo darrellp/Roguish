@@ -27,6 +27,6 @@ internal class MapGenerator
         Areas = generator.Context.GetFirst<Area[]>("Areas");
     }
 
-    public MapGenerator() : this(Program.Kernel.Get<RootScreen>().Width, Program.Kernel.Get<RootScreen>().Height) {}
+    public MapGenerator() : this(Program.Kernel.Get<DungeonSurface>().Width, Program.Kernel.Get<DungeonSurface>().Height) {}
 }
 

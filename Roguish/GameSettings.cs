@@ -36,11 +36,11 @@ public class GameSettings
     {
         var container = Program.Kernel.Get<TopContainer>();
         Game.Instance.Screen = Program.Kernel.Get<TopContainer>(); 
-        var rs = Program.Kernel.Get<RootScreen>();
-        container.Children.Add(rs);
+        var ds = Program.Kernel.Get<DungeonSurface>();
+        container.Children.Add(ds);
         var sb = Program.Kernel.Get<StatusBar>();
         container.Children.Add(sb);
 
-        rs.FillSurface();
+        ds.FillSurface();
     }
 }
