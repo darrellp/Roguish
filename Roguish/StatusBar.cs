@@ -9,7 +9,7 @@ internal class StatusBar : ScreenSurface
 {
     public static Color BgndColor = Color.Blue;
     public static Color ForeColor = Color.White;
-    public static string PositionFormat = "({0,4:D},{1,4:D})";
+    public static string PositionFormat = "({0,3:D},{1,3:D})";
 
     private Button _btnRedraw;
     private Label _lblPosition;

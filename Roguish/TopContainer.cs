@@ -52,7 +52,7 @@ namespace Roguish
 
             var sb = Program.Kernel.Get<StatusBar>();
             var resizableStatusBar = (ICellSurfaceResize)sb.Surface;
-            sb.Position = new Point(0, adjHeight - settings.SbHeight);
+            sb.Position = new Point(0, chHeight - settings.SbHeight);
             resizableStatusBar.Resize(chWidth, settings.SbHeight, false);
         }
 
