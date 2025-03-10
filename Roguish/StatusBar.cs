@@ -25,11 +25,10 @@ internal class StatusBar : ScreenSurface
         _lblPosition = new Label(pointWidth)
         {
             Position = new Point(),
-            DisplayText = "Testing"
         };
         controls.Add(_lblPosition);
 
-        _btnRedraw = new(10)
+        _btnRedraw = new Button(width:10)
         {
             Position = new Point(pointWidth + 3, 0),
             Text = "Redraw",
