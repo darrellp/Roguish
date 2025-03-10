@@ -1,4 +1,5 @@
 ﻿using GoRogue.MapGeneration;
+using Ninject;
 using SadRogue.Primitives.GridViews;
 
 namespace Roguish.Map_Generation;
@@ -26,6 +27,6 @@ internal class MapGenerator
         Areas = generator.Context.GetFirst<Area[]>("Areas");
     }
 
-    public MapGenerator() : this(RootScreen.GetRootScreen().Width, RootScreen.GetRootScreen().Height) {}
+    public MapGenerator() : this(Program.Kernel.Get<RootScreen>().Width, Program.Kernel.Get<RootScreen>().Height) {}
 }
 

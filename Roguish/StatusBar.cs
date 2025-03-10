@@ -1,4 +1,5 @@
-﻿using SadConsole.UI;
+﻿using Ninject;
+using SadConsole.UI;
 using SadConsole.UI.Controls;
 
 namespace Roguish;
@@ -12,10 +13,11 @@ internal class StatusBar : ScreenSurface
     private Button _btnRedraw;
     private Label _lblPosition;
 
-    public StatusBar(int width, int height) : base(width, height)
+    public StatusBar(GameSettings settings) : base(settings.SbWidth, settings.SbHeight)
     {
         _sbSingleton = this;
         ControlHost controls = [];
+        Position = settings.SbPosition;
 
         var originString = string.Format(PositionFormat, 0, 0);
         var pointWidth = originString.Length;
@@ -36,7 +38,7 @@ internal class StatusBar : ScreenSurface
 
         _btnRedraw.Click += (s, e) =>
         {
-            RootScreen.GetRootScreen().FillSurface();
+            Program.Kernel.Get<RootScreen>().FillSurface();
             controls.FocusedControl = null;
         };
         controls.Add(_btnRedraw);

@@ -11,6 +11,10 @@ public class GameSettings
     public int DungeonWidth { get; } = GameWidth;
     public int DungeonHeight { get; } = GameHeight - 1;
 
+    public int SbWidth = GameWidth;
+    public int SbHeight = 1;
+    public Point SbPosition = new Point(0, GameHeight - 1);
+
     public bool FAllowResize { get; } = true;
     public bool FResizeHook = true;
     public Settings.WindowResizeOptions ResizeMode { get; } = Settings.WindowResizeOptions.None;
@@ -35,8 +39,9 @@ public class GameSettings
         Game.Instance.Screen = container;
         var rs = Program.Kernel.Get<RootScreen>();
         container.Children.Add(rs);
-        var sb = new StatusBar(GameWidth, 1);
-        sb.Position = new Point(0, GameHeight - 1);
+        var sb = Program.Kernel.Get<StatusBar>();
         container.Children.Add(sb);
+
+        rs.FillSurface();
     }
 }

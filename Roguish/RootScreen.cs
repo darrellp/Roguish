@@ -38,13 +38,10 @@ public class RootScreen : ScreenObject
 
     public RootScreen(GameSettings settings)
     {
-        _rsSingleton = this;
-
         // Create a surface that's the same size as the screen.
         _mainSurface = Program.Kernel.Get<DungeonSurface>();
-        //_mainSurface = new ScreenSurface(GameSettings.DungeonWidth, GameSettings.DungeonHeight);
 
-        FillSurface();
+        //FillSurface();
 
         // Add _mainSurface as a child object of this one. This object, RootScreen, is a simple object
         // and doesn't display anything itself. Since _mainSurface is going to be a child of it, _mainSurface
@@ -201,15 +198,15 @@ public class RootScreen : ScreenObject
     }
 #endif
 
-    private static RootScreen? _rsSingleton;
-    public static RootScreen GetRootScreen()
-    {
-        if (_rsSingleton == null)
-        {
-            throw new InvalidOperationException("Trying to retrieve singleton RootScreen before instantiation");
-        }
-        return _rsSingleton;
-    }
+    //private static RootScreen? _rsSingleton;
+    //public static RootScreen GetRootScreen()
+    //{
+    //    if (_rsSingleton == null)
+    //    {
+    //        throw new InvalidOperationException("Trying to retrieve singleton RootScreen before instantiation");
+    //    }
+    //    return _rsSingleton;
+    //}
 
     // Solely for testing TUnit (as opposed to TUnit testing).
     public static int Add(int x, int y)
