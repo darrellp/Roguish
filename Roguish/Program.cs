@@ -21,7 +21,6 @@ internal class Program
     private static void SetupIoc()
     {
         Kernel.Bind<GameSettings>().ToSelf().InSingletonScope();
-        //Kernel.Bind<RootScreen>().ToSelf().InSingletonScope();
         Kernel.Bind<DungeonSurface>().ToSelf().InSingletonScope();
         Kernel.Bind<StatusBar>().ToSelf().InSingletonScope();
         Kernel.Bind<TopContainer>().ToSelf().InSingletonScope();
