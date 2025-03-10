@@ -12,7 +12,7 @@ internal class StatusBar : ScreenSurface
 {
     public static Color BgndColor = Color.Blue;
     public static Color ForeColor = Color.White;
-    public static string PositionFormat = "({0:D4},{1:D4})";
+    public static string PositionFormat = "({0,4:D},{1,4:D})";
 
     private Button _btnRedraw;
     private Label _lblPosition;
@@ -21,7 +21,6 @@ internal class StatusBar : ScreenSurface
     {
         _sbSingleton = this;
         ControlHost controls = new();
-        SadComponents.Add(controls);
 
         var originString = String.Format(PositionFormat, 0, 0);
         var pointWidth = originString.Length;
@@ -36,14 +35,17 @@ internal class StatusBar : ScreenSurface
         _btnRedraw = new(10, 1)
         {
             Position = new Point(pointWidth + 3, 0),
-            Text = "Redraw"
+            Text = "Redraw",
+            FocusOnMouseClick = false,
         };
 
         _btnRedraw.Click += (s, e) =>
         {
             RootScreen.GetRootScreen().FillSurface();
+            controls.FocusedControl = null;
         };
         controls.Add(_btnRedraw);
+        SadComponents.Add(controls);
 
 
         if (GameSettings.FResizeHook)
