@@ -15,7 +15,6 @@ internal class StatusBar : ScreenSurface
 
     public StatusBar(GameSettings settings) : base(settings.SbWidth, settings.SbHeight)
     {
-        _sbSingleton = this;
         ControlHost controls = [];
         Position = settings.SbPosition;
 
@@ -56,16 +55,5 @@ internal class StatusBar : ScreenSurface
             var text = String.Format(PositionFormat, ptMouse.X, ptMouse.Y);
             _lblPosition.DisplayText = text;
         }
-    }
-
-    private static StatusBar? _sbSingleton;
-
-    public static StatusBar GetStatusBar()
-    {
-        if (_sbSingleton == null)
-        {
-            throw new InvalidOperationException("Trying to retrieve singleton StatusBar before instantiation");
-        }
-        return _sbSingleton;
     }
 }

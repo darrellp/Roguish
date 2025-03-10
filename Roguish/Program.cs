@@ -26,6 +26,7 @@ internal class Program
         Kernel.Bind<RootScreen>().ToSelf().InSingletonScope();
         Kernel.Bind<DungeonSurface>().ToSelf().InSingletonScope();
         Kernel.Bind<StatusBar>().ToSelf().InSingletonScope();
+        Kernel.Bind<TopContainer>().ToSelf().InSingletonScope();
     }
 }
 

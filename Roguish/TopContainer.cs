@@ -1,4 +1,5 @@
-﻿using GoRogue.Pathing;
+﻿using System.Runtime.CompilerServices;
+using GoRogue.Pathing;
 using Roguish.Map_Generation;
 using SadConsole.Host;
 using SadConsole.Input;
@@ -8,8 +9,13 @@ namespace Roguish
 {
     internal class TopContainer : ScreenObject
     {
-        void Game_WindowResized(object? sender, EventArgs e)
+        public TopContainer()
         {
+            UseMouse = false;
         }
+
+        //void Game_WindowResized(object? sender, EventArgs e)
+        //{
+        //}
     }
 }
