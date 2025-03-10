@@ -35,7 +35,7 @@ public class GameSettings
     private static void Start(object? sender, GameHost e)
     {
         var container = Program.Kernel.Get<TopContainer>();
-        Game.Instance.Screen = Program.Kernel.Get<TopContainer>(); ;
+        Game.Instance.Screen = Program.Kernel.Get<TopContainer>(); 
         var rs = Program.Kernel.Get<RootScreen>();
         container.Children.Add(rs);
         var sb = Program.Kernel.Get<StatusBar>();

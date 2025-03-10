@@ -1,6 +1,6 @@
-﻿using Roguish;
-using Ninject;
+﻿using Ninject;
 
+namespace Roguish;
 internal class Program
 {
     public static StandardKernel Kernel { get; } = new();
@@ -27,4 +27,3 @@ internal class Program
         Kernel.Bind<TopContainer>().ToSelf().InSingletonScope();
     }
 }
-
