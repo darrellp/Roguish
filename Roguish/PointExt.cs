@@ -130,7 +130,7 @@ namespace Roguish
         /// <returns>   An IEnumerable&lt;HVPoint&gt; of neighbors </returns>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        internal static IEnumerable<Point> Neighbors(this Point @this, int width, int height)
+        internal static IEnumerable<Point> Neighbors(this Point @this, int width, int height, bool f4Neighbors = true)
         {
             if (@this.X > 0)
             {
@@ -148,6 +148,29 @@ namespace Roguish
             {
                 yield return new Point(@this.X, @this.Y + 1);
             }
+
+            if (f4Neighbors)
+            {
+                yield break;
+            }
+
+            if (@this.X > 0 && @this.Y > 0)
+            {
+                yield return new Point(@this.X - 1, @this.Y - 1);
+            }
+            if (@this.X < width - 1 && @this.Y > 0)
+            {
+                yield return new Point(@this.X + 1, @this.Y - 1);
+            }
+            if (@this.X < width - 1 && @this.Y < height - 1)
+            {
+                yield return new Point(@this.X + 1, @this.Y + 1);
+            }
+            if (@this.X > 0 && @this.Y < height - 1)
+            {
+                yield return new Point(@this.X - 1, @this.Y + 1);
+            }
+
         }
     }
 }

@@ -1,5 +1,7 @@
-﻿//#define DRAWPATH
+﻿#define DRAWPATH
+#if DRAWPATH
 using GoRogue.Pathing;
+#endif
 using Ninject;
 using Roguish.Map_Generation;
 using SadConsole.Input;
@@ -11,12 +13,12 @@ public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.Dung
 {
 #if DRAWPATH
     // ReSharper disable InconsistentNaming
-    private static ColoredGlyph pathVert = new(Color.Red, Color.White, 0xBA);
-    private static ColoredGlyph pathHoriz = new(Color.Red, Color.White, 0xCD);
-    private static ColoredGlyph pathUR = new(Color.Red, Color.White, 0xBB);
-    private static ColoredGlyph pathUL = new(Color.Red, Color.White, 0xC9);
-    private static ColoredGlyph pathLR = new(Color.Red, Color.White, 0xBC);
-    private static ColoredGlyph pathLL = new(Color.Red, Color.White, 0xC8);
+    private static ColoredGlyph pathVert = new(Color.Yellow, Color.Black, 0xBA);
+    private static ColoredGlyph pathHoriz = new(Color.Yellow, Color.Black, 0xCD);
+    private static ColoredGlyph pathUR = new(Color.Yellow, Color.Black, 0xBB);
+    private static ColoredGlyph pathUL = new(Color.Yellow, Color.Black, 0xC9);
+    private static ColoredGlyph pathLR = new(Color.Yellow, Color.Black, 0xBC);
+    private static ColoredGlyph pathLL = new(Color.Yellow, Color.Black, 0xC8);
     // ReSharper restore InconsistentNaming
 
     private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new()
@@ -55,10 +57,10 @@ public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.Dung
     public void FillSurface()
     {
         var settings = Program.Kernel.Get<GameSettings>();
-        var wallAppearance = new ColoredGlyph(settings.ClearColor, Color.Black, 0x00);
-        var areaAppearance = new ColoredGlyph(settings.ClearColor, Color.Chocolate, 0x00);
+        var wallAppearance = new ColoredGlyph(settings.ClearColor, Color.DarkBlue, 0x00);
+        var offMapAppearance = new ColoredGlyph(settings.ClearColor, Color.Black, 0x00);
 
-        this.Fill(new Rectangle(0, 0, Width, Height), settings.ForeColor, settings.ClearColor, 0,
+        this.Fill(new Rectangle(0, 0, Width, Height), settings.ForeColor, settings.ClearColor, '.',
             Mirror.None);
         var gen = new MapGenerator();
 
@@ -66,23 +68,19 @@ public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.Dung
         {
             for (var iY = 0; iY < Height; iY++)
             {
-                if (!gen.Walkable(iX, iY))
+                if (gen.Wall(iX, iY))
                 {
                     DrawGlyph(wallAppearance, iX, iY);
                 }
-            }
-        }
-
-        foreach (var area in gen.Areas)
-        {
-            foreach (var pos in area.AsEnumerable())
-            {
-                DrawGlyph(areaAppearance, pos);
+                else if (!gen.Walkable(iX, iY))
+                {
+                    DrawGlyph(offMapAppearance, iX, iY);
+                }
             }
         }
 #if DRAWPATH
         var pathStart = new ColoredGlyph(Color.Green, Color.Green, '\u2591');
-        var pathEnd = new ColoredGlyph(Color.Red, Color.Blue, '\u2591');
+        var pathEnd = new ColoredGlyph(Color.Red, Color.Purple, '\u2591');
 
         var fFoundStart = false;
         var fFoundEnd = false;

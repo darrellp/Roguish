@@ -1,7 +1,9 @@
-﻿using GoRogue.MapGeneration;
+﻿using GoRogue.GameFramework;
+using GoRogue.MapGeneration;
 using GoRogue.Random;
 using SadRogue.Primitives.GridViews;
 using ShaiRandom.Generators;
+// ReSharper disable IdentifierTypo
 
 namespace Roguish.Map_Generation
 {
@@ -12,12 +14,14 @@ namespace Roguish.Map_Generation
         public string? RectRoomsComponentTag;
         public string? TunnelsComponentTag;
         public string? AreasComponentTag;
+        public string? WallsComponentTag;
 
         public int PctMergeChance = 50;
         private GridConnections? _connections;
         private GridConnections? _merges;
 
         private ISettableGridView<bool>? _wallFloor;
+        private ISettableGridView<bool>? _walls;
         RectangularRoom[][] _rooms = [];
         private Dictionary<RectangularRoom, Area> _roomAreas;
 
@@ -30,7 +34,8 @@ namespace Roguish.Map_Generation
         public RoomConnectDAP(string? name = null, string? wallFloorComponentTag = "WallFloor",
             string? tunnelsComponentTag = "Tunnels",
             string? rectRoomsComponentTag = "RectRooms",
-            string? areasComponentTag = "Areas")
+            string? areasComponentTag = "Areas",
+            string? wallsComponentTag = "Walls")
             : base(name,
                 (typeof(IGridView<bool>), wallFloorComponentTag),
                 (typeof(RectangularRoom[][]), rectRoomsComponentTag))
@@ -39,13 +44,14 @@ namespace Roguish.Map_Generation
             RectRoomsComponentTag = rectRoomsComponentTag;
             TunnelsComponentTag = tunnelsComponentTag;
             AreasComponentTag = areasComponentTag;
+            WallsComponentTag = wallsComponentTag;
 
             _roomAreas = new Dictionary<RectangularRoom, Area>();
         }
 
         protected override IEnumerator<object?> OnPerform(GenerationContext context)
         {
-            // Get or create/add a wall-floor context component
+            // Get or create/add the various context components
             _wallFloor = context.GetFirst<ISettableGridView<bool>>(WallFloorComponentTag);
             _rooms = context.GetFirst<RectangularRoom[][]>(RectRoomsComponentTag);
             _roomAreas = new Dictionary<RectangularRoom, Area>();
@@ -53,6 +59,8 @@ namespace Roguish.Map_Generation
             // Create our connections objects
             _connections = new GridConnections(SuperGridWidth, SuperGridHeight);
             _merges = new GridConnections(SuperGridWidth, SuperGridHeight);
+            _walls = new ArrayView<bool>(context.Width, context.Height);
+
 
             foreach (var room in _rooms.SelectMany(roomRow => roomRow))
             {
@@ -78,7 +86,13 @@ namespace Roguish.Map_Generation
             ExcavateRoomConnections();
 
             // Do any cleanup
-            //PostProcess(map);
+            PostProcess(context);
+
+            // Get or create/add a walls context component
+            context.GetFirstOrNew<ISettableGridView<bool>>(
+                () => _walls,
+                WallsComponentTag
+            );
 
             var areas = new HashSet<Area>(_roomAreas.Values).ToArray();
             context.GetFirstOrNew(
@@ -87,6 +101,39 @@ namespace Roguish.Map_Generation
             );
 
             yield return null;
+        }
+
+        private void PostProcess(GenerationContext context)
+        {
+            CompleteWalls(context);
+        }
+
+        private void CompleteWalls(GenerationContext context)
+        {
+            for (var iRow = 0; iRow < context.Height; iRow++)
+            {
+                // For each Column
+                for (var iColumn = 0; iColumn < context.Width; iColumn++)
+                {
+                    // Is there a no floor here?
+                    if (!_wallFloor![iColumn, iRow])
+                    {
+                        continue;
+                    }
+
+                    var pos = new Point(iColumn, iRow);
+                    // Get the neighboring off map locations
+                    var offmapLocations = pos.Neighbors(context.Width, context.Height, false)
+                        .Where(p => !_wallFloor[p]);
+
+                    // For each neighboring off map location
+                    foreach (var location in offmapLocations)
+                    {
+                        // Turn it into stone wall
+                        _walls![location] = true;
+                    }
+                }
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////

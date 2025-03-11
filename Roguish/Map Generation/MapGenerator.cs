@@ -6,8 +6,10 @@ namespace Roguish.Map_Generation;
 internal class MapGenerator
 {
     public ISettableGridView<bool> WallFloorValues { get; init; }
+    public ISettableGridView<bool> Walls { get; init; }
     public Area[] Areas { get; init; }
     public bool Walkable(int x, int y) => WallFloorValues[x, y];
+    public bool Wall(int x, int y) => Walls[x, y];
 
     public MapGenerator(int width, int height)
     {
@@ -24,9 +26,11 @@ internal class MapGenerator
         });
 
         WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
+        Walls = generator.Context.GetFirst<ISettableGridView<bool>>("Walls");
         Areas = generator.Context.GetFirst<Area[]>("Areas");
     }
 
     public MapGenerator() : this(Program.Kernel.Get<DungeonSurface>().Width, Program.Kernel.Get<DungeonSurface>().Height) {}
+    
 }
 

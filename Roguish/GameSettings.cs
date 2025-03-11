@@ -18,8 +18,8 @@ public class GameSettings
     public bool FAllowResize { get; } = true;
     public bool FResizeHook = true;
     public Settings.WindowResizeOptions ResizeMode { get; } = Settings.WindowResizeOptions.None;
-    public Color ClearColor = Color.BurlyWood;
-    public Color ForeColor = Color.Black;
+    public Color ClearColor = Color.Black;
+    public Color ForeColor = Color.Orange;
 
     public Builder SetupGame()
     {
