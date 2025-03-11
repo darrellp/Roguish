@@ -13,7 +13,7 @@ public class GameSettings
 
     public int SbWidth = GameWidth;
     public int SbHeight = 1;
-    public Point SbPosition = new Point(0, GameHeight - 1);
+    public Point SbPosition = new(0, GameHeight - 1);
 
     public bool FAllowResize { get; } = true;
     public bool FResizeHook = true;

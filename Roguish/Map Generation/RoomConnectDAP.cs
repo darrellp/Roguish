@@ -1,5 +1,4 @@
-﻿using GoRogue.GameFramework;
-using GoRogue.MapGeneration;
+﻿using GoRogue.MapGeneration;
 using GoRogue.Random;
 using SadRogue.Primitives.GridViews;
 using ShaiRandom.Generators;
@@ -89,7 +88,7 @@ namespace Roguish.Map_Generation
             PostProcess(context);
 
             // Get or create/add a walls context component
-            context.GetFirstOrNew<ISettableGridView<bool>>(
+            context.GetFirstOrNew(
                 () => _walls,
                 WallsComponentTag
             );

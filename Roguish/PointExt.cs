@@ -154,6 +154,7 @@ namespace Roguish
                 yield break;
             }
 
+            // ReSharper disable once MergeIntoPattern
             if (@this.X > 0 && @this.Y > 0)
             {
                 yield return new Point(@this.X - 1, @this.Y - 1);

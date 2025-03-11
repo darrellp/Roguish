@@ -80,7 +80,7 @@ public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.Dung
         }
 #if DRAWPATH
         var pathStart = new ColoredGlyph(Color.Green, Color.Green, '\u2591');
-        var pathEnd = new ColoredGlyph(Color.Red, Color.Purple, '\u2591');
+        var pathEnd = new ColoredGlyph(Color.Red, Color.Red, '\u2591');
 
         var fFoundStart = false;
         var fFoundEnd = false;

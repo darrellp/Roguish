@@ -40,6 +40,7 @@ internal class StatusBar : ScreenSurface
             Program.Kernel.Get<DungeonSurface>().FillSurface();
         };
         controls.Add(_btnRedraw);
+
         SadComponents.Add(controls);
 
         ReportMousePos(new Point());
