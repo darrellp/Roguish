@@ -13,6 +13,7 @@ internal class StatusBar : ScreenSurface
 
     private Button _btnRedraw;
     private Label _lblPosition;
+    private CheckBox _chkDrawPath;
 
     public StatusBar(GameSettings settings) : base(settings.SbWidth, settings.SbHeight)
     {
@@ -40,6 +41,20 @@ internal class StatusBar : ScreenSurface
             Program.Kernel.Get<DungeonSurface>().FillSurface();
         };
         controls.Add(_btnRedraw);
+
+        _chkDrawPath = new CheckBox("Draw Path")
+        {
+            Position = new Point(pointWidth + 3 + _btnRedraw.Width + 3, 0),
+            FocusOnMouseClick = false,
+        };
+        _chkDrawPath.Click += (c, _) =>
+        {
+            var ds = Program.Kernel.Get<DungeonSurface>();
+            ds.DrawPath = !((c as CheckBox)!).IsSelected;
+            ds.DrawMap();
+        };
+
+        controls.Add(_chkDrawPath);
 
         SadComponents.Add(controls);
 
