@@ -1,4 +1,5 @@
 ﻿using Ninject;
+using Roguish.ECS;
 
 namespace Roguish;
 internal class Program
@@ -12,9 +13,12 @@ internal class Program
 
         var settings = Kernel.Get<GameSettings>();
         var gameConfig = settings.SetupGame();
+        var application = new EcsRxApp();
 
         Game.Create(gameConfig);
+        application.StartApplication();
         Game.Instance.Run();
+        application.StopApplication();
         Game.Instance.Dispose();
     }
 
