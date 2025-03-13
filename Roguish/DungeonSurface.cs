@@ -9,7 +9,7 @@ namespace Roguish;
 
 public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.DungeonWidth, settings.DungeonHeight)
 {
-    private MapGenerator _mapgen;
+    private static MapGenerator _mapgen;
     public bool DrawPath { get; set; }
 
     // ReSharper disable InconsistentNaming
@@ -54,10 +54,10 @@ public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.Dung
         DrawGlyph(glyph, pt.X, pt.Y);
     }
 
-    public void FillSurface()
+    public static void FillSurface(DungeonSurface? surface)
     {
         _mapgen = new MapGenerator();
-        DrawMap();
+        surface?.DrawMap();
     }
 
     public void DrawMap()

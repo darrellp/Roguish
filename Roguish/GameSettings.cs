@@ -41,6 +41,7 @@ public class GameSettings
         var sb = Program.Kernel.Get<StatusBar>();
         container.Children.Add(sb);
 
-        ds.FillSurface();
+        DungeonSurface.FillSurface(ds);
+        MVVM.Bindings.Bind();
     }
 }
