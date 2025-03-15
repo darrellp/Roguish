@@ -1,4 +1,5 @@
 ﻿using Ninject;
+using Roguish.ECS;
 using SadConsole.Configuration;
 
 namespace Roguish;
@@ -29,11 +30,20 @@ public class GameSettings
 
         return new Builder()
                 .SetScreenSize(GameWidth, GameHeight)
-                .OnStart(Start);
+                .OnStart(Start)
+                .OnEnd(End);
+    }
+
+    private void End(object? sender, GameHost e)
+    {
+        Program.Kernel.Get<EcsRxApp>().StopApplication();
     }
 
     private static void Start(object? sender, GameHost e)
     {
+        var ecsApp = Program.Kernel.Get<EcsRxApp>();
+        ecsApp.StartApplication();
+
         var container = Program.Kernel.Get<TopContainer>();
         Game.Instance.Screen = Program.Kernel.Get<TopContainer>(); 
         var ds = Program.Kernel.Get<DungeonSurface>();

@@ -2,6 +2,6 @@
 
 namespace Roguish.ECS.Components;
 
-internal class IsDeadComponent : IComponent
+internal class IsPlayerControlledComponent : IComponent
 {
 }

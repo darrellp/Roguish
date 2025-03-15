@@ -13,12 +13,9 @@ internal class Program
 
         var settings = Kernel.Get<GameSettings>();
         var gameConfig = settings.SetupGame();
-        var application = new EcsRxApp();
 
         Game.Create(gameConfig);
-        application.StartApplication();
         Game.Instance.Run();
-        application.StopApplication();
         Game.Instance.Dispose();
     }
 
@@ -28,5 +25,6 @@ internal class Program
         Kernel.Bind<DungeonSurface>().ToSelf().InSingletonScope();
         Kernel.Bind<StatusBar>().ToSelf().InSingletonScope();
         Kernel.Bind<TopContainer>().ToSelf().InSingletonScope();
+        Kernel.Bind<EcsRxApp>().ToSelf().InSingletonScope();
     }
 }

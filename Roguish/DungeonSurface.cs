@@ -9,7 +9,7 @@ namespace Roguish;
 
 public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.DungeonWidth, settings.DungeonHeight)
 {
-    private static MapGenerator _mapgen;
+    private static MapGenerator? _mapgen = null;
     public bool DrawPath { get; set; }
 
     // ReSharper disable InconsistentNaming
@@ -71,7 +71,7 @@ public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.Dung
         {
             for (var iY = 0; iY < Height; iY++)
             {
-                if (_mapgen.Wall(iX, iY))
+                if (_mapgen!.Wall(iX, iY))
                 {
                     DrawGlyph(wallAppearance, iX, iY);
                 }
@@ -98,12 +98,12 @@ public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.Dung
         {
             for (var iY = 0; iY < Height; iY++)
             {
-                if (!fFoundStart && _mapgen.Walkable(iX, iY))
+                if (!fFoundStart && _mapgen!.Walkable(iX, iY))
                 {
                     ptStart = new Point(iX, iY);
                     fFoundStart = true;
                 }
-                if (!fFoundEnd && _mapgen.Walkable(Width - 1 - iX, Height - 1 - iY))
+                if (!fFoundEnd && _mapgen!.Walkable(Width - 1 - iX, Height - 1 - iY))
                 {
                     ptEnd = new Point(Width - 1 - iX, Height - 1 - iY);
                     fFoundEnd = true;
@@ -118,7 +118,7 @@ public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.Dung
                 break;
             }
         }
-        var aStar = new AStar(_mapgen.WallFloorValues, Distance.Manhattan);
+        var aStar = new AStar(_mapgen!.WallFloorValues, Distance.Manhattan);
         var path = aStar.ShortestPath(ptStart, ptEnd);
         if (path != null)
         {

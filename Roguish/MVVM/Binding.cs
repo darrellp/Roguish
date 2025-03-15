@@ -11,7 +11,7 @@ internal class Binding
     public required Point Position;
     public required ControlBase Control;
     public EventHandler? Command = null;
-    public ScreenSurface Surface => Program.Kernel.Get(Screen) as ScreenSurface;
+    public ScreenSurface Surface => (ScreenSurface)Program.Kernel.Get(Screen);
 
     public virtual void SetBinding()
     {
