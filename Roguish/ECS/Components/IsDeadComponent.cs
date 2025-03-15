@@ -1,7 +1,5 @@
-﻿using EcsRx.Components;
+﻿namespace Roguish.ECS.Components;
 
-namespace Roguish.ECS.Components;
-
-internal class IsDeadComponent : IComponent
+internal class IsDeadComponent : EcsComponent
 {
 }

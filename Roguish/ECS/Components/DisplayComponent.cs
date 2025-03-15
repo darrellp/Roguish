@@ -1,8 +1,7 @@
-﻿using EcsRx.Components;
-
+﻿using SadConsole.Entities;
 namespace Roguish.ECS.Components;
 
-internal class DisplayComponent(ColoredGlyph glyph) : IComponent
+internal class DisplayComponent(Entity entity) : EcsComponent
 {
-    public ColoredGlyph Glyph { get; set; } = glyph;
+    public Entity ScEntity{ get; set; } = entity;
 }

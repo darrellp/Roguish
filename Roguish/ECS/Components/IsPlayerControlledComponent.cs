@@ -1,7 +1,5 @@
-﻿using EcsRx.Components;
+﻿namespace Roguish.ECS.Components;
 
-namespace Roguish.ECS.Components;
-
-internal class IsPlayerControlledComponent : IComponent
+internal class IsPlayerControlledComponent : EcsComponent
 {
 }

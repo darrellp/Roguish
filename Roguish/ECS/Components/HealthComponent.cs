@@ -1,9 +1,8 @@
-﻿using EcsRx.Components;
-using SystemsRx.ReactiveData;
+﻿using SystemsRx.ReactiveData;
 
 namespace Roguish.ECS.Components;
 
-internal class HealthComponent(int maxHealth) : IComponent, IDisposable
+internal class HealthComponent(int maxHealth) : EcsComponent, IDisposable
 {
     public ReactiveProperty<int> CurrentHealth { get; set; } = new(maxHealth);
     public int MaxHealth { get; set; } = maxHealth;

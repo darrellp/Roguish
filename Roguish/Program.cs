@@ -1,4 +1,7 @@
-﻿using Ninject;
+﻿global using EcsEntity = EcsRx.Entities.Entity;
+global using EcsComponent = EcsRx.Components.IComponent;
+
+using Ninject;
 using Roguish.ECS;
 
 namespace Roguish;

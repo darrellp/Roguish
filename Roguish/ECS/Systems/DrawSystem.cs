@@ -30,7 +30,7 @@ internal class DrawSystem : IReactToEntitySystem
         var positionComponent = entity.GetComponent<PositionComponent>();
         var displayComponent = entity.GetComponent<DisplayComponent>();
         var position = positionComponent.Position.Value;
-        var glyph = displayComponent.Glyph;
+        var scEntity = displayComponent.ScEntity;
         //_dungeonSurface.DrawOvlyGlyph(glyph, position);
     }
 

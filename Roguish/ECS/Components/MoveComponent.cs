@@ -1,8 +1,6 @@
-﻿using EcsRx.Components;
+﻿namespace Roguish.ECS.Components;
 
-namespace Roguish.ECS.Components;
-
-internal class MoveComponent(Point move) : IComponent
+internal class MoveComponent(Point move) : EcsComponent
 {
     public Point MoveValue { get; set; } = move;
 
