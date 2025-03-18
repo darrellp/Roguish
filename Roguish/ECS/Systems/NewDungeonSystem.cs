@@ -1,41 +1,27 @@
-﻿using EcsR3.Plugins.GroupBinding.Attributes;
-using EcsRx.Groups;
-using EcsRx.Groups.Observable;
-using EcsRx.Systems;
+﻿using EcsRx.Groups.Observable;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using SystemsRx.Systems.Conventional;
-using EcsRx.Collections;
-using EcsRx.Entities;
-using EcsRx.Extensions;
-using EcsRx.Groups;
-using EcsRx.Groups.Observable;
-using EcsRx.Systems;
+using EcsRx.Infrastructure.Extensions;
 
 
 namespace Roguish.ECS.Systems;
 
-internal class NewDungeonSystem : IReactToEventSystem<LevelChangeEvent>
+// ReSharper disable once UnusedMember.Global
+internal class NewDungeonSystem(DungeonSurface dungeon) : IReactToEventSystem<LevelChangeEvent>
 {
-    [FromComponents(typeof(LevelItemComponent))]
-    public IObservableGroup LevelItems;
-
-    private readonly DungeonSurface _dungeon;
-
-    public NewDungeonSystem(DungeonSurface dungeon)
-    {
-        _dungeon = dungeon;
-    }
+    public IObservableGroup LevelItems = 
+        Program.EcsApp.DependencyRegistry.BuildResolver().ResolveObservableGroup(typeof(LevelItemComponent));
 
     public void Process(LevelChangeEvent eventData)
     {
-        //foreach (var item in LevelItems)
-        //{
-        //    if (item.HasComponent(typeof(DisplayComponent)))
-        //    {
-        //        var display = item.GetComponent(typeof(DisplayComponent)) as DisplayComponent;
-        //        display.ScEntity.Position = _dungeon.FindRandomEmptyPoint();
-        //    }
-        //}
+        foreach (var item in LevelItems)
+        {
+            if (item.HasComponent(typeof(IsPlayerControlledComponent)) && item.HasComponent(typeof(DisplayComponent)))
+            {
+                var display = item.GetComponent(typeof(DisplayComponent)) as DisplayComponent;
+                display.ScEntity.Position = dungeon.FindRandomEmptyPoint();
+            }
+        }
     }
 }
