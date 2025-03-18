@@ -1,13 +1,19 @@
 ﻿#define DRAWPATH
 using GoRogue.Pathing;
+using GoRogue.Random;
 using Ninject;
+using Roguish.ECS.Events;
 using Roguish.Map_Generation;
+using SadConsole.Entities;
 using SadConsole.Input;
+using ShaiRandom.Generators;
+using SystemsRx.Events;
+
 // ReSharper disable IdentifierTypo
 
 namespace Roguish;
 
-public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.DungeonWidth, settings.DungeonHeight)
+public class DungeonSurface : ScreenSurface
 {
     private static MapGenerator? _mapgen = null;
     public bool DrawPath { get; set; }
@@ -30,6 +36,46 @@ public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.Dung
         { 10, pathHoriz },
         { 12, pathUR },
     };
+
+    private readonly EntityManager _entityManager;
+    private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
+    private static IEventSystem _eventSystem;
+
+    public DungeonSurface(GameSettings settings, IEventSystem eventSystem) : base(settings.DungeonWidth, settings.DungeonHeight)
+    {
+        // Create the entity renderer. This component should contain all the entities you want drawn on the surface
+        _entityManager = new EntityManager();
+        SadComponents.Add(_entityManager);
+        _eventSystem = eventSystem;
+    }
+
+    public Entity CreateScEntity(ColoredGlyph glyph, Point pt, int chGlyph, int zOrder)
+    {
+        var scEntity = new Entity(new Entity.SingleCell(glyph.Foreground, glyph.Background, chGlyph), zOrder)
+        {
+            Position = pt,
+        };
+        _entityManager.Add(scEntity);
+        return scEntity;
+    }
+
+    public Point FindRandomEmptyPoint()
+    {
+        if (_mapgen == null)
+        {
+            throw new InvalidOperationException("FindRandomEmptyPoint called before map generation");
+        }
+        while (true)
+        {
+            var x = _rng.NextInt(Width);
+            var y = _rng.NextInt(Height);
+
+            if (_mapgen.Walkable(x, y))
+            {
+                return new Point(x, y);
+            }
+        }
+    }
 
     protected override void OnMouseMove(MouseScreenObjectState state)
     {
@@ -58,6 +104,7 @@ public class DungeonSurface(GameSettings settings) : ScreenSurface(settings.Dung
     {
         _mapgen = new MapGenerator();
         surface?.DrawMap();
+        _eventSystem.Publish(new LevelChangeEvent(0));
     }
 
     public void DrawMap()

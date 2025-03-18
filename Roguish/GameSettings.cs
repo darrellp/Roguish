@@ -1,6 +1,7 @@
 ﻿using Ninject;
 using Roguish.ECS;
 using SadConsole.Configuration;
+using SystemsRx.Infrastructure.Ninject.Extensions;
 
 namespace Roguish;
 
@@ -34,18 +35,17 @@ public class GameSettings
                 .OnEnd(End);
     }
 
-    private void End(object? sender, GameHost e)
+    private static void End(object? sender, GameHost e)
     {
-        Program.Kernel.Get<EcsRxApp>().StopApplication();
+        Program.EcsApp.StopApplication();
     }
 
     private static void Start(object? sender, GameHost e)
     {
-        var ecsApp = Program.Kernel.Get<EcsRxApp>();
-        ecsApp.StartApplication();
+        Program.EcsApp.StartApplication();
 
         var container = Program.Kernel.Get<TopContainer>();
-        Game.Instance.Screen = Program.Kernel.Get<TopContainer>(); 
+        Game.Instance.Screen = container; 
         var ds = Program.Kernel.Get<DungeonSurface>();
         container.Children.Add(ds);
         var sb = Program.Kernel.Get<StatusBar>();

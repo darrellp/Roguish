@@ -1,7 +1,6 @@
-﻿using SadConsole.Entities;
-namespace Roguish.ECS.Components;
+﻿namespace Roguish.ECS.Components;
 
-internal class DisplayComponent(Entity entity) : EcsComponent
+internal class DisplayComponent(ScEntity scEntity) : EcsComponent
 {
-    public Entity ScEntity{ get; set; } = entity;
+    public ScEntity ScEntity{ get; set; } = scEntity;
 }

@@ -8,16 +8,21 @@ namespace Roguish;
 
 internal class StatusBar : ScreenSurface
 {
+    #region Members
     public static Color BgndColor = Color.Blue;
     public static Color ForeColor = Color.White;
     public static string PositionFormat = "({0,3:D},{1,3:D})";
     public static ReactiveProperty<Point> MousePosition = new(new Point());
+    #endregion
 
+    #region Constructor
     public StatusBar(GameSettings settings) : base(settings.SbWidth, settings.SbHeight)
     {
         Position = settings.SbPosition;
     }
+    #endregion
 
+    #region Handlers
     private Point _lastPosition = new(-1, -1);
     public void ReportMousePos(Point ptMouse)
     {
@@ -27,7 +32,6 @@ internal class StatusBar : ScreenSurface
         }
     }
 
-    #region Handlers
     public static EventHandler RedrawClick = (c, _) =>
     {
         DungeonSurface.FillSurface(Program.Kernel.Get<DungeonSurface>());

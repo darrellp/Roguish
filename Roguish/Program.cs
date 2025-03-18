@@ -1,17 +1,22 @@
 ﻿global using EcsEntity = EcsRx.Entities.Entity;
+global using ScEntity = SadConsole.Entities.Entity;
 global using EcsComponent = EcsRx.Components.IComponent;
 
 using Ninject;
 using Roguish.ECS;
+using SystemsRx.Infrastructure.Ninject.Extensions;
 
 namespace Roguish;
 internal class Program
 {
-    public static StandardKernel Kernel { get; } = new();
+    public static IKernel Kernel { get; set; }
+    public static EcsRxApp EcsApp = new();
 
     public static void Main(string[] args)
     {
-        SetupIoc();
+        Kernel = EcsApp.DependencyRegistry.GetKernel();
+        RebindAsSingletons();
+
         Settings.WindowTitle = "My SadConsole Game";
 
         var settings = Kernel.Get<GameSettings>();
@@ -22,12 +27,20 @@ internal class Program
         Game.Instance.Dispose();
     }
 
-    private static void SetupIoc()
+    // These are not bound as singletons by EcsRx so we have to unbind them and rebind as singletons
+    private static void RebindAsSingletons()
     {
-        Kernel.Bind<GameSettings>().ToSelf().InSingletonScope();
-        Kernel.Bind<DungeonSurface>().ToSelf().InSingletonScope();
-        Kernel.Bind<StatusBar>().ToSelf().InSingletonScope();
-        Kernel.Bind<TopContainer>().ToSelf().InSingletonScope();
-        Kernel.Bind<EcsRxApp>().ToSelf().InSingletonScope();
+        RebindAsSingleton<StatusBar>();
+        RebindAsSingleton<DungeonSurface>();
+        RebindAsSingleton<GameSettings>();
+        RebindAsSingleton<TopContainer>();
+
     }
+
+    private static void RebindAsSingleton<T>() where T : class
+    {
+        Program.Kernel.Unbind<T>();
+        Program.Kernel.Bind<T>().ToSelf().InSingletonScope();
+    }
+
 }
