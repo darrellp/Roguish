@@ -15,7 +15,7 @@ internal class Program
     public static void Main(string[] args)
     {
         Kernel = EcsApp.DependencyRegistry.GetKernel();
-        RebindAsSingletons();
+        DoBindings();
 
         Settings.WindowTitle = "My SadConsole Game";
 
@@ -27,20 +27,11 @@ internal class Program
         Game.Instance.Dispose();
     }
 
-    // These are not bound as singletons by EcsRx so we have to unbind them and rebind as singletons
-    private static void RebindAsSingletons()
+    private static void DoBindings()
     {
-        RebindAsSingleton<StatusBar>();
-        RebindAsSingleton<DungeonSurface>();
-        RebindAsSingleton<GameSettings>();
-        RebindAsSingleton<TopContainer>();
-
+        Kernel.Bind<StatusBar>().ToSelf().InSingletonScope();
+        Kernel.Bind<DungeonSurface>().ToSelf().InSingletonScope();
+        Kernel.Bind<GameSettings>().ToSelf().InSingletonScope();
+        Kernel.Bind<TopContainer>().ToSelf().InSingletonScope();
     }
-
-    private static void RebindAsSingleton<T>() where T : class
-    {
-        Program.Kernel.Unbind<T>();
-        Program.Kernel.Bind<T>().ToSelf().InSingletonScope();
-    }
-
 }

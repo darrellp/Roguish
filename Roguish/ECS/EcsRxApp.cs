@@ -24,7 +24,8 @@ internal class EcsRxApp : EcsRxApplication
             new IsPlayerControlledComponent(),
             new DescriptionComponent("Player", "It's you silly!"),
             new PositionComponent( playerPos),
-            new DisplayComponent(scePlayer)
+            new DisplayComponent(scePlayer),
+            new LevelItemComponent(),
         };
 
         entity.AddComponents(components);
