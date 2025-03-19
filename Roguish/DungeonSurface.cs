@@ -102,7 +102,7 @@ public class DungeonSurface : ScreenSurface
     protected override void OnMouseMove(MouseScreenObjectState state)
     {
         var sb = Program.Kernel.Get<StatusBar>();
-        sb.ReportMousePos(state.CellPosition + ViewPosition);
+        sb.ReportMousePos(state.CellPosition);// + ViewPosition);
     }
 
     public override void LostMouse(MouseScreenObjectState state)
