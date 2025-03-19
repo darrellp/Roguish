@@ -41,12 +41,24 @@ public class DungeonSurface : ScreenSurface
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
     private static IEventSystem _eventSystem = null!;
 
-    public DungeonSurface(GameSettings settings, IEventSystem eventSystem) : base(settings.DungeonWidth, settings.DungeonHeight)
+    public DungeonSurface(IEventSystem eventSystem) : base(GameSettings.DungeonViewWidth, GameSettings.DungeonViewHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight)
     {
         // Create the entity renderer. This component should contain all the entities you want drawn on the surface
         _entityManager = new EntityManager();
         SadComponents.Add(_entityManager);
         _eventSystem = eventSystem;
+        IsFocused = true;
+    }
+
+    public override bool ProcessKeyboard(Keyboard keyboard)
+    {
+        if (!keyboard.HasKeysPressed)
+        {
+            return false;
+        }
+        _eventSystem.Publish(new KeyboardEvent(keyboard.KeysPressed));
+        KeepPlayerInView();
+        return true;
     }
 
     public Entity CreateScEntity(ColoredGlyph glyph, Point pt, int chGlyph, int zOrder)
@@ -82,10 +94,15 @@ public class DungeonSurface : ScreenSurface
         }
     }
 
+    public bool IsWalkable(Point pt)
+    {
+        return _mapgen!.Walkable(pt.X, pt.Y);
+    }
+
     protected override void OnMouseMove(MouseScreenObjectState state)
     {
         var sb = Program.Kernel.Get<StatusBar>();
-        sb.ReportMousePos(state.CellPosition);
+        sb.ReportMousePos(state.CellPosition + ViewPosition);
     }
 
     public override void LostMouse(MouseScreenObjectState state)
@@ -105,14 +122,57 @@ public class DungeonSurface : ScreenSurface
         DrawGlyph(glyph, pt.X, pt.Y);
     }
 
-    public static void FillSurface(DungeonSurface? surface)
+    public void FillSurface(DungeonSurface? surface)
     {
         _mapgen = new MapGenerator();
-        surface?.DrawMap();
+        surface?.DrawMap(false);
         _eventSystem.Publish(new LevelChangeEvent(0));
+        CenterView(Program.EcsApp.PlayerPos);
     }
 
-    public void DrawMap()
+    private void CenterView(Point pt)
+    {
+        var idealPt = pt - new Point(ViewWidth / 2, ViewHeight / 2);
+        var x = Math.Min(GameSettings.DungeonWidth - ViewWidth, (Math.Max(idealPt.X, 0)));
+        var y = Math.Min(GameSettings.DungeonHeight - ViewHeight, (Math.Max(idealPt.Y, 0)));
+        var newPos = new Point(x, y);
+        ViewPosition = newPos;
+    }
+
+    private void KeepPlayerInView()
+    {
+        var playerPos = Program.EcsApp.PlayerPos;
+        var playerPosRelative = playerPos - ViewPosition;
+        var (x, y) =  ViewPosition;
+        var isChanged = false;
+        if (playerPosRelative.X < GameSettings.BorderWidthX)
+        {
+            isChanged = true;
+            x -= GameSettings.BorderWidthX - playerPosRelative.X;
+        }
+        else if (playerPosRelative.X >= ViewWidth - GameSettings.BorderWidthX)
+        {
+            isChanged = true;
+            x -= ViewWidth - GameSettings.BorderWidthX - playerPosRelative.X;
+        }
+        if (playerPosRelative.Y < GameSettings.BorderWidthY)
+        {
+            isChanged = true;
+            y -= GameSettings.BorderWidthY - playerPosRelative.Y;
+        }
+        else if (playerPosRelative.Y >= ViewHeight - GameSettings.BorderWidthY)
+        {
+            isChanged = true;
+            y -= ViewHeight - GameSettings.BorderWidthY - playerPosRelative.Y;
+        }
+
+        if (isChanged)
+        {
+            ViewPosition = new Point(x, y);
+        }
+    }
+
+    public void DrawMap(bool fCenter = true)
     {
         var settings = Program.Kernel.Get<GameSettings>();
         this.Fill(new Rectangle(0, 0, Width, Height), settings.ForeColor, settings.ClearColor, '.',
@@ -132,6 +192,11 @@ public class DungeonSurface : ScreenSurface
                     DrawGlyph(offMapAppearance, iX, iY);
                 }
             }
+        }
+
+        if (fCenter)
+        {
+            CenterView(Program.EcsApp.PlayerPos);
         }
 
         if (!DrawPath)

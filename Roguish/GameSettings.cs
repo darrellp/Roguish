@@ -10,8 +10,14 @@ public class GameSettings
     public static int GameWidth { get; }= 90;
     public static int GameHeight { get; }= 41;
 
-    public int DungeonWidth { get; } = GameWidth;
-    public int DungeonHeight { get; } = GameHeight - 1;
+    public static int DungeonWidth { get; } = 300;
+    public static int DungeonHeight { get; } = 200;
+
+    public static int DungeonViewWidth { get; } = GameWidth;
+    public static int DungeonViewHeight { get; } = GameHeight - 1;
+
+    public static int BorderWidthX = 7;
+    public static int BorderWidthY = 5;
 
     public int SbWidth = GameWidth;
     public int SbHeight = 1;
@@ -51,7 +57,7 @@ public class GameSettings
         var sb = Program.Kernel.Get<StatusBar>();
         container.Children.Add(sb);
 
-        DungeonSurface.FillSurface(ds);
+        ds.FillSurface(ds);
         MVVM.Bindings.Bind();
     }
 }

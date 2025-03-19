@@ -1,6 +1,9 @@
 ﻿global using EcsEntity = EcsRx.Entities.IEntity;
 global using ScEntity = SadConsole.Entities.Entity;
 global using EcsComponent = EcsRx.Components.IComponent;
+global using static Roguish.Program;
+
+
 using EcsRx.Groups.Observable;
 using EcsRx.Infrastructure.Extensions;
 using Ninject;

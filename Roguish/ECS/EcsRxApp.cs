@@ -1,4 +1,5 @@
-﻿using EcsRx.Groups.Observable;
+﻿using System.Diagnostics;
+using EcsRx.Groups.Observable;
 using EcsRx.Infrastructure;
 using EcsRx.Plugins.Views;
 using Ninject;
@@ -7,14 +8,21 @@ using SystemsRx.Events;
 using SystemsRx.Infrastructure.Dependencies;
 using SystemsRx.Infrastructure.Ninject;
 using SystemsRx.Infrastructure.Ninject.Extensions;
+// ReSharper disable IdentifierTypo
 
 namespace Roguish.ECS;
 
 internal class EcsRxApp : EcsRxApplication
 {
+    public IObservableGroup PlayerGroup = null!;
+    public IObservableGroup LevelItems = null!;
+
     protected override void ApplicationStarted()
     {
-        var collection = EntityDatabase.GetCollection();
+        PlayerGroup = Program.GetGroup(typeof(IsPlayerControlledComponent));
+        LevelItems = Program.GetGroup(typeof(LevelItemComponent));
+
+    var collection = EntityDatabase.GetCollection();
         var entity = collection.CreateEntity();
         var dungeon = Program.Kernel.Get<DungeonSurface>();
         var playerPos = new Point(0, 0);
@@ -29,6 +37,17 @@ internal class EcsRxApp : EcsRxApplication
         };
 
         entity.AddComponents(components);
+    }
+
+    public Point PlayerPos
+    {
+        get
+        {
+            var player = PlayerGroup[0];
+            var poscmp = player.GetComponent(typeof(PositionComponent)) as PositionComponent;
+            Debug.Assert(poscmp != null);
+            return poscmp.Position.Value;
+        }
     }
 
     protected override void LoadPlugins()

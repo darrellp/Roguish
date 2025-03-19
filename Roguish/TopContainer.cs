@@ -41,8 +41,9 @@ internal class TopContainer : ScreenObject
         }
 
         var resizableDungeonSurface = (ICellSurfaceResize)dungeonSurface.Surface;
-        resizableDungeonSurface.Resize(chWidth, chHeight - settings.SbHeight, false);
-        DungeonSurface.FillSurface(Program.Kernel.Get<DungeonSurface>());
+        resizableDungeonSurface.Resize(chWidth, chHeight - settings.SbHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight, false);
+        dungeonSurface.DrawMap();
+
 
         var sb = Program.Kernel.Get<StatusBar>();
         var resizableStatusBar = (ICellSurfaceResize)sb.Surface;
