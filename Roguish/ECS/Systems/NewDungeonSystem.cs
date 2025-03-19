@@ -1,4 +1,5 @@
-﻿using EcsRx.Groups.Observable;
+﻿using System.Diagnostics;
+using EcsRx.Groups.Observable;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using SystemsRx.Systems.Conventional;
@@ -19,6 +20,7 @@ internal class NewDungeonSystem(DungeonSurface dungeon) : IReactToEventSystem<Le
             if (item.HasComponent(typeof(IsPlayerControlledComponent)) && item.HasComponent(typeof(DisplayComponent)))
             {
                 var display = item.GetComponent(typeof(DisplayComponent)) as DisplayComponent;
+                Debug.Assert(display != null, nameof(display) + " != null");
                 display.ScEntity.Position = dungeon.FindRandomEmptyPoint();
             }
         }

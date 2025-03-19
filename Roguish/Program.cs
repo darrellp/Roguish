@@ -10,7 +10,7 @@ using SystemsRx.Infrastructure.Ninject.Extensions;
 namespace Roguish;
 internal class Program
 {
-    public static IKernel Kernel { get; set; }
+    public static IKernel Kernel { get; set; } = null!;
     public static EcsRxApp EcsApp = new();
 
     public static void Main(string[] args)

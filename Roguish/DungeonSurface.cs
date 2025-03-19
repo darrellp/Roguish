@@ -39,7 +39,7 @@ public class DungeonSurface : ScreenSurface
 
     private readonly EntityManager _entityManager;
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
-    private static IEventSystem _eventSystem;
+    private static IEventSystem _eventSystem = null!;
 
     public DungeonSurface(GameSettings settings, IEventSystem eventSystem) : base(settings.DungeonWidth, settings.DungeonHeight)
     {

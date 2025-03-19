@@ -2,6 +2,8 @@
 
 namespace Roguish.ECS.Components;
 
+// Position of the entity
+
 internal class PositionComponent(Point position) : EcsComponent, IDisposable
 {
     public ReactiveProperty<Point> Position { get; set; } = new(position);
