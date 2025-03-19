@@ -1,7 +1,8 @@
-﻿global using EcsEntity = EcsRx.Entities.Entity;
+﻿global using EcsEntity = EcsRx.Entities.IEntity;
 global using ScEntity = SadConsole.Entities.Entity;
 global using EcsComponent = EcsRx.Components.IComponent;
-
+using EcsRx.Groups.Observable;
+using EcsRx.Infrastructure.Extensions;
 using Ninject;
 using Roguish.ECS;
 using SystemsRx.Infrastructure.Ninject.Extensions;
@@ -25,6 +26,11 @@ internal class Program
         Game.Create(gameConfig);
         Game.Instance.Run();
         Game.Instance.Dispose();
+    }
+
+    public static IObservableGroup GetGroup(params Type[] Components)
+    {
+        return EcsApp.DependencyRegistry.BuildResolver().ResolveObservableGroup(Components);
     }
 
     private static void DoBindings()

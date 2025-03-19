@@ -59,6 +59,11 @@ public class DungeonSurface : ScreenSurface
         return scEntity;
     }
 
+    public void RemoveScEntity(ScEntity scEntity)
+    {
+        _entityManager.Remove(scEntity);
+    }
+
     public Point FindRandomEmptyPoint()
     {
         if (_mapgen == null)
