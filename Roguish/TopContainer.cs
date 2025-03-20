@@ -6,10 +6,10 @@ using Game = SadConsole.Game;
 namespace Roguish;
 internal class TopContainer : ScreenObject
 {
-    public TopContainer(GameSettings settings)
+    public TopContainer()
     {
         UseMouse = false;
-        if (settings.FResizeHook)
+        if (GameSettings.FAllowResize)
         {
             // Resizing causes some weird gunk occasionally around the edges where the window is being resized into.
             // Suspicious that this is a MonoGame issue since there are some videos demonstrating similar behavior with
@@ -22,12 +22,11 @@ internal class TopContainer : ScreenObject
 
     private void Game_WindowResized(object? sender, EventArgs e)
     {
-        var settings = Program.Kernel.Get<GameSettings>();
         var dungeonSurface = Program.Kernel.Get<DungeonSurface>();
         var chWidth = Game.Instance.MonoGameInstance.Window.ClientBounds.Width / dungeonSurface.FontSize.X;
-        chWidth = Math.Max(80, chWidth);
+        chWidth = Math.Min(GameSettings.DungeonWidth, Math.Max(80, chWidth));
         var chHeight = Game.Instance.MonoGameInstance.Window.ClientBounds.Height / dungeonSurface.FontSize.Y;
-        chHeight = Math.Max(25, chHeight);
+        chHeight = Math.Min(GameSettings.DungeonHeight, Math.Max(25, chHeight));
         var adjWidth = chWidth * dungeonSurface.FontSize.X;
         var adjHeight = chHeight * dungeonSurface.FontSize.Y;
         if (adjWidth != Game.Instance.MonoGameInstance.Window.ClientBounds.Width ||
@@ -41,14 +40,14 @@ internal class TopContainer : ScreenObject
         }
 
         var resizableDungeonSurface = (ICellSurfaceResize)dungeonSurface.Surface;
-        resizableDungeonSurface.Resize(chWidth, chHeight - settings.SbHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight, false);
+        resizableDungeonSurface.Resize(chWidth, chHeight - GameSettings.SbHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight, false);
         dungeonSurface.DrawMap();
 
 
         var sb = Program.Kernel.Get<StatusBar>();
         var resizableStatusBar = (ICellSurfaceResize)sb.Surface;
-        sb.Position = new Point(0, chHeight - settings.SbHeight);
-        resizableStatusBar.Resize(chWidth, settings.SbHeight, false);
+        sb.Position = new Point(0, chHeight - GameSettings.SbHeight);
+        resizableStatusBar.Resize(chWidth, GameSettings.SbHeight, false);
     }
 
 }

@@ -3,11 +3,11 @@ global using ScEntity = SadConsole.Entities.Entity;
 global using EcsComponent = EcsRx.Components.IComponent;
 global using static Roguish.Program;
 
-
 using EcsRx.Groups.Observable;
 using EcsRx.Infrastructure.Extensions;
 using Ninject;
 using Roguish.ECS;
+using SadConsole.Configuration;
 using SystemsRx.Infrastructure.Ninject.Extensions;
 
 namespace Roguish;
@@ -23,8 +23,7 @@ internal class Program
 
         Settings.WindowTitle = "My SadConsole Game";
 
-        var settings = Kernel.Get<GameSettings>();
-        var gameConfig = settings.SetupGame();
+        var gameConfig = SetupGame();
 
         Game.Create(gameConfig);
         Game.Instance.Run();
@@ -40,7 +39,38 @@ internal class Program
     {
         Kernel.Bind<StatusBar>().ToSelf().InSingletonScope();
         Kernel.Bind<DungeonSurface>().ToSelf().InSingletonScope();
-        Kernel.Bind<GameSettings>().ToSelf().InSingletonScope();
         Kernel.Bind<TopContainer>().ToSelf().InSingletonScope();
     }
+
+    public static Builder SetupGame()
+    {
+        Settings.AllowWindowResize = GameSettings.FAllowResize;
+        Settings.ResizeMode = GameSettings.ResizeMode;
+        Settings.ClearColor = GameSettings.ClearColor;
+
+        return new Builder()
+            .SetScreenSize(GameSettings.GameWidth, GameSettings.GameHeight)
+            .OnStart(Start)
+            .OnEnd(End);
+    }
+    private static void End(object? sender, GameHost e)
+    {
+        Program.EcsApp.StopApplication();
+    }
+
+    private static void Start(object? sender, GameHost e)
+    {
+        Program.EcsApp.StartApplication();
+
+        var container = Program.Kernel.Get<TopContainer>();
+        Game.Instance.Screen = container;
+        var ds = Program.Kernel.Get<DungeonSurface>();
+        container.Children.Add(ds);
+        var sb = Program.Kernel.Get<StatusBar>();
+        container.Children.Add(sb);
+
+        ds.FillSurface(ds);
+        MVVM.Bindings.Bind();
+    }
+
 }

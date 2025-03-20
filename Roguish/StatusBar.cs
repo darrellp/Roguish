@@ -17,10 +17,10 @@ internal class StatusBar : ScreenSurface
     #endregion
 
     #region Constructor
-    public StatusBar(GameSettings settings, DungeonSurface dungeon) : base(settings.SbWidth, settings.SbHeight)
+    public StatusBar(DungeonSurface dungeon) : base(GameSettings.SbWidth, GameSettings.SbHeight)
     {
         _dungeon = dungeon;
-        Position = settings.SbPosition;
+        Position = GameSettings.SbPosition;
         FocusOnMouseClick = false;
     }
     #endregion

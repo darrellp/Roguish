@@ -1,5 +1,4 @@
-﻿#define DRAWPATH
-using GoRogue.Pathing;
+﻿using GoRogue.Pathing;
 using GoRogue.Random;
 using Ninject;
 using Roguish.ECS.Events;
@@ -15,7 +14,9 @@ namespace Roguish;
 
 public class DungeonSurface : ScreenSurface
 {
-    private static MapGenerator? _mapgen = null;
+    #region Local Variables
+    private Point _ptPlayer;
+    private static MapGenerator? _mapgen;
     public bool DrawPath { get; set; }
 
     // ReSharper disable InconsistentNaming
@@ -40,7 +41,9 @@ public class DungeonSurface : ScreenSurface
     private readonly EntityManager _entityManager;
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
     private static IEventSystem _eventSystem = null!;
+    #endregion
 
+    #region Constructor
     public DungeonSurface(IEventSystem eventSystem) : base(GameSettings.DungeonViewWidth, GameSettings.DungeonViewHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight)
     {
         // Create the entity renderer. This component should contain all the entities you want drawn on the surface
@@ -49,7 +52,9 @@ public class DungeonSurface : ScreenSurface
         _eventSystem = eventSystem;
         IsFocused = true;
     }
+    #endregion
 
+    #region I/O
     public override bool ProcessKeyboard(Keyboard keyboard)
     {
         if (!keyboard.HasKeysPressed)
@@ -57,10 +62,26 @@ public class DungeonSurface : ScreenSurface
             return false;
         }
         _eventSystem.Publish(new KeyboardEvent(keyboard.KeysPressed));
+
+        _ptPlayer = Program.EcsApp.PlayerPos;
         KeepPlayerInView();
         return true;
     }
 
+    protected override void OnMouseMove(MouseScreenObjectState state)
+    {
+        var sb = Program.Kernel.Get<StatusBar>();
+        sb.ReportMousePos(state.CellPosition);// + ViewPosition);
+    }
+
+    public override void LostMouse(MouseScreenObjectState state)
+    {
+        var sb = Program.Kernel.Get<StatusBar>();
+        sb.ReportMousePos(new Point(0, 0));
+    }
+    #endregion
+
+    #region Entity Management
     public Entity CreateScEntity(ColoredGlyph glyph, Point pt, int chGlyph, int zOrder)
     {
         var scEntity = new Entity(new Entity.SingleCell(glyph.Foreground, glyph.Background, chGlyph), zOrder)
@@ -75,7 +96,9 @@ public class DungeonSurface : ScreenSurface
     {
         _entityManager.Remove(scEntity);
     }
+    #endregion
 
+    #region Map Management
     public Point FindRandomEmptyPoint()
     {
         if (_mapgen == null)
@@ -98,19 +121,9 @@ public class DungeonSurface : ScreenSurface
     {
         return _mapgen!.Walkable(pt.X, pt.Y);
     }
+    #endregion
 
-    protected override void OnMouseMove(MouseScreenObjectState state)
-    {
-        var sb = Program.Kernel.Get<StatusBar>();
-        sb.ReportMousePos(state.CellPosition);// + ViewPosition);
-    }
-
-    public override void LostMouse(MouseScreenObjectState state)
-    {
-        var sb = Program.Kernel.Get<StatusBar>();
-        sb.ReportMousePos(new Point(0, 0));
-    }
-
+    #region Drawing
     private void DrawGlyph(ColoredGlyph glyph, int x, int y)
     {
         this.SetCellAppearance(x, y, glyph);
@@ -127,58 +140,16 @@ public class DungeonSurface : ScreenSurface
         _mapgen = new MapGenerator();
         surface?.DrawMap(false);
         _eventSystem.Publish(new LevelChangeEvent(0));
-        CenterView(Program.EcsApp.PlayerPos);
-    }
-
-    private void CenterView(Point pt)
-    {
-        var idealPt = pt - new Point(ViewWidth / 2, ViewHeight / 2);
-        var x = Math.Min(GameSettings.DungeonWidth - ViewWidth, (Math.Max(idealPt.X, 0)));
-        var y = Math.Min(GameSettings.DungeonHeight - ViewHeight, (Math.Max(idealPt.Y, 0)));
-        var newPos = new Point(x, y);
-        ViewPosition = newPos;
-    }
-
-    private void KeepPlayerInView()
-    {
-        var playerPos = Program.EcsApp.PlayerPos;
-        var playerPosRelative = playerPos - ViewPosition;
-        var (x, y) =  ViewPosition;
-        var isChanged = false;
-        if (playerPosRelative.X < GameSettings.BorderWidthX)
-        {
-            isChanged = true;
-            x -= GameSettings.BorderWidthX - playerPosRelative.X;
-        }
-        else if (playerPosRelative.X >= ViewWidth - GameSettings.BorderWidthX)
-        {
-            isChanged = true;
-            x -= ViewWidth - GameSettings.BorderWidthX - playerPosRelative.X;
-        }
-        if (playerPosRelative.Y < GameSettings.BorderWidthY)
-        {
-            isChanged = true;
-            y -= GameSettings.BorderWidthY - playerPosRelative.Y;
-        }
-        else if (playerPosRelative.Y >= ViewHeight - GameSettings.BorderWidthY)
-        {
-            isChanged = true;
-            y -= ViewHeight - GameSettings.BorderWidthY - playerPosRelative.Y;
-        }
-
-        if (isChanged)
-        {
-            ViewPosition = new Point(x, y);
-        }
+        _ptPlayer = Program.EcsApp.PlayerPos;
+        CenterView();
     }
 
     public void DrawMap(bool fCenter = true)
     {
-        var settings = Program.Kernel.Get<GameSettings>();
-        this.Fill(new Rectangle(0, 0, Width, Height), settings.ForeColor, settings.ClearColor, '.',
+        this.Fill(new Rectangle(0, 0, Width, Height), GameSettings.ForeColor, GameSettings.ClearColor, '.',
             Mirror.None);
-        var wallAppearance = new ColoredGlyph(settings.ClearColor, Color.DarkBlue, 0x00);
-        var offMapAppearance = new ColoredGlyph(settings.ClearColor, Color.Black, 0x00);
+        var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.DarkBlue, 0x00);
+        var offMapAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);
         for (var iX = 0; iX < Width; iX++)
         {
             for (var iY = 0; iY < Height; iY++)
@@ -196,7 +167,7 @@ public class DungeonSurface : ScreenSurface
 
         if (fCenter)
         {
-            CenterView(Program.EcsApp.PlayerPos);
+            CenterView();
         }
 
         if (!DrawPath)
@@ -250,7 +221,6 @@ public class DungeonSurface : ScreenSurface
         }
     }
 
-
     private void InscribePath(Point prev, Point cur, Point next)
     {
         var index = ConnectValue(cur, prev) | ConnectValue(cur, next);
@@ -274,4 +244,49 @@ public class DungeonSurface : ScreenSurface
             return pt.X < ptConnect.X ? 2 : 8;
         }
     }
+    #endregion
+
+    #region View Management
+    private void CenterView()
+    {
+        var idealPt = _ptPlayer - new Point(ViewWidth / 2, ViewHeight / 2);
+        var x = Math.Min(GameSettings.DungeonWidth - ViewWidth, (Math.Max(idealPt.X, 0)));
+        var y = Math.Min(GameSettings.DungeonHeight - ViewHeight, (Math.Max(idealPt.Y, 0)));
+        var newPos = new Point(x, y);
+        ViewPosition = newPos;
+    }
+
+    private void KeepPlayerInView()
+    {
+        var playerPos = Program.EcsApp.PlayerPos;
+        var playerPosRelative = playerPos - ViewPosition;
+        var (x, y) =  ViewPosition;
+        var isChanged = false;
+        if (playerPosRelative.X < GameSettings.BorderWidthX)
+        {
+            isChanged = true;
+            x -= GameSettings.BorderWidthX - playerPosRelative.X;
+        }
+        else if (playerPosRelative.X >= ViewWidth - GameSettings.BorderWidthX)
+        {
+            isChanged = true;
+            x -= ViewWidth - GameSettings.BorderWidthX - playerPosRelative.X;
+        }
+        if (playerPosRelative.Y < GameSettings.BorderWidthY)
+        {
+            isChanged = true;
+            y -= GameSettings.BorderWidthY - playerPosRelative.Y;
+        }
+        else if (playerPosRelative.Y >= ViewHeight - GameSettings.BorderWidthY)
+        {
+            isChanged = true;
+            y -= ViewHeight - GameSettings.BorderWidthY - playerPosRelative.Y;
+        }
+
+        if (isChanged)
+        {
+            ViewPosition = new Point(x, y);
+        }
+    }
+    #endregion
 }

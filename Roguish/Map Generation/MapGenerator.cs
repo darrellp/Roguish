@@ -1,5 +1,4 @@
 ﻿using GoRogue.MapGeneration;
-using Ninject;
 using SadRogue.Primitives.GridViews;
 
 namespace Roguish.Map_Generation;
@@ -21,8 +20,8 @@ internal class MapGenerator
             //gen.AddSteps(DefaultAlgorithms.DungeonMazeMapSteps());
             //gen.AddSteps(DefaultAlgorithms.BasicRandomRoomsMapSteps());
             //gen.AddSteps(DefaultAlgorithms.CellularAutomataGenerationSteps());
-            gen.AddStep(new RoomGenDAP() { MinRoomHeight = 5});
-            gen.AddStep(new RoomConnectDAP() {PctMergeChance = 30});
+            gen.AddStep(new RoomGenDAP() { MinRoomHeight = 4, MinRoomWidth = 10, SuperCellHeight = 12, SuperCellWidth = 20});
+            gen.AddStep(new RoomConnectDAP() {PctMergeChance = 40});
         });
 
         WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
