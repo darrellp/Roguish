@@ -1,4 +1,5 @@
-﻿using GoRogue.Pathing;
+﻿using System.Diagnostics;
+using GoRogue.Pathing;
 using GoRogue.Random;
 using Ninject;
 using Roguish.ECS.EcsEvents;
@@ -171,6 +172,10 @@ public class DungeonSurface : ScreenSurface
         var offMapAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);
 
         this.Fill(unseenFloor);
+
+
+        var playerPos = Program.EcsApp.PlayerPos;
+        Debug.Assert(_mapgen.IsVisible(playerPos.X, playerPos.Y));
 
         for (var iX = 0; iX < Width; iX++)
         {

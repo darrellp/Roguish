@@ -22,5 +22,6 @@ internal class NewDungeonSystem(DungeonSurface dungeon) : IReactToEventSystem<Le
                 }
             }
         }
+        Program.OnNewTurn(this);
     }
 }

@@ -10,7 +10,7 @@ internal class MapGenerator
     public Area[] Areas { get; init; }
     public bool Walkable(int x, int y) => WallFloorValues[x, y];
     public bool Wall(int x, int y) => Walls[x, y];
-    private IGridView<bool> Visibility { get; init; }
+    private bool[][] Visibility { get; init; }
 
     public RecursiveShadowcastingBooleanBasedFOV FOV { get; init; }
 
@@ -33,10 +33,34 @@ internal class MapGenerator
         Areas = generator.Context.GetFirst<Area[]>("Areas");
 
         FOV = new RecursiveShadowcastingBooleanBasedFOV(WallFloorValues);
-        Visibility = FOV.BooleanResultView;
+        var gvVisibility = FOV.BooleanResultView;
+        Visibility = new bool[width][];
+        for (var iX = 0; iX < width; iX++)
+        {
+            Visibility[iX] = new bool[height];
+            for (var iY = 0; iY < height; iY++)
+            {
+                Visibility[iX][iY] = gvVisibility[iX, iY];
+            }
+        }
+
+        Program.NewTurnEvent +=Program_NewTurnEvent;
     }
 
-    public bool IsVisible(int x, int y) => Visibility[x, y];
+    private void Program_NewTurnEvent(object sender, Events.NewTurnEventArgs e)
+    {
+        FOV.Calculate(e.PlayerPosition, GameSettings.FovRadius);
+        foreach (var ptNewlySeen in FOV.NewlySeen)
+        {
+            Visibility[ptNewlySeen.X][ptNewlySeen.Y] = true;
+        }
+        foreach (var ptNewlyUnseen in FOV.NewlyUnseen)
+        {
+            Visibility[ptNewlyUnseen.X][ptNewlyUnseen.Y] = true;
+        }
+    }
+
+    public bool IsVisible(int x, int y) => Visibility[x][y];
     public MapGenerator() : this(GameSettings.DungeonWidth, GameSettings.DungeonHeight) {}
     
 }
