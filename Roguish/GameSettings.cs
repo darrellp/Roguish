@@ -11,7 +11,7 @@ public static class GameSettings
     public const int GameHeight = 41;
 
     // Size of the dungeon
-    public const int DungeonWidth = 300;
+    public const int DungeonWidth = 400;
     public const int DungeonHeight = 80;
 
     // Starting size of the window into the dungeon
@@ -33,5 +33,6 @@ public static class GameSettings
     public static Settings.WindowResizeOptions ResizeMode => Settings.WindowResizeOptions.None;
     public static Color ClearColor = Color.Black;
     public static Color ForeColor = Color.Orange;
+    public const int FovRadius = 30;
     #endregion
 }

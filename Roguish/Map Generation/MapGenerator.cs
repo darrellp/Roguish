@@ -1,4 +1,5 @@
 ﻿using GoRogue.MapGeneration;
+using GoRogue.FOV;
 using SadRogue.Primitives.GridViews;
 
 namespace Roguish.Map_Generation;
@@ -9,6 +10,9 @@ internal class MapGenerator
     public Area[] Areas { get; init; }
     public bool Walkable(int x, int y) => WallFloorValues[x, y];
     public bool Wall(int x, int y) => Walls[x, y];
+    private IGridView<bool> Visibility { get; init; }
+
+    public RecursiveShadowcastingBooleanBasedFOV FOV { get; init; }
 
     public MapGenerator(int width, int height)
     {
@@ -27,8 +31,12 @@ internal class MapGenerator
         WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
         Walls = generator.Context.GetFirst<ISettableGridView<bool>>("Walls");
         Areas = generator.Context.GetFirst<Area[]>("Areas");
+
+        FOV = new RecursiveShadowcastingBooleanBasedFOV(WallFloorValues);
+        Visibility = FOV.BooleanResultView;
     }
 
+    public bool IsVisible(int x, int y) => Visibility[x, y];
     public MapGenerator() : this(GameSettings.DungeonWidth, GameSettings.DungeonHeight) {}
     
 }

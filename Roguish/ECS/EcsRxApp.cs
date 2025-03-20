@@ -4,10 +4,15 @@ using EcsRx.Infrastructure;
 using EcsRx.Plugins.Views;
 using Ninject;
 using Roguish.ECS.Components;
+using Roguish.ECS.EcsEvents;
+using Roguish.Events;
+using SystemsR3.Events;
 using SystemsRx.Events;
 using SystemsRx.Infrastructure.Dependencies;
 using SystemsRx.Infrastructure.Ninject;
 using SystemsRx.Infrastructure.Ninject.Extensions;
+using IEventSystem = SystemsR3.Events.IEventSystem;
+
 // ReSharper disable IdentifierTypo
 
 namespace Roguish.ECS;

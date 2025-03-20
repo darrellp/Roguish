@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Roguish.ECS.Components;
-using Roguish.ECS.Events;
+using Roguish.ECS.EcsEvents;
 using SystemsRx.Systems.Conventional;
 
 namespace Roguish.ECS.Systems;

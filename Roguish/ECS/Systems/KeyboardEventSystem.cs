@@ -1,10 +1,11 @@
 ﻿using Roguish.ECS.Components;
-using Roguish.ECS.Events;
+using Roguish.ECS.EcsEvents;
 using SadConsole.Input;
+using SystemsRx.Events;
 using SystemsRx.Systems.Conventional;
 
 namespace Roguish.ECS.Systems;
-internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem<KeyboardEvent>
+internal class KeyboardEventSystem(DungeonSurface dungeon, IEventSystem eventSystem) : IReactToEventSystem<KeyboardEvent>
 {
     public void Process(KeyboardEvent keyData)
     {
@@ -13,6 +14,8 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
             // We currently only handle single key presses
             return;
         }
+
+        bool fNewTurn = true;
         var key = keyData.Keys[0].Key;
         switch (key)
         {
@@ -48,8 +51,17 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
                 MovePlayer(new Point(-1, 1));
                 break;
 
-            default:
+            case Keys.D5:
                 break;
+
+            default:
+                fNewTurn = false;
+                break;
+        }
+
+        if (fNewTurn)
+        {
+            Program.OnNewTurn(this);
         }
     }
 

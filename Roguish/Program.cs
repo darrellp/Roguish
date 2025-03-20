@@ -2,19 +2,23 @@
 global using ScEntity = SadConsole.Entities.Entity;
 global using EcsComponent = EcsRx.Components.IComponent;
 global using static Roguish.Program;
-
 using EcsRx.Groups.Observable;
 using EcsRx.Infrastructure.Extensions;
 using Ninject;
 using Roguish.ECS;
+using Roguish.Events;
 using SadConsole.Configuration;
 using SystemsRx.Infrastructure.Ninject.Extensions;
+using Roguish.ECS.EcsEvents;
+using SystemsRx.Events;
 
 namespace Roguish;
 internal class Program
 {
     public static IKernel Kernel { get; set; } = null!;
     public static EcsRxApp EcsApp = new();
+    public static event NewTurnEventHandler? NewTurnEvent;
+    public delegate void NewTurnEventHandler(object sender, NewTurnEventArgs e);
 
     public static void Main(string[] args)
     {
@@ -28,6 +32,14 @@ internal class Program
         Game.Create(gameConfig);
         Game.Instance.Run();
         Game.Instance.Dispose();
+    }
+
+    public static void OnNewTurn(object sender)
+    {
+        var playerPosition = EcsApp.PlayerPos;
+        EcsApp.Get<IEventSystem>().Publish(new NewTurnEvent(playerPosition));
+        var eventArgs = new NewTurnEventArgs(playerPosition);
+        NewTurnEvent?.Invoke(sender, eventArgs);
     }
 
     public static IObservableGroup GetGroup(params Type[] Components)

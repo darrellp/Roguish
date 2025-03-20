@@ -1,7 +1,7 @@
 ﻿using GoRogue.Pathing;
 using GoRogue.Random;
 using Ninject;
-using Roguish.ECS.Events;
+using Roguish.ECS.EcsEvents;
 using Roguish.Map_Generation;
 using SadConsole.Entities;
 using SadConsole.Input;
@@ -51,6 +51,16 @@ public class DungeonSurface : ScreenSurface
         SadComponents.Add(_entityManager);
         _eventSystem = eventSystem;
         IsFocused = true;
+    }
+
+    private Color UnseenColor(Color color)
+    {
+        var (h, s, l) = (
+            color.GetHSLHue(),
+            color.GetHSLSaturation(), 
+            color.GetHSLLightness());
+
+        return Color.FromHSL(h, s * 0.7f, l * 0.7f);
     }
     #endregion
 
@@ -144,23 +154,40 @@ public class DungeonSurface : ScreenSurface
         CenterView();
     }
 
+    private void DrawFOV()
+    {
+        foreach (var pos in _mapgen.FOV.NewlySeen)
+        {
+            
+        }
+    }
+
     public void DrawMap(bool fCenter = true)
     {
-        this.Fill(new Rectangle(0, 0, Width, Height), GameSettings.ForeColor, GameSettings.ClearColor, '.',
-            Mirror.None);
-        var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.DarkBlue, 0x00);
+        var seenFloor = new ColoredGlyph(GameSettings.ForeColor, GameSettings.ClearColor, '.');
+        var unseenFloor = new ColoredGlyph(UnseenColor(GameSettings.ForeColor), GameSettings.ClearColor, '.');
+        var seenWall = new ColoredGlyph(GameSettings.ClearColor, Color.DarkBlue, 0x00);
+        var unseenWall = new ColoredGlyph(GameSettings.ClearColor, UnseenColor(Color.DarkBlue), 0x00);
         var offMapAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);
+
+        this.Fill(unseenFloor);
+
         for (var iX = 0; iX < Width; iX++)
         {
             for (var iY = 0; iY < Height; iY++)
             {
+                var seen = _mapgen!.IsVisible(iX, iY);
                 if (_mapgen!.Wall(iX, iY))
                 {
-                    DrawGlyph(wallAppearance, iX, iY);
+                    DrawGlyph(seen ? seenWall : unseenWall, iX, iY);
                 }
                 else if (!_mapgen.Walkable(iX, iY))
                 {
                     DrawGlyph(offMapAppearance, iX, iY);
+                }
+                else if (seen)
+                {
+                    DrawGlyph(seenFloor, iX, iY);
                 }
             }
         }
@@ -239,10 +266,8 @@ public class DungeonSurface : ScreenSurface
         {
             return pt.Y < ptConnect.Y ? 4 : 1;
         }
-        else
-        {
-            return pt.X < ptConnect.X ? 2 : 8;
-        }
+
+        return pt.X < ptConnect.X ? 2 : 8;
     }
     #endregion
 
