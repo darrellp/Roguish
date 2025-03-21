@@ -1,6 +1,7 @@
 ﻿global using EcsEntity = EcsRx.Entities.IEntity;
 global using ScEntity = SadConsole.Entities.Entity;
 global using EcsComponent = EcsRx.Components.IComponent;
+global using FOV = GoRogue.FOV.RecursiveShadowcastingBooleanBasedFOV;
 global using static Roguish.Program;
 
 
@@ -8,6 +9,7 @@ using EcsRx.Groups.Observable;
 using EcsRx.Infrastructure.Extensions;
 using Ninject;
 using Roguish.ECS;
+using Roguish.Map_Generation;
 using SystemsRx.Infrastructure.Ninject.Extensions;
 
 namespace Roguish;
@@ -42,5 +44,6 @@ internal class Program
         Kernel.Bind<DungeonSurface>().ToSelf().InSingletonScope();
         Kernel.Bind<GameSettings>().ToSelf().InSingletonScope();
         Kernel.Bind<TopContainer>().ToSelf().InSingletonScope();
+        Kernel.Bind<MapGenerator>().ToSelf().InSingletonScope();
     }
 }

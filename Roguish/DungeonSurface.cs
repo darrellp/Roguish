@@ -15,7 +15,7 @@ namespace Roguish;
 
 public class DungeonSurface : ScreenSurface
 {
-    private static MapGenerator? _mapgen = null;
+    private MapGenerator _mapgen;
     public bool DrawPath { get; set; }
 
     // ReSharper disable InconsistentNaming
@@ -41,12 +41,13 @@ public class DungeonSurface : ScreenSurface
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
     private static IEventSystem _eventSystem = null!;
 
-    public DungeonSurface(IEventSystem eventSystem) : base(GameSettings.DungeonViewWidth, GameSettings.DungeonViewHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight)
+    public DungeonSurface(IEventSystem eventSystem, MapGenerator mapgen) : base(GameSettings.DungeonViewWidth, GameSettings.DungeonViewHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight)
     {
         // Create the entity renderer. This component should contain all the entities you want drawn on the surface
         _entityManager = new EntityManager();
         SadComponents.Add(_entityManager);
         _eventSystem = eventSystem;
+        _mapgen = mapgen;
         IsFocused = true;
     }
 
@@ -124,9 +125,9 @@ public class DungeonSurface : ScreenSurface
 
     public void FillSurface(DungeonSurface? surface)
     {
-        _mapgen = new MapGenerator();
+        // Create a new dungeon and put our hero in it
+        _eventSystem.Publish(new NewDungeonEvent(0));
         surface?.DrawMap(false);
-        _eventSystem.Publish(new LevelChangeEvent(0));
         CenterView(Program.EcsApp.PlayerPos);
     }
 

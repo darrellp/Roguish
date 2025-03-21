@@ -1,5 +1,5 @@
 ﻿namespace Roguish.ECS.Events;
-internal class LevelChangeEvent(int newLevel)
+internal class NewDungeonEvent(int newLevel)
 {
     public int NewLevel { get; set; } = newLevel;
 }
