@@ -27,7 +27,9 @@ public class GameSettings
     public bool FResizeHook = true;
     public Settings.WindowResizeOptions ResizeMode { get; } = Settings.WindowResizeOptions.None;
     public Color ClearColor = Color.Black;
-    public Color ForeColor = Color.Orange;
+    public static Color FloorColor = Color.Orange;
+    public static Color WallColor = Color.DarkBlue;
+    public const int FovRadius = 15;
 
     public Builder SetupGame()
     {

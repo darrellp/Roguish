@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Ninject;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using Roguish.Map_Generation;
@@ -12,6 +13,8 @@ internal class NewDungeonSystem(MapGenerator mapgen, DungeonSurface dungeon) : I
     public void Process(NewDungeonEvent eventData)
     {
         mapgen.Generate();
+        Program.Fov = new FOV(mapgen.WallFloorValues);
+
         foreach (var item in EcsApp.LevelItems)
         {
             if (item.HasComponent(typeof(IsPlayerControlledComponent)) && item.HasComponent(typeof(DisplayComponent)))
@@ -21,8 +24,11 @@ internal class NewDungeonSystem(MapGenerator mapgen, DungeonSurface dungeon) : I
                     var posCmp = item.GetComponent(typeof(PositionComponent)) as PositionComponent;
                     Debug.Assert(dungeon != null, nameof(dungeon) + " != null");
                     posCmp!.Position.SetValueAndForceNotify(dungeon.FindRandomEmptyPoint());
+                    Fov.Calculate(posCmp.Position.Value, GameSettings.FovRadius);
                 }
             }
         }
+
+        FovSystem.SignalNewFov();
     }
 }

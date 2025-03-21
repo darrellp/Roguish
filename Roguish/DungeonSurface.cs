@@ -1,4 +1,4 @@
-﻿#define DRAWPATH
+﻿using System.Diagnostics;
 using GoRogue.Pathing;
 using GoRogue.Random;
 using Ninject;
@@ -6,6 +6,7 @@ using Roguish.ECS.Events;
 using Roguish.Map_Generation;
 using SadConsole.Entities;
 using SadConsole.Input;
+using SadConsole.Effects;
 using ShaiRandom.Generators;
 using SystemsRx.Events;
 
@@ -26,6 +27,11 @@ public class DungeonSurface : ScreenSurface
     private static ColoredGlyph pathLR = new(Color.Yellow, Color.Black, 0xBC);
     private static ColoredGlyph pathLL = new(Color.Yellow, Color.Black, 0xC8);
     // ReSharper restore InconsistentNaming
+
+    private static readonly Color wallColor = GameSettings.WallColor;
+    private static readonly Color floorColor = GameSettings.FloorColor;
+    private static readonly Color dimWallColor = Utility.DimmedColor(wallColor);
+    private static readonly Color dimFloorColor = Utility.DimmedColor(floorColor);
 
     private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new()
     {
@@ -123,6 +129,30 @@ public class DungeonSurface : ScreenSurface
         DrawGlyph(glyph, pt.X, pt.Y);
     }
 
+    public void MarkSeen(Point pt)
+    {
+        var glyph = this.GetCellAppearance(pt.X, pt.Y);
+        glyph.Foreground = glyph.Glyph switch
+        {
+            '.' => floorColor,
+            0 => wallColor,
+            _ => throw new NotImplementedException("Glyph without FOV info")
+        };
+        DrawGlyph(glyph as ColoredGlyph, pt);
+    }
+
+    public void MarkUnseen(Point pt)
+    {
+        var glyph = this.GetCellAppearance(pt.X, pt.Y);
+        glyph.Foreground = glyph.Glyph switch
+        {
+            '.' => dimFloorColor,
+            0 => dimWallColor,
+            _ => throw new NotImplementedException("Glyph without FOV info")
+        };
+        DrawGlyph(glyph as ColoredGlyph, pt);
+    }
+
     public void FillSurface(DungeonSurface? surface)
     {
         // Create a new dungeon and put our hero in it
@@ -176,9 +206,9 @@ public class DungeonSurface : ScreenSurface
     public void DrawMap(bool fCenter = true)
     {
         var settings = Program.Kernel.Get<GameSettings>();
-        this.Fill(new Rectangle(0, 0, Width, Height), settings.ForeColor, settings.ClearColor, '.',
+        this.Fill(new Rectangle(0, 0, Width, Height), dimFloorColor, settings.ClearColor, '.',
             Mirror.None);
-        var wallAppearance = new ColoredGlyph(settings.ClearColor, Color.DarkBlue, 0x00);
+        var wallAppearance = new ColoredGlyph(settings.ClearColor, dimWallColor, 0x00);
         var offMapAppearance = new ColoredGlyph(settings.ClearColor, Color.Black, 0x00);
         for (var iX = 0; iX < Width; iX++)
         {

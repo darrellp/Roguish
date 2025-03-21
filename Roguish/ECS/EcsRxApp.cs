@@ -22,7 +22,7 @@ internal class EcsRxApp : EcsRxApplication
         PlayerGroup = Program.GetGroup(typeof(IsPlayerControlledComponent));
         LevelItems = Program.GetGroup(typeof(LevelItemComponent));
 
-    var collection = EntityDatabase.GetCollection();
+        var collection = EntityDatabase.GetCollection();
         var entity = collection.CreateEntity();
         var dungeon = Program.Kernel.Get<DungeonSurface>();
         var playerPos = new Point(0, 0);

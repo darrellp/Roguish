@@ -17,6 +17,7 @@ internal class Program
 {
     public static IKernel Kernel { get; set; } = null!;
     public static EcsRxApp EcsApp = new();
+    public static FOV Fov = null!;
 
     public static void Main(string[] args)
     {

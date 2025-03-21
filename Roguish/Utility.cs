@@ -13,6 +13,6 @@ internal static class Utility
             color.GetHSLHue(),
             color.GetHSLSaturation(),
             color.GetHSLLightness());
-        return Color.FromHSL(h, s * 0.7f, l * 0.7f);
+        return Color.FromHSL(h, s * 0.5f, l * 0.5f);
     }
 }

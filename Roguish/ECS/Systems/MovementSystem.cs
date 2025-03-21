@@ -1,8 +1,8 @@
-﻿using EcsRx.Extensions;
+﻿using System.Reactive.Linq;
+using EcsRx.Extensions;
 using EcsRx.Groups;
 using EcsRx.Systems;
 using Roguish.ECS.Components;
-using System.Reactive.Linq;
 
 namespace Roguish.ECS.Systems;
 
@@ -21,5 +21,11 @@ internal class MovementSystem : IReactToEntitySystem
         var scEntity = entity.GetComponent<DisplayComponent>().ScEntity;
         var pos = entity.GetComponent<PositionComponent>().Position.Value;
         scEntity.Position = pos;
+
+        if (Fov != null && entity.HasComponent(typeof(IsPlayerControlledComponent)))
+        {
+            Fov.Calculate(pos, GameSettings.FovRadius);
+            FovSystem.SignalNewFov();
+        }
     }
 }
