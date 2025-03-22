@@ -36,17 +36,4 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
             }
         }
     }
-    public static void SignalNewFov()
-    {
-        foreach (var point in Fov.NewlySeen)
-        {
-            _dungeon!.MarkSeen(point);
-        }
-
-        foreach (var point in Fov.NewlyUnseen)
-        {
-            _dungeon!.MarkUnseen(point);
-        }
-    }
-
 }

@@ -29,7 +29,7 @@ internal class MovementSystem : IReactToEntitySystem
         }
 
         Fov.Calculate(pos, GameSettings.FovRadius);
-        NewDungeonSystem.SignalNewFov();
+        DungeonSurface.SignalNewFov();
         posCmp.FDrawFullFov = false;
     }
 }

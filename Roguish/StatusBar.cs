@@ -1,4 +1,5 @@
 ﻿using Ninject;
+using Roguish.ECS.Systems;
 using SadConsole.UI.Controls;
 using SystemsRx.ReactiveData;
 
@@ -47,6 +48,7 @@ internal class StatusBar : ScreenSurface
         ds.DrawPath = !((c as CheckBox)!).IsSelected;
         ds.DrawMap();
         Dungeon.IsFocused = true;
+        DungeonSurface.SignalNewFov();
     };
 
     public static Action<Point> GetMousePosObserver(ControlBase c)

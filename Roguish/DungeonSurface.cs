@@ -15,6 +15,7 @@ namespace Roguish;
 
 public class DungeonSurface : ScreenSurface
 {
+    private static DungeonSurface? Dungeon { get; set; }
     private MapGenerator _mapgen;
     public bool DrawPath { get; set; }
 
@@ -54,6 +55,7 @@ public class DungeonSurface : ScreenSurface
         _eventSystem = eventSystem;
         _mapgen = mapgen;
         IsFocused = true;
+        Dungeon = this;
     }
 
     public override bool ProcessKeyboard(Keyboard keyboard)
@@ -130,50 +132,63 @@ public class DungeonSurface : ScreenSurface
 
     public void MarkSeen(Point pt)
     {
-        var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
-        Debug.Assert(glyph != null);
-        if (glyph.Glyph == 0)
-        {
-            // Walls use bg color
-            glyph.Background = wallColor;
-        }
-        else
-        {
-            glyph.Foreground = glyph.Glyph switch
-            {
-                '.' => floorColor,
-                _ => throw new NotImplementedException("Glyph without FOV info")
-            };
-        }
-        DrawGlyph(glyph, pt);
+        MarkFov(pt, true);
     }
 
     public void MarkUnseen(Point pt)
     {
+        MarkFov(pt, false);
+    }
+
+    public void MarkFov(Point pt, bool fSeen)
+    {
+        var (clrWall, clrFloor) = fSeen ? (wallColor, floorColor) : (dimWallColor, dimFloorColor);
+
         var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
         Debug.Assert(glyph != null);
         if (glyph.Glyph == 0)
         {
             // Walls use bg color
-            glyph.Background = dimWallColor;
+            glyph.Background = clrWall;
         }
         else
         {
             glyph.Foreground = glyph.Glyph switch
             {
-                '.' => dimFloorColor,
-                _ => throw new NotImplementedException("Glyph without FOV info")
+                '.' => clrFloor,
+                _ => glyph.Foreground,          // Leave things alone if not specifically handled above
             };
         }
         DrawGlyph(glyph, pt);
     }
 
+    public static void SignalNewFov()
+    {
+        foreach (var point in Fov.NewlySeen)
+        {
+            Dungeon!.MarkSeen(point);
+        }
+
+        foreach (var point in Fov.NewlyUnseen)
+        {
+            Dungeon!.MarkUnseen(point);
+        }
+    }
+
+
+
     public void FillSurface(DungeonSurface? surface)
     {
+        // Create a new dungeon
         _mapgen.Generate();
+
+        // Draw the new dungeon
         surface?.DrawMap(false);
-        // Create a new dungeon and put our hero in it
+
+        // Position stuff in the new dungeon
         _eventSystem.Publish(new NewDungeonEvent(0));
+
+        // Make sure our hero is front and center
         CenterView(Program.EcsApp.PlayerPos);
     }
 
