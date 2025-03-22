@@ -203,11 +203,10 @@ public class DungeonSurface : ScreenSurface
 
     public void DrawMap(bool fCenter = true)
     {
-        var settings = Program.Kernel.Get<GameSettings>();
-        this.Fill(new Rectangle(0, 0, Width, Height), dimFloorColor, settings.ClearColor, '.',
+        this.Fill(new Rectangle(0, 0, Width, Height), dimFloorColor, GameSettings.ClearColor, '.',
             Mirror.None);
-        var wallAppearance = new ColoredGlyph(settings.ClearColor, dimWallColor, 0x00);
-        var offMapAppearance = new ColoredGlyph(settings.ClearColor, Color.Black, 0x00);
+        var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, dimWallColor, 0x00);
+        var offMapAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);
         for (var iX = 0; iX < Width; iX++)
         {
             for (var iY = 0; iY < Height; iY++)
