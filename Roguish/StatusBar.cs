@@ -13,13 +13,13 @@ internal class StatusBar : ScreenSurface
     public static Color ForeColor = Color.White;
     public static string PositionFormat = "({0,3:D},{1,3:D})";
     public static ReactiveProperty<Point> MousePosition = new(new Point());
-    public static DungeonSurface _dungeon = null!;
+    public static DungeonSurface Dungeon = null!;
     #endregion
 
     #region Constructor
     public StatusBar(GameSettings settings, DungeonSurface dungeon) : base(settings.SbWidth, settings.SbHeight)
     {
-        _dungeon = dungeon;
+        Dungeon = dungeon;
         Position = settings.SbPosition;
         FocusOnMouseClick = false;
     }
@@ -35,10 +35,10 @@ internal class StatusBar : ScreenSurface
         }
     }
 
-    public static EventHandler RedrawClick = (c, _) =>
+    public static EventHandler RedrawClick = (_, _) =>
     {
-        _dungeon.FillSurface(Program.Kernel.Get<DungeonSurface>());
-        _dungeon.IsFocused = true;
+        Dungeon.FillSurface(Program.Kernel.Get<DungeonSurface>());
+        Dungeon.IsFocused = true;
     };
 
     public static EventHandler DrawPathClick = (c, _) =>
@@ -46,7 +46,7 @@ internal class StatusBar : ScreenSurface
         var ds = Program.Kernel.Get<DungeonSurface>();
         ds.DrawPath = !((c as CheckBox)!).IsSelected;
         ds.DrawMap();
-        _dungeon.IsFocused = true;
+        Dungeon.IsFocused = true;
     };
 
     public static Action<Point> GetMousePosObserver(ControlBase c)

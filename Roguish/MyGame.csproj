@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="EcsR3.Plugins.GroupBinding" Version="8.0.22" />
-    <PackageReference Include="EcsRx" Version="8.0.184" />
+    <PackageReference Include="EcsRx" Version="8.0.187" />
     <PackageReference Include="EcsRx.Infrastructure" Version="8.0.184" />
     <PackageReference Include="EcsRx.Plugins.GroupBinding" Version="8.0.184" />
     <PackageReference Include="EcsRx.Plugins.Views" Version="8.0.184" />

@@ -47,9 +47,6 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
             case Keys.End:
                 MovePlayer(new Point(-1, 1));
                 break;
-
-            default:
-                break;
         }
     }
 

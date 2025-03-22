@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EcsRx.Entities;
+﻿using System.Reactive.Linq;
 using EcsRx.Extensions;
 using EcsRx.Groups;
 using EcsRx.Groups.Observable;
@@ -18,15 +12,9 @@ namespace Roguish.ECS.Systems;
 // That's not exactly what I want but it may not cause any problems.  Until it does I guess I'll leave
 // it like this.  Perhaps, ultimately, I want this on a timed update loop.
 [Priority(-100)]
-internal class SweepUpSystem : IReactToGroupSystem
+internal class SweepUpSystem(DungeonSurface dungeon) : IReactToGroupSystem
 {
-    private DungeonSurface _dungeon;
     public IGroup Group => new Group(typeof(IsDestroyedComponent));
-
-    public SweepUpSystem(DungeonSurface dungeon)
-    {
-        _dungeon = dungeon;
-    }
 
     public IObservable<IObservableGroup> ReactToGroup(IObservableGroup observableGroup)
     {
@@ -39,7 +27,7 @@ internal class SweepUpSystem : IReactToGroupSystem
         if (entity.HasComponent(typeof(DisplayComponent)))
         {
             var scEntity = ((entity.GetComponent(typeof(DisplayComponent)) as DisplayComponent)!).ScEntity;
-            _dungeon.RemoveScEntity(scEntity);
+            dungeon.RemoveScEntity(scEntity);
         }
         Program.EcsApp.EntityDatabase.RemoveEntity(entity);
     }

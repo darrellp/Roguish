@@ -1,7 +1,5 @@
 ﻿using Ninject;
-using Roguish.ECS;
 using SadConsole.Configuration;
-using SystemsRx.Infrastructure.Ninject.Extensions;
 
 namespace Roguish;
 

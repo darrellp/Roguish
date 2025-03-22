@@ -4,7 +4,6 @@ using EcsRx.Infrastructure;
 using EcsRx.Plugins.Views;
 using Ninject;
 using Roguish.ECS.Components;
-using SystemsRx.Events;
 using SystemsRx.Infrastructure.Dependencies;
 using SystemsRx.Infrastructure.Ninject;
 using SystemsRx.Infrastructure.Ninject.Extensions;
@@ -57,6 +56,7 @@ internal class EcsRxApp : EcsRxApplication
 
     public override IDependencyRegistry DependencyRegistry { get; } = new NinjectDependencyRegistry();
 
+    // ReSharper disable once UnusedMember.Global
     public T Get<T>()
     {
         return DependencyRegistry.GetKernel().Get<T>();

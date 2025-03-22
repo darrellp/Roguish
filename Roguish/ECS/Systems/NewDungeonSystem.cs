@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using Ninject;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using Roguish.Map_Generation;
@@ -14,7 +13,6 @@ internal class NewDungeonSystem(MapGenerator mapgen, DungeonSurface dungeon) : I
     {
         mapgen.Generate();
         Program.Fov = new FOV(mapgen.WallFloorValues);
-
         foreach (var item in EcsApp.LevelItems)
         {
             if (item.HasComponent(typeof(IsPlayerControlledComponent)) && item.HasComponent(typeof(DisplayComponent)))
@@ -28,7 +26,5 @@ internal class NewDungeonSystem(MapGenerator mapgen, DungeonSurface dungeon) : I
                 }
             }
         }
-
-        FovSystem.SignalNewFov();
     }
 }

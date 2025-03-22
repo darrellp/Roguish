@@ -34,9 +34,9 @@ internal class Program
         Game.Instance.Dispose();
     }
 
-    public static IObservableGroup GetGroup(params Type[] Components)
+    public static IObservableGroup GetGroup(params Type[] components)
     {
-        return EcsApp.DependencyRegistry.BuildResolver().ResolveObservableGroup(Components);
+        return EcsApp.DependencyRegistry.BuildResolver().ResolveObservableGroup(components);
     }
 
     private static void DoBindings()

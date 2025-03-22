@@ -22,6 +22,7 @@ internal class MovementSystem : IReactToEntitySystem
         var pos = entity.GetComponent<PositionComponent>().Position.Value;
         scEntity.Position = pos;
 
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (Fov != null && entity.HasComponent(typeof(IsPlayerControlledComponent)))
         {
             Fov.Calculate(pos, GameSettings.FovRadius);

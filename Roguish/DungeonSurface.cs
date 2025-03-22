@@ -1,12 +1,10 @@
-﻿using System.Diagnostics;
-using GoRogue.Pathing;
+﻿using GoRogue.Pathing;
 using GoRogue.Random;
 using Ninject;
 using Roguish.ECS.Events;
 using Roguish.Map_Generation;
 using SadConsole.Entities;
 using SadConsole.Input;
-using SadConsole.Effects;
 using ShaiRandom.Generators;
 using SystemsRx.Events;
 
@@ -103,7 +101,7 @@ public class DungeonSurface : ScreenSurface
 
     public bool IsWalkable(Point pt)
     {
-        return _mapgen!.Walkable(pt.X, pt.Y);
+        return _mapgen.Walkable(pt.X, pt.Y);
     }
 
     protected override void OnMouseMove(MouseScreenObjectState state)
@@ -138,7 +136,7 @@ public class DungeonSurface : ScreenSurface
             0 => wallColor,
             _ => throw new NotImplementedException("Glyph without FOV info")
         };
-        DrawGlyph(glyph as ColoredGlyph, pt);
+        DrawGlyph((ColoredGlyph)glyph, pt);
     }
 
     public void MarkUnseen(Point pt)
@@ -150,7 +148,7 @@ public class DungeonSurface : ScreenSurface
             0 => dimWallColor,
             _ => throw new NotImplementedException("Glyph without FOV info")
         };
-        DrawGlyph(glyph as ColoredGlyph, pt);
+        DrawGlyph((ColoredGlyph)glyph, pt);
     }
 
     public void FillSurface(DungeonSurface? surface)
@@ -214,7 +212,7 @@ public class DungeonSurface : ScreenSurface
         {
             for (var iY = 0; iY < Height; iY++)
             {
-                if (_mapgen!.Wall(iX, iY))
+                if (_mapgen.Wall(iX, iY))
                 {
                     DrawGlyph(wallAppearance, iX, iY);
                 }
@@ -246,12 +244,12 @@ public class DungeonSurface : ScreenSurface
         {
             for (var iY = 0; iY < Height; iY++)
             {
-                if (!fFoundStart && _mapgen!.Walkable(iX, iY))
+                if (!fFoundStart && _mapgen.Walkable(iX, iY))
                 {
                     ptStart = new Point(iX, iY);
                     fFoundStart = true;
                 }
-                if (!fFoundEnd && _mapgen!.Walkable(Width - 1 - iX, Height - 1 - iY))
+                if (!fFoundEnd && _mapgen.Walkable(Width - 1 - iX, Height - 1 - iY))
                 {
                     ptEnd = new Point(Width - 1 - iX, Height - 1 - iY);
                     fFoundEnd = true;
