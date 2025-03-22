@@ -30,6 +30,6 @@ public static class GameSettings
     public static Color ClearColor = Color.Black;
     public static Color FloorColor = Color.Orange;
     public static Color WallColor = Color.Blue;
-    public const int FovRadius = 30;
+    public const int FovRadius = 20;
     #endregion
 }

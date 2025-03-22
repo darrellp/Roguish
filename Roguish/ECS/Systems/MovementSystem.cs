@@ -19,14 +19,17 @@ internal class MovementSystem : IReactToEntitySystem
     public void Process(EcsEntity entity)
     {
         var scEntity = entity.GetComponent<DisplayComponent>().ScEntity;
-        var pos = entity.GetComponent<PositionComponent>().Position.Value;
+        var posCmp = entity.GetComponent<PositionComponent>();
+        var pos = posCmp.Position.Value;
         scEntity.Position = pos;
-
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (Fov != null && entity.HasComponent(typeof(IsPlayerControlledComponent)))
+        if (Fov == null || !entity.HasComponent(typeof(IsPlayerControlledComponent)))
         {
-            Fov.Calculate(pos, GameSettings.FovRadius);
-            FovSystem.SignalNewFov();
+            return;
         }
+
+        Fov.Calculate(pos, GameSettings.FovRadius);
+        NewDungeonSystem.SignalNewFov();
+        posCmp.FDrawFullFov = false;
     }
 }

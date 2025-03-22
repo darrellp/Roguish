@@ -1,4 +1,5 @@
-﻿using GoRogue.Pathing;
+﻿using System.Diagnostics;
+using GoRogue.Pathing;
 using GoRogue.Random;
 using Ninject;
 using Roguish.ECS.Events;
@@ -129,33 +130,50 @@ public class DungeonSurface : ScreenSurface
 
     public void MarkSeen(Point pt)
     {
-        var glyph = this.GetCellAppearance(pt.X, pt.Y);
-        glyph.Foreground = glyph.Glyph switch
+        var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
+        Debug.Assert(glyph != null);
+        if (glyph.Glyph == 0)
         {
-            '.' => floorColor,
-            0 => wallColor,
-            _ => throw new NotImplementedException("Glyph without FOV info")
-        };
-        DrawGlyph((ColoredGlyph)glyph, pt);
+            // Walls use bg color
+            glyph.Background = wallColor;
+        }
+        else
+        {
+            glyph.Foreground = glyph.Glyph switch
+            {
+                '.' => floorColor,
+                _ => throw new NotImplementedException("Glyph without FOV info")
+            };
+        }
+        DrawGlyph(glyph, pt);
     }
 
     public void MarkUnseen(Point pt)
     {
-        var glyph = this.GetCellAppearance(pt.X, pt.Y);
-        glyph.Foreground = glyph.Glyph switch
+        var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
+        Debug.Assert(glyph != null);
+        if (glyph.Glyph == 0)
         {
-            '.' => dimFloorColor,
-            0 => dimWallColor,
-            _ => throw new NotImplementedException("Glyph without FOV info")
-        };
-        DrawGlyph((ColoredGlyph)glyph, pt);
+            // Walls use bg color
+            glyph.Background = dimWallColor;
+        }
+        else
+        {
+            glyph.Foreground = glyph.Glyph switch
+            {
+                '.' => dimFloorColor,
+                _ => throw new NotImplementedException("Glyph without FOV info")
+            };
+        }
+        DrawGlyph(glyph, pt);
     }
 
     public void FillSurface(DungeonSurface? surface)
     {
+        _mapgen.Generate();
+        surface?.DrawMap(false);
         // Create a new dungeon and put our hero in it
         _eventSystem.Publish(new NewDungeonEvent(0));
-        surface?.DrawMap(false);
         CenterView(Program.EcsApp.PlayerPos);
     }
 

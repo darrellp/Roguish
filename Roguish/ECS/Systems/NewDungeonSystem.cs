@@ -7,12 +7,20 @@ using SystemsRx.Systems.Conventional;
 namespace Roguish.ECS.Systems;
 
 // ReSharper disable once UnusedMember.Global
-internal class NewDungeonSystem(MapGenerator mapgen, DungeonSurface dungeon) : IReactToEventSystem<NewDungeonEvent>
+internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
 {
+    private readonly MapGenerator _mapgen;
+    static DungeonSurface? _dungeon;
+
+    public NewDungeonSystem(MapGenerator mapgen, DungeonSurface dungeon)
+    {
+        _mapgen = mapgen;
+        _dungeon = dungeon;
+    }
+
     public void Process(NewDungeonEvent eventData)
     {
-        mapgen.Generate();
-        Program.Fov = new FOV(mapgen.WallFloorValues);
+        Fov = new FOV(_mapgen.WallFloorValues);
         foreach (var item in EcsApp.LevelItems)
         {
             if (item.HasComponent(typeof(IsPlayerControlledComponent)) && item.HasComponent(typeof(DisplayComponent)))
@@ -20,11 +28,25 @@ internal class NewDungeonSystem(MapGenerator mapgen, DungeonSurface dungeon) : I
                 if (item.HasComponent(typeof(PositionComponent)))
                 {
                     var posCmp = item.GetComponent(typeof(PositionComponent)) as PositionComponent;
-                    Debug.Assert(dungeon != null, nameof(dungeon) + " != null");
-                    posCmp!.Position.SetValueAndForceNotify(dungeon.FindRandomEmptyPoint());
-                    Fov.Calculate(posCmp.Position.Value, GameSettings.FovRadius);
+                    Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
+                    posCmp.FDrawFullFov = true;
+                    Debug.Assert(_dungeon != null, nameof(_dungeon) + " != null");
+                    posCmp!.Position.SetValueAndForceNotify(_dungeon.FindRandomEmptyPoint());
                 }
             }
         }
     }
+    public static void SignalNewFov()
+    {
+        foreach (var point in Fov.NewlySeen)
+        {
+            _dungeon!.MarkSeen(point);
+        }
+
+        foreach (var point in Fov.NewlyUnseen)
+        {
+            _dungeon!.MarkUnseen(point);
+        }
+    }
+
 }
