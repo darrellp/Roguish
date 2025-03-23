@@ -15,6 +15,7 @@ namespace Roguish;
 
 public class DungeonSurface : ScreenSurface
 {
+    #region Fields/Properties
     private static DungeonSurface? Dungeon { get; set; }
     private MapGenerator _mapgen;
     public bool DrawPath { get; set; }
@@ -58,10 +59,13 @@ public class DungeonSurface : ScreenSurface
             {
                 _drawFov = value;
                 DrawMap();
+                SignalNewFov(true);
             }
         }
     }
+    #endregion
 
+    #region Constructor
     public DungeonSurface(IEventSystem eventSystem, MapGenerator mapgen) : base(GameSettings.DungeonViewWidth, GameSettings.DungeonViewHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight)
     {
         // Create the entity renderer. This component should contain all the entities you want drawn on the surface
@@ -73,18 +77,9 @@ public class DungeonSurface : ScreenSurface
         IsFocused = true;
         Dungeon = this;
     }
+    #endregion
 
-    public override bool ProcessKeyboard(Keyboard keyboard)
-    {
-        if (!keyboard.HasKeysPressed)
-        {
-            return false;
-        }
-        _eventSystem.Publish(new KeyboardEvent(keyboard.KeysPressed));
-        KeepPlayerInView();
-        return true;
-    }
-
+    #region SadConsole Entities
     public ScEntity CreateScEntity(ColoredGlyph glyph, Point pt, int chGlyph, int zOrder)
     {
         var scEntity = new ScEntity(new ScEntity.SingleCell(glyph.Foreground, glyph.Background, chGlyph), zOrder)
@@ -99,131 +94,9 @@ public class DungeonSurface : ScreenSurface
     {
         _entityManager.Remove(scEntity);
     }
+    #endregion
 
-    public Point FindRandomEmptyPoint()
-    {
-        if (_mapgen == null)
-        {
-            throw new InvalidOperationException("FindRandomEmptyPoint called before map generation");
-        }
-        while (true)
-        {
-            var x = _rng.NextInt(Width);
-            var y = _rng.NextInt(Height);
-
-            if (_mapgen.Walkable(x, y))
-            {
-                return new Point(x, y);
-            }
-        }
-    }
-
-    public bool IsWalkable(Point pt)
-    {
-        return _mapgen.Walkable(pt.X, pt.Y);
-    }
-
-    protected override void OnMouseMove(MouseScreenObjectState state)
-    {
-        var sb = Program.Kernel.Get<StatusBar>();
-        sb.ReportMousePos(state.CellPosition);// + ViewPosition);
-    }
-
-    public override void LostMouse(MouseScreenObjectState state)
-    {
-        var sb = Program.Kernel.Get<StatusBar>();
-        sb.ReportMousePos(new Point(0, 0));
-    }
-
-    private void DrawGlyph(ColoredGlyph glyph, int x, int y)
-    {
-        this.SetCellAppearance(x, y, glyph);
-        IsDirty = true;
-    }
-
-    private void DrawGlyph(ColoredGlyph glyph, Point pt)
-    {
-        DrawGlyph(glyph, pt.X, pt.Y);
-    }
-
-    public void MarkSeen(Point pt)
-    {
-        MarkFov(pt, true);
-    }
-
-    public void MarkUnseen(Point pt)
-    {
-        MarkFov(pt, false);
-    }
-
-    public void MarkFov(Point pt, bool fSeen)
-    {
-        _revealed[pt.X, pt.Y] = true;
-        if (!DrawFOV)
-        {
-            return;
-        }
-        var (clrWall, clrFloor) = fSeen ? (wallColor, floorColor) : (dimWallColor, dimFloorColor);
-
-        var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
-        Debug.Assert(glyph != null);
-        if (glyph.Glyph == 0)
-        {
-            // Walls use bg color
-            glyph.Background = clrWall;
-        }
-        else
-        {
-            glyph.Foreground = glyph.Glyph switch
-            {
-                '.' => clrFloor,
-                _ => glyph.Foreground,          // Leave things alone if not specifically handled above
-            };
-        }
-        DrawGlyph(glyph, pt);
-    }
-
-    public static void SignalNewFov(bool fDrawFullFov)
-    {
-        Debug.Assert(Dungeon != null, "Null dungeon in SignalNewFov");
-        if (fDrawFullFov)
-        {
-            foreach (var point in Fov.CurrentFOV)
-            {
-                Dungeon.MarkSeen(point);
-            }
-
-            return;
-        }
-        foreach (var point in Fov.NewlySeen)
-        {
-            Dungeon.MarkSeen(point);
-        }
-
-        foreach (var point in Fov.NewlyUnseen)
-        {
-            Dungeon.MarkUnseen(point);
-        }
-    }
-
-    public void FillSurface(DungeonSurface? surface)
-    {
-        // Create a new dungeon
-        _mapgen.Generate();
-
-        // Nothing has been revealed yet
-        _revealed.Initialize();
-
-        // Draw the new dungeon
-        surface?.DrawMap(false);
-
-        // Position stuff in the new dungeon
-        _eventSystem.Publish(new NewDungeonEvent(0));
-
-        // Make sure our hero is front and center
-        CenterView(Program.EcsApp.PlayerPos);
-    }
-
+    #region Mapping
     private void CenterView(Point pt)
     {
         var idealPt = pt - new Point(ViewWidth / 2, ViewHeight / 2);
@@ -266,6 +139,86 @@ public class DungeonSurface : ScreenSurface
         }
     }
 
+    public Point FindRandomEmptyPoint()
+    {
+        if (_mapgen == null)
+        {
+            throw new InvalidOperationException("FindRandomEmptyPoint called before map generation");
+        }
+        while (true)
+        {
+            var x = _rng.NextInt(Width);
+            var y = _rng.NextInt(Height);
+
+            if (_mapgen.Walkable(x, y))
+            {
+                return new Point(x, y);
+            }
+        }
+    }
+    #endregion
+
+    #region Queries
+    public bool IsWalkable(Point pt)
+    {
+        return _mapgen.Walkable(pt.X, pt.Y);
+    }
+    #endregion
+
+    #region Event Handlers
+    public override bool ProcessKeyboard(Keyboard keyboard)
+    {
+        if (!keyboard.HasKeysPressed)
+        {
+            return false;
+        }
+        _eventSystem.Publish(new KeyboardEvent(keyboard.KeysPressed));
+        KeepPlayerInView();
+        return true;
+    }
+
+    protected override void OnMouseMove(MouseScreenObjectState state)
+    {
+        var sb = Program.Kernel.Get<StatusBar>();
+        sb.ReportMousePos(state.CellPosition);// + ViewPosition);
+    }
+
+    public override void LostMouse(MouseScreenObjectState state)
+    {
+        var sb = Program.Kernel.Get<StatusBar>();
+        sb.ReportMousePos(new Point(0, 0));
+    }
+    #endregion
+
+    #region Drawing
+    private void DrawGlyph(ColoredGlyph glyph, int x, int y)
+    {
+        this.SetCellAppearance(x, y, glyph);
+        IsDirty = true;
+    }
+
+    private void DrawGlyph(ColoredGlyph glyph, Point pt)
+    {
+        DrawGlyph(glyph, pt.X, pt.Y);
+    }
+
+    public void FillSurface(DungeonSurface? surface)
+    {
+        // Create a new dungeon
+        _mapgen.Generate();
+
+        // Nothing has been revealed yet
+        _revealed.Initialize();
+
+        // Draw the new dungeon
+        surface?.DrawMap(false);
+
+        // Position stuff in the new dungeon
+        _eventSystem.Publish(new NewDungeonEvent(0));
+
+        // Make sure our hero is front and center
+        CenterView(Program.EcsApp.PlayerPos);
+    }
     private int GlyphAt(int iX, int iY)
     {
         return _mapgen.Walkable(iX, iY) ? '.' : 0;
@@ -383,4 +336,68 @@ public class DungeonSurface : ScreenSurface
             return pt.X < ptConnect.X ? 2 : 8;
         }
     }
+    #endregion
+
+    #region FOV
+    public void MarkSeen(Point pt)
+    {
+        MarkFov(pt, true);
+    }
+
+    public void MarkUnseen(Point pt)
+    {
+        MarkFov(pt, false);
+    }
+
+    public void MarkFov(Point pt, bool fSeen)
+    {
+        _revealed[pt.X, pt.Y] = true;
+        if (!DrawFOV)
+        {
+            return;
+        }
+        var (clrWall, clrFloor) = fSeen ? (wallColor, floorColor) : (dimWallColor, dimFloorColor);
+
+        var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
+        Debug.Assert(glyph != null);
+        if (glyph.Glyph == 0)
+        {
+            // Walls use bg color
+            glyph.Background = clrWall;
+        }
+        else
+        {
+            glyph.Foreground = glyph.Glyph switch
+            {
+                '.' => clrFloor,
+                _ => glyph.Foreground,          // Leave things alone if not specifically handled above
+            };
+        }
+        DrawGlyph(glyph, pt);
+    }
+
+    public static void SignalNewFov(bool fDrawFullFov)
+    {
+        Debug.Assert(Dungeon != null, "Null dungeon in SignalNewFov");
+        if (fDrawFullFov)
+        {
+            foreach (var point in Fov.CurrentFOV)
+            {
+                Dungeon.MarkSeen(point);
+            }
+
+            return;
+        }
+        foreach (var point in Fov.NewlySeen)
+        {
+            Dungeon.MarkSeen(point);
+        }
+
+        foreach (var point in Fov.NewlyUnseen)
+        {
+            Dungeon.MarkUnseen(point);
+        }
+    }
+    #endregion
+
 }

@@ -14,7 +14,7 @@ using SadConsole.Configuration;
 using SystemsRx.Infrastructure.Ninject.Extensions;
 
 namespace Roguish;
-internal class Program
+internal static class Program
 {
     public static IKernel Kernel { get; set; } = null!;
     public static EcsRxApp EcsApp = new();
@@ -77,5 +77,4 @@ internal class Program
         ds.FillSurface(ds);
         MVVM.Bindings.Bind();
     }
-
 }
