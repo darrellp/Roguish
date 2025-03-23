@@ -29,6 +29,7 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
                 {
                     var posCmp = item.GetComponent(typeof(PositionComponent)) as PositionComponent;
                     Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
+                    posCmp.FDrawFullFov = true;
                     Debug.Assert(_dungeon != null, nameof(_dungeon) + " != null");
                     posCmp!.Position.SetValueAndForceNotify(_dungeon.FindRandomEmptyPoint());
                 }

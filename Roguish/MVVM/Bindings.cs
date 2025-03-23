@@ -29,6 +29,13 @@ internal static class Bindings
             Control = new Label(12),
             BindValue = StatusBar.MousePosition,
             Observer = StatusBar.GetMousePosObserver,
+        },
+        new()
+        {
+            Screen = typeof(StatusBar),
+            Position = new Point(45, 0),
+            Control = new Button(10) {Text = "FOV", FocusOnMouseClick = false},
+            Command = StatusBar.FovClick,
         }
     ];
 

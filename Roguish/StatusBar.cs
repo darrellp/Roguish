@@ -61,4 +61,10 @@ internal class StatusBar : ScreenSurface
         };
     }
     #endregion
+
+    public static void FovClick(object? sender, EventArgs e)
+    {
+        Dungeon.IsFocused = true;
+        Dungeon.DrawFOV = !Dungeon.DrawFOV;
+    }
 }

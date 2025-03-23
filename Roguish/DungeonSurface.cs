@@ -47,6 +47,20 @@ public class DungeonSurface : ScreenSurface
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
     private static IEventSystem _eventSystem = null!;
     private readonly bool[,]_revealed;
+    private bool _drawFov = true;
+
+    public bool DrawFOV
+    {
+        get => _drawFov;
+        set
+        {
+            if (_drawFov != value)
+            {
+                _drawFov = value;
+                DrawMap();
+            }
+        }
+    }
 
     public DungeonSurface(IEventSystem eventSystem, MapGenerator mapgen) : base(GameSettings.DungeonViewWidth, GameSettings.DungeonViewHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight)
     {
@@ -145,6 +159,10 @@ public class DungeonSurface : ScreenSurface
     public void MarkFov(Point pt, bool fSeen)
     {
         _revealed[pt.X, pt.Y] = true;
+        if (!DrawFOV)
+        {
+            return;
+        }
         var (clrWall, clrFloor) = fSeen ? (wallColor, floorColor) : (dimWallColor, dimFloorColor);
 
         var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
@@ -167,23 +185,24 @@ public class DungeonSurface : ScreenSurface
 
     public static void SignalNewFov(bool fDrawFullFov)
     {
+        Debug.Assert(Dungeon != null, "Null dungeon in SignalNewFov");
         if (fDrawFullFov)
         {
             foreach (var point in Fov.CurrentFOV)
             {
-                Dungeon!.MarkSeen(point);
+                Dungeon.MarkSeen(point);
             }
 
             return;
         }
         foreach (var point in Fov.NewlySeen)
         {
-            Dungeon!.MarkSeen(point);
+            Dungeon.MarkSeen(point);
         }
 
         foreach (var point in Fov.NewlyUnseen)
         {
-            Dungeon!.MarkUnseen(point);
+            Dungeon.MarkUnseen(point);
         }
     }
 
@@ -254,15 +273,15 @@ public class DungeonSurface : ScreenSurface
 
     public void DrawMap(bool fCenter = true)
     {
-        this.Fill(new Rectangle(0, 0, Width, Height), Color.Black, Color.Black, '.', Mirror.None);
+        this.Fill(new Rectangle(0, 0, Width, Height), DrawFOV ? Color.Black : floorColor, Color.Black, '.', Mirror.None);
         var offMapAppearance = new ColoredGlyph(Color.Black, Color.Black, 0x00);
-        var wallAppearance = new ColoredGlyph(Color.Black, dimWallColor, 0x00);
-        var floorAppearance = new ColoredGlyph(dimFloorColor, Color.Black, '.');
+        var wallAppearance = new ColoredGlyph(Color.Black, DrawFOV ? dimWallColor : wallColor, 0x00);
+        var floorAppearance = new ColoredGlyph(DrawFOV ? dimFloorColor : floorColor, Color.Black, '.');
         for (var iX = 0; iX < Width; iX++)
         {
             for (var iY = 0; iY < Height; iY++)
             {
-                if (!_revealed[iX, iY])
+                if (DrawFOV && !_revealed[iX, iY])
                 {
                     var appearance = new ColoredGlyph(Color.Black, Color.Black, GlyphAt(iX, iY));
                     DrawGlyph(appearance, iX, iY);
