@@ -29,10 +29,10 @@ public class DungeonSurface : ScreenSurface
     private static ColoredGlyph pathLL = new(Color.Yellow, Color.Black, 0xC8);
     // ReSharper restore InconsistentNaming
 
-    private static readonly Color wallColor = GameSettings.WallColor;
-    private static readonly Color floorColor = GameSettings.FloorColor;
-    private static readonly Color dimWallColor = Utility.DimmedColor(wallColor);
-    private static readonly Color dimFloorColor = Utility.DimmedColor(floorColor);
+    private static readonly Color WallColor = GameSettings.WallColor;
+    private static readonly Color FloorColor = GameSettings.FloorColor;
+    private static readonly Color DimWallColor = Utility.DimmedColor(WallColor);
+    private static readonly Color DimFloorColor = Utility.DimmedColor(FloorColor);
 
     private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new()
     {
@@ -232,10 +232,10 @@ public class DungeonSurface : ScreenSurface
 
     public void DrawMap(bool fCenter = true)
     {
-        this.Fill(new Rectangle(0, 0, Width, Height), DrawFOV ? Color.Black : floorColor, Color.Black, '.', Mirror.None);
+        this.Fill(new Rectangle(0, 0, Width, Height), DrawFOV ? Color.Black : FloorColor, Color.Black, '.', Mirror.None);
         var offMapAppearance = new ColoredGlyph(Color.Black, Color.Black, 0x00);
-        var wallAppearance = new ColoredGlyph(Color.Black, DrawFOV ? dimWallColor : wallColor, 0x00);
-        var floorAppearance = new ColoredGlyph(DrawFOV ? dimFloorColor : floorColor, Color.Black, '.');
+        var wallAppearance = new ColoredGlyph(Color.Black, DrawFOV ? DimWallColor : WallColor, 0x00);
+        var floorAppearance = new ColoredGlyph(DrawFOV ? DimFloorColor : FloorColor, Color.Black, '.');
         for (var iX = 0; iX < Width; iX++)
         {
             for (var iY = 0; iY < Height; iY++)
@@ -362,7 +362,7 @@ public class DungeonSurface : ScreenSurface
         {
             return;
         }
-        var (clrWall, clrFloor) = fSeen ? (wallColor, floorColor) : (dimWallColor, dimFloorColor);
+        var (clrWall, clrFloor) = fSeen ? (wallColor: WallColor, floorColor: FloorColor) : (dimWallColor: DimWallColor, dimFloorColor: DimFloorColor);
 
         var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
         Debug.Assert(glyph != null);
