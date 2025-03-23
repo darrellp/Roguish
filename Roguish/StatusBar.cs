@@ -48,7 +48,7 @@ internal class StatusBar : ScreenSurface
         ds.DrawPath = !((c as CheckBox)!).IsSelected;
         ds.DrawMap();
         Dungeon.IsFocused = true;
-        DungeonSurface.SignalNewFov();
+        DungeonSurface.SignalNewFov(true);
     };
 
     public static Action<Point> GetMousePosObserver(ControlBase c)

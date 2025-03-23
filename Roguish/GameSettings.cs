@@ -7,8 +7,8 @@ public static class GameSettings
     public const int GameHeight = 41;
 
     // Size of the dungeon
-    public const int DungeonWidth = 400;
-    public const int DungeonHeight = 80;
+    public const int DungeonWidth = 200;
+    public const int DungeonHeight = 60;
 
     // Starting size of the window into the dungeon
     public static int DungeonViewWidth { get; } = GameWidth;

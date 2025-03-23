@@ -46,6 +46,7 @@ public class DungeonSurface : ScreenSurface
     private readonly EntityManager _entityManager;
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
     private static IEventSystem _eventSystem = null!;
+    private readonly bool[,]_revealed;
 
     public DungeonSurface(IEventSystem eventSystem, MapGenerator mapgen) : base(GameSettings.DungeonViewWidth, GameSettings.DungeonViewHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight)
     {
@@ -54,6 +55,7 @@ public class DungeonSurface : ScreenSurface
         SadComponents.Add(_entityManager);
         _eventSystem = eventSystem;
         _mapgen = mapgen;
+        _revealed = new bool[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
         IsFocused = true;
         Dungeon = this;
     }
@@ -69,9 +71,9 @@ public class DungeonSurface : ScreenSurface
         return true;
     }
 
-    public Entity CreateScEntity(ColoredGlyph glyph, Point pt, int chGlyph, int zOrder)
+    public ScEntity CreateScEntity(ColoredGlyph glyph, Point pt, int chGlyph, int zOrder)
     {
-        var scEntity = new Entity(new Entity.SingleCell(glyph.Foreground, glyph.Background, chGlyph), zOrder)
+        var scEntity = new ScEntity(new ScEntity.SingleCell(glyph.Foreground, glyph.Background, chGlyph), zOrder)
         {
             Position = pt,
         };
@@ -142,6 +144,7 @@ public class DungeonSurface : ScreenSurface
 
     public void MarkFov(Point pt, bool fSeen)
     {
+        _revealed[pt.X, pt.Y] = true;
         var (clrWall, clrFloor) = fSeen ? (wallColor, floorColor) : (dimWallColor, dimFloorColor);
 
         var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
@@ -162,8 +165,17 @@ public class DungeonSurface : ScreenSurface
         DrawGlyph(glyph, pt);
     }
 
-    public static void SignalNewFov()
+    public static void SignalNewFov(bool fDrawFullFov)
     {
+        if (fDrawFullFov)
+        {
+            foreach (var point in Fov.CurrentFOV)
+            {
+                Dungeon!.MarkSeen(point);
+            }
+
+            return;
+        }
         foreach (var point in Fov.NewlySeen)
         {
             Dungeon!.MarkSeen(point);
@@ -175,12 +187,13 @@ public class DungeonSurface : ScreenSurface
         }
     }
 
-
-
     public void FillSurface(DungeonSurface? surface)
     {
         // Create a new dungeon
         _mapgen.Generate();
+
+        // Nothing has been revealed yet
+        _revealed.Initialize();
 
         // Draw the new dungeon
         surface?.DrawMap(false);
@@ -234,21 +247,37 @@ public class DungeonSurface : ScreenSurface
         }
     }
 
+    private int GlyphAt(int iX, int iY)
+    {
+        return _mapgen.Walkable(iX, iY) ? '.' : 0;
+    }
+
     public void DrawMap(bool fCenter = true)
     {
-        this.Fill(new Rectangle(0, 0, Width, Height), dimFloorColor, GameSettings.ClearColor, '.',
-            Mirror.None);
-        var wallAppearance = new ColoredGlyph(GameSettings.ClearColor, dimWallColor, 0x00);
-        var offMapAppearance = new ColoredGlyph(GameSettings.ClearColor, Color.Black, 0x00);
+        this.Fill(new Rectangle(0, 0, Width, Height), Color.Black, Color.Black, '.', Mirror.None);
+        var offMapAppearance = new ColoredGlyph(Color.Black, Color.Black, 0x00);
+        var wallAppearance = new ColoredGlyph(Color.Black, dimWallColor, 0x00);
+        var floorAppearance = new ColoredGlyph(dimFloorColor, Color.Black, '.');
         for (var iX = 0; iX < Width; iX++)
         {
             for (var iY = 0; iY < Height; iY++)
             {
+                if (!_revealed[iX, iY])
+                {
+                    var appearance = new ColoredGlyph(Color.Black, Color.Black, GlyphAt(iX, iY));
+                    DrawGlyph(appearance, iX, iY);
+                    continue;
+                }
+
                 if (_mapgen.Wall(iX, iY))
                 {
                     DrawGlyph(wallAppearance, iX, iY);
                 }
-                else if (!_mapgen.Walkable(iX, iY))
+                else if (_mapgen.Walkable(iX, iY))
+                {
+                    DrawGlyph(floorAppearance, iX, iY);
+                }
+                else
                 {
                     DrawGlyph(offMapAppearance, iX, iY);
                 }

@@ -1,5 +1,4 @@
 ﻿using Ninject;
-using Roguish.ECS.Systems;
 using SadConsole.Host;
 using Game = SadConsole.Game;
 // ReSharper disable IdentifierTypo
@@ -25,9 +24,9 @@ internal class TopContainer : ScreenObject
     {
         var dungeonSurface = Program.Kernel.Get<DungeonSurface>();
         var chWidth = Game.Instance.MonoGameInstance.Window.ClientBounds.Width / dungeonSurface.FontSize.X;
-        chWidth = Math.Max(80, chWidth);
+        chWidth = Math.Min(GameSettings.DungeonWidth, Math.Max(80, chWidth));
         var chHeight = Game.Instance.MonoGameInstance.Window.ClientBounds.Height / dungeonSurface.FontSize.Y;
-        chHeight = Math.Max(25, chHeight);
+        chHeight = Math.Min(GameSettings.DungeonHeight, Math.Max(25, chHeight));
         var adjWidth = chWidth * dungeonSurface.FontSize.X;
         var adjHeight = chHeight * dungeonSurface.FontSize.Y;
         if (adjWidth != Game.Instance.MonoGameInstance.Window.ClientBounds.Width ||
@@ -44,7 +43,7 @@ internal class TopContainer : ScreenObject
         resizableDungeonSurface.Resize(chWidth, chHeight - GameSettings.SbHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight, false);
         dungeonSurface.DrawMap();
 
-        DungeonSurface.SignalNewFov();
+        DungeonSurface.SignalNewFov(true);
 
         var sb = Program.Kernel.Get<StatusBar>();
         var resizableStatusBar = (ICellSurfaceResize)sb.Surface;
