@@ -208,7 +208,13 @@ public class DungeonSurface : ScreenSurface
         _mapgen.Generate();
 
         // Nothing has been revealed yet
-        _revealed.Initialize();
+        for (var iX = 0; iX < GameSettings.DungeonWidth; iX++)
+        {
+            for (var iY = 0; iY < GameSettings.DungeonHeight; iY++)
+            {
+                _revealed[iX, iY] = false;
+            }
+        }
 
         // Draw the new dungeon
         surface?.DrawMap(false);
