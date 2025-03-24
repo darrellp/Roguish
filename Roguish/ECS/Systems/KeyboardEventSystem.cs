@@ -1,4 +1,5 @@
-﻿using Roguish.ECS.Components;
+﻿using System.Collections.Concurrent;
+using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using SadConsole.Input;
 using SystemsRx.Systems.Conventional;
@@ -6,14 +7,37 @@ using SystemsRx.Systems.Conventional;
 namespace Roguish.ECS.Systems;
 internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem<KeyboardEvent>
 {
+    public static ConcurrentQueue<Keys> KeysQueue { get; set; } = new();
+    
     public void Process(KeyboardEvent keyData)
     {
-        if (keyData.Keys.Count != 1)
+        if (keyData.RetrieveFromQueue)
+        {
+            ReadFromQueue();
+            return;
+        }
+        
+        KeysQueue.Clear();
+
+        if (keyData.Keys == null || keyData.Keys.Count != 1)
         {
             // We currently only handle single key presses
             return;
         }
         var key = keyData.Keys[0].Key;
+        ProcessKey(key);
+    }
+
+    private void ReadFromQueue()
+    {
+        while (KeysQueue.TryDequeue(out var key))
+        {
+            ProcessKey(key);
+        }
+    }
+
+    private void ProcessKey(Keys key)
+    {
         switch (key)
         {
             case Keys.Up:

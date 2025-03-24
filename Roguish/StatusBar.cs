@@ -44,9 +44,8 @@ internal class StatusBar : ScreenSurface
 
     public static EventHandler DrawPathClick = (c, _) =>
     {
-        var ds = Program.Kernel.Get<DungeonSurface>();
-        ds.DrawPath = !((c as CheckBox)!).IsSelected;
-        ds.DrawMap();
+        Dungeon.DrawPath = !((c as CheckBox)!).IsSelected;
+        Dungeon.DrawMap();
         Dungeon.IsFocused = true;
         DungeonSurface.SignalNewFov(true);
     };
@@ -60,11 +59,11 @@ internal class StatusBar : ScreenSurface
             label!.DisplayText = text;
         };
     }
-    #endregion
 
     public static void FovClick(object? sender, EventArgs e)
     {
         Dungeon.IsFocused = true;
         Dungeon.DrawFOV = !Dungeon.DrawFOV;
     }
+    #endregion
 }

@@ -3,11 +3,13 @@ using GoRogue.Pathing;
 using GoRogue.Random;
 using Ninject;
 using Roguish.ECS.Events;
+using Roguish.ECS.Systems;
 using Roguish.Map_Generation;
 using SadConsole.Entities;
 using SadConsole.Input;
 using ShaiRandom.Generators;
 using SystemsRx.Events;
+using Path = GoRogue.Pathing.Path;
 
 // ReSharper disable IdentifierTypo
 
@@ -76,6 +78,8 @@ public class DungeonSurface : ScreenSurface
         _revealed = new bool[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
         IsFocused = true;
         Dungeon = this;
+        this.UseMouse = true;
+        MouseButtonClicked += MouseButtonClickedHandler;
     }
     #endregion
 
@@ -166,6 +170,40 @@ public class DungeonSurface : ScreenSurface
     #endregion
 
     #region Event Handlers
+    void MouseButtonClickedHandler(object? sender, MouseScreenObjectState state)
+    {
+        var posDest = state.CellPosition;
+        if (!_mapgen.Walkable(posDest.X, posDest.Y))
+        {
+            return;
+        }
+        var aStar = new AStar(_mapgen!.WallFloorValues, Distance.Manhattan);
+        var path = aStar.ShortestPath(EcsApp.PlayerPos, posDest);
+        EnqueuePath(path);
+    }
+
+    private static void EnqueuePath(Path path)
+    {
+        Point ptPrev = EcsApp.PlayerPos;
+        foreach (var pt in path.Steps)
+        {
+            var key = (pt - ptPrev) switch
+            {
+                (0, -1) => Keys.Up,
+                (1, -1) => Keys.PageUp,
+                (1, 0) => Keys.Right,
+                (1, 1) => Keys.PageDown,
+                (0, 1) => Keys.Down,
+                (-1,-1) => Keys.End,
+                (-1, 0) => Keys.Left,
+                (-1, 1) => Keys.Home,
+            };
+            KeyboardEventSystem.KeysQueue.Enqueue(key);
+            ptPrev = pt;
+        }
+        _eventSystem.Publish(new KeyboardEvent(null) { RetrieveFromQueue = true });
+    }
+
     public override bool ProcessKeyboard(Keyboard keyboard)
     {
         if (!keyboard.HasKeysPressed)
