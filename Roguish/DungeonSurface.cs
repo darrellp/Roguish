@@ -110,7 +110,7 @@ public class DungeonSurface : ScreenSurface
         ViewPosition = newPos;
     }
 
-    private void KeepPlayerInView()
+    public void KeepPlayerInView()
     {
         var playerPos = Program.EcsApp.PlayerPos;
         var playerPosRelative = playerPos - ViewPosition;
@@ -172,14 +172,20 @@ public class DungeonSurface : ScreenSurface
     #region Event Handlers
     void MouseButtonClickedHandler(object? sender, MouseScreenObjectState state)
     {
+        _eventSystem.Publish(new KeyboardEvent(null) { RetrieveFromQueue = false });
+
         var posDest = state.CellPosition;
-        if (!_mapgen.Walkable(posDest.X, posDest.Y))
+        if ((_drawFov && !_revealed[posDest.X, posDest.Y]) || !_mapgen.Walkable(posDest.X, posDest.Y))
         {
             return;
         }
         var aStar = new AStar(_mapgen!.WallFloorValues, Distance.Manhattan);
         var path = aStar.ShortestPath(EcsApp.PlayerPos, posDest);
-        EnqueuePath(path);
+        Debug.Assert(path != null, "Path finding returned null");
+        if (path != null)
+        {
+            EnqueuePath(path);
+        }
     }
 
     private static void EnqueuePath(Path path)
@@ -197,7 +203,12 @@ public class DungeonSurface : ScreenSurface
                 (-1,-1) => Keys.End,
                 (-1, 0) => Keys.Left,
                 (-1, 1) => Keys.Home,
+                _ => Keys.None
             };
+            if (key == Keys.None)
+            {
+                Debug.Assert(false, "Path skipped a step");
+            }
             KeyboardEventSystem.KeysQueue.Enqueue(key);
             ptPrev = pt;
         }
@@ -211,7 +222,6 @@ public class DungeonSurface : ScreenSurface
             return false;
         }
         _eventSystem.Publish(new KeyboardEvent(keyboard.KeysPressed));
-        KeepPlayerInView();
         return true;
     }
 

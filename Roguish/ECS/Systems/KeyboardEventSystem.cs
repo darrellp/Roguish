@@ -13,13 +13,13 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
     {
         if (keyData.RetrieveFromQueue)
         {
-            ReadFromQueue();
+            var task = Task.Factory.StartNew(ReadFromQueue);
             return;
         }
         
         KeysQueue.Clear();
 
-        if (keyData.Keys == null || keyData.Keys.Count != 1)
+        if (keyData.Keys is not { Count: 1 })
         {
             // We currently only handle single key presses
             return;
@@ -33,6 +33,7 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         while (KeysQueue.TryDequeue(out var key))
         {
             ProcessKey(key);
+            Thread.Sleep(50);
         }
     }
 
@@ -72,6 +73,7 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
                 MovePlayer(new Point(-1, 1));
                 break;
         }
+        dungeon.KeepPlayerInView();
     }
 
     private void MovePlayer(Point ptMove)
