@@ -43,7 +43,7 @@ public class DungeonSurface : ScreenSurface
         { 9, pathLR },
         { 6, pathUL },
         { 10, pathHoriz },
-        { 12, pathUR },
+        { 12, pathUR }
     };
 
     private readonly EntityManager _entityManager;
@@ -52,7 +52,7 @@ public class DungeonSurface : ScreenSurface
     private readonly bool[,]_revealed;
     private bool _drawFov = true;
 
-    public bool DrawFOV
+    public bool DrawFov
     {
         get => _drawFov;
         set
@@ -78,7 +78,7 @@ public class DungeonSurface : ScreenSurface
         _revealed = new bool[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
         IsFocused = true;
         Dungeon = this;
-        this.UseMouse = true;
+        UseMouse = true;
         MouseButtonClicked += MouseButtonClickedHandler;
     }
     #endregion
@@ -88,7 +88,7 @@ public class DungeonSurface : ScreenSurface
     {
         var scEntity = new ScEntity(new ScEntity.SingleCell(glyph.Foreground, glyph.Background, chGlyph), zOrder)
         {
-            Position = pt,
+            Position = pt
         };
         _entityManager.Add(scEntity);
         return scEntity;
@@ -104,15 +104,15 @@ public class DungeonSurface : ScreenSurface
     private void CenterView(Point pt)
     {
         var idealPt = pt - new Point(ViewWidth / 2, ViewHeight / 2);
-        var x = Math.Min(GameSettings.DungeonWidth - ViewWidth, (Math.Max(idealPt.X, 0)));
-        var y = Math.Min(GameSettings.DungeonHeight - ViewHeight, (Math.Max(idealPt.Y, 0)));
+        var x = Math.Min(GameSettings.DungeonWidth - ViewWidth, Math.Max(idealPt.X, 0));
+        var y = Math.Min(GameSettings.DungeonHeight - ViewHeight, Math.Max(idealPt.Y, 0));
         var newPos = new Point(x, y);
         ViewPosition = newPos;
     }
 
     public void KeepPlayerInView()
     {
-        var playerPos = Program.EcsApp.PlayerPos;
+        var playerPos = EcsApp.PlayerPos;
         var playerPosRelative = playerPos - ViewPosition;
         var (x, y) =  ViewPosition;
         var isChanged = false;
@@ -170,7 +170,8 @@ public class DungeonSurface : ScreenSurface
     #endregion
 
     #region Event Handlers
-    void MouseButtonClickedHandler(object? sender, MouseScreenObjectState state)
+
+    private void MouseButtonClickedHandler(object? sender, MouseScreenObjectState state)
     {
         _eventSystem.Publish(new KeyboardEvent(null) { RetrieveFromQueue = false });
 
@@ -179,18 +180,15 @@ public class DungeonSurface : ScreenSurface
         {
             return;
         }
-        var aStar = new AStar(_mapgen!.WallFloorValues, Distance.Manhattan);
+        var aStar = new AStar(_mapgen.WallFloorValues, Distance.Manhattan);
         var path = aStar.ShortestPath(EcsApp.PlayerPos, posDest);
         Debug.Assert(path != null, "Path finding returned null");
-        if (path != null)
-        {
-            EnqueuePath(path);
-        }
+        EnqueuePath(path);
     }
 
     private static void EnqueuePath(Path path)
     {
-        Point ptPrev = EcsApp.PlayerPos;
+        var ptPrev = EcsApp.PlayerPos;
         foreach (var pt in path.Steps)
         {
             var key = (pt - ptPrev) switch
@@ -227,13 +225,13 @@ public class DungeonSurface : ScreenSurface
 
     protected override void OnMouseMove(MouseScreenObjectState state)
     {
-        var sb = Program.Kernel.Get<StatusBar>();
+        var sb = Kernel.Get<StatusBar>();
         sb.ReportMousePos(state.CellPosition);// + ViewPosition);
     }
 
     public override void LostMouse(MouseScreenObjectState state)
     {
-        var sb = Program.Kernel.Get<StatusBar>();
+        var sb = Kernel.Get<StatusBar>();
         sb.ReportMousePos(new Point(0, 0));
     }
     #endregion
@@ -271,7 +269,7 @@ public class DungeonSurface : ScreenSurface
         _eventSystem.Publish(new NewDungeonEvent(0));
 
         // Make sure our hero is front and center
-        CenterView(Program.EcsApp.PlayerPos);
+        CenterView(EcsApp.PlayerPos);
     }
     private int GlyphAt(int iX, int iY)
     {
@@ -280,15 +278,15 @@ public class DungeonSurface : ScreenSurface
 
     public void DrawMap(bool fCenter = true)
     {
-        this.Fill(new Rectangle(0, 0, Width, Height), DrawFOV ? Color.Black : FloorColor, Color.Black, '.', Mirror.None);
+        this.Fill(new Rectangle(0, 0, Width, Height), DrawFov ? Color.Black : FloorColor, Color.Black, '.', Mirror.None);
         var offMapAppearance = new ColoredGlyph(Color.Black, Color.Black, 0x00);
-        var wallAppearance = new ColoredGlyph(Color.Black, DrawFOV ? DimWallColor : WallColor, 0x00);
-        var floorAppearance = new ColoredGlyph(DrawFOV ? DimFloorColor : FloorColor, Color.Black, '.');
+        var wallAppearance = new ColoredGlyph(Color.Black, DrawFov ? DimWallColor : WallColor, 0x00);
+        var floorAppearance = new ColoredGlyph(DrawFov ? DimFloorColor : FloorColor, Color.Black, '.');
         for (var iX = 0; iX < Width; iX++)
         {
             for (var iY = 0; iY < Height; iY++)
             {
-                if (DrawFOV && !_revealed[iX, iY])
+                if (DrawFov && !_revealed[iX, iY])
                 {
                     var appearance = new ColoredGlyph(Color.Black, Color.Black, GlyphAt(iX, iY));
                     DrawGlyph(appearance, iX, iY);
@@ -312,7 +310,7 @@ public class DungeonSurface : ScreenSurface
 
         if (fCenter)
         {
-            CenterView(Program.EcsApp.PlayerPos);
+            CenterView(EcsApp.PlayerPos);
         }
 
         if (!DrawPath)
@@ -351,7 +349,7 @@ public class DungeonSurface : ScreenSurface
                 break;
             }
         }
-        var aStar = new AStar(_mapgen!.WallFloorValues, Distance.Manhattan);
+        var aStar = new AStar(_mapgen.WallFloorValues, Distance.Manhattan);
         var path = aStar.ShortestPath(ptStart, ptEnd);
         if (path != null)
         {
@@ -385,10 +383,8 @@ public class DungeonSurface : ScreenSurface
         {
             return pt.Y < ptConnect.Y ? 4 : 1;
         }
-        else
-        {
-            return pt.X < ptConnect.X ? 2 : 8;
-        }
+
+        return pt.X < ptConnect.X ? 2 : 8;
     }
     #endregion
 
@@ -406,7 +402,7 @@ public class DungeonSurface : ScreenSurface
     public void MarkFov(Point pt, bool fSeen)
     {
         _revealed[pt.X, pt.Y] = true;
-        if (!DrawFOV)
+        if (!DrawFov)
         {
             return;
         }
