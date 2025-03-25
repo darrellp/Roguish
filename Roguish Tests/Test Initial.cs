@@ -1,13 +1,19 @@
-﻿using Roguish;
+﻿using GoRogue.Random;
+using Roguish;
+using ShaiRandom.Generators;
 
 namespace Roguish_Tests;
 
 public class TestInitial
 {
-    //[Test]
-    //[Arguments(1, 2, 3)]
-    //[Arguments(-2, 2, 0)]
-    //public async Task Test_Add(int a, int b, int sum)
-    //{
-    //}
+    private static readonly IEnhancedRandom Rng = GlobalRandom.DefaultRNG;
+
+    [Test]
+    [Arguments(1, 3)]
+    [Arguments(0, 100)]
+    public async Task Test_Rng(int a, int b)
+    {
+        var list = Enumerable.Repeat(0, 100).Select(_ => Rng.NextInt(a, b)).ToList();
+        await Assert.That(list.All(x => x >= a && x < b)).IsTrue();
+    }
 }

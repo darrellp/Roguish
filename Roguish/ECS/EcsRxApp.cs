@@ -7,6 +7,7 @@ using Roguish.ECS.Components;
 using SystemsRx.Infrastructure.Dependencies;
 using SystemsRx.Infrastructure.Ninject;
 using SystemsRx.Infrastructure.Ninject.Extensions;
+using EcsRx.Extensions;
 // ReSharper disable IdentifierTypo
 
 namespace Roguish.ECS;
@@ -22,20 +23,9 @@ internal class EcsRxApp : EcsRxApplication
         LevelItems = Program.GetGroup(typeof(LevelItemComponent));
 
         var collection = EntityDatabase.GetCollection();
-        var entity = collection.CreateEntity();
         var dungeon = Program.Kernel.Get<DungeonSurface>();
-        var playerPos = new Point(0, 0);
-        var scePlayer = dungeon.CreateScEntity(new ColoredGlyph(Color.White, Color.Transparent, 0x40), playerPos, '@', int.MaxValue);
-        IReadOnlyList<EcsComponent> components = new List<EcsComponent>
-        {
-            new IsPlayerControlledComponent(),
-            new DescriptionComponent("Player", "It's you silly!"),
-            new PositionComponent( playerPos),
-            new DisplayComponent(scePlayer),
-            new LevelItemComponent(),
-        };
-
-        entity.AddComponents(components);
+        var entity = collection.CreateEntity(MonsterInfo.PlayerBlueprint(20, dungeon));
+        entity.AddComponent(new IsPlayerControlledComponent());
     }
 
     public Point PlayerPos

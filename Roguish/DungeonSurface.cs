@@ -9,6 +9,7 @@ using SadConsole.Entities;
 using SadConsole.Input;
 using ShaiRandom.Generators;
 using SystemsRx.Events;
+using static Microsoft.Xna.Framework.Graphics.SpriteFont;
 using Path = GoRogue.Pathing.Path;
 
 // ReSharper disable IdentifierTypo
@@ -18,6 +19,7 @@ namespace Roguish;
 public class DungeonSurface : ScreenSurface
 {
     #region Fields/Properties
+
     private static DungeonSurface? Dungeon { get; set; }
     private MapGenerator _mapgen;
     public bool DrawPath { get; set; }
@@ -49,7 +51,7 @@ public class DungeonSurface : ScreenSurface
     private readonly EntityManager _entityManager;
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
     private static IEventSystem _eventSystem = null!;
-    private readonly bool[,]_revealed;
+    private readonly bool[,] _revealed;
     private bool _drawFov = true;
 
     public bool DrawFov
@@ -65,10 +67,13 @@ public class DungeonSurface : ScreenSurface
             }
         }
     }
+
     #endregion
 
     #region Constructor
-    public DungeonSurface(IEventSystem eventSystem, MapGenerator mapgen) : base(GameSettings.DungeonViewWidth, GameSettings.DungeonViewHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight)
+
+    public DungeonSurface(IEventSystem eventSystem, MapGenerator mapgen) : base(GameSettings.DungeonViewWidth,
+        GameSettings.DungeonViewHeight, GameSettings.DungeonWidth, GameSettings.DungeonHeight)
     {
         // Create the entity renderer. This component should contain all the entities you want drawn on the surface
         _entityManager = new EntityManager();
@@ -81,12 +86,24 @@ public class DungeonSurface : ScreenSurface
         UseMouse = true;
         MouseButtonClicked += MouseButtonClickedHandler;
     }
+
     #endregion
 
     #region SadConsole Entities
+
     public ScEntity CreateScEntity(ColoredGlyph glyph, Point pt, int chGlyph, int zOrder)
     {
         var scEntity = new ScEntity(new ScEntity.SingleCell(glyph.Foreground, glyph.Background, chGlyph), zOrder)
+        {
+            Position = pt
+        };
+        _entityManager.Add(scEntity);
+        return scEntity;
+    }
+
+    public ScEntity CreateScEntity(Color foreground, Point pt, int chGlyph, int zOrder)
+    {
+        var scEntity = new ScEntity(new ScEntity.SingleCell(foreground, Color.Transparent, chGlyph), zOrder)
         {
             Position = pt
         };
@@ -98,9 +115,11 @@ public class DungeonSurface : ScreenSurface
     {
         _entityManager.Remove(scEntity);
     }
+
     #endregion
 
     #region Mapping
+
     private void CenterView(Point pt)
     {
         var idealPt = pt - new Point(ViewWidth / 2, ViewHeight / 2);
@@ -114,7 +133,7 @@ public class DungeonSurface : ScreenSurface
     {
         var playerPos = EcsApp.PlayerPos;
         var playerPosRelative = playerPos - ViewPosition;
-        var (x, y) =  ViewPosition;
+        var (x, y) = ViewPosition;
         var isChanged = false;
         if (playerPosRelative.X < GameSettings.BorderWidthX)
         {
@@ -126,6 +145,7 @@ public class DungeonSurface : ScreenSurface
             isChanged = true;
             x -= ViewWidth - GameSettings.BorderWidthX - playerPosRelative.X;
         }
+
         if (playerPosRelative.Y < GameSettings.BorderWidthY)
         {
             isChanged = true;
@@ -149,6 +169,7 @@ public class DungeonSurface : ScreenSurface
         {
             throw new InvalidOperationException("FindRandomEmptyPoint called before map generation");
         }
+
         while (true)
         {
             var x = _rng.NextInt(Width);
@@ -159,6 +180,25 @@ public class DungeonSurface : ScreenSurface
                 return new Point(x, y);
             }
         }
+    }
+
+    #endregion
+
+    #region Populate
+
+    // Player has been placed, FOV calculated
+    public void Populate(int iLevel)
+    {
+        for (var iMonster = 0; iMonster < GameSettings.MonstersPerLevel; iMonster++)
+        {
+            var bp = MonsterInfo.GetBlueprint(iLevel, this);
+            EcsApp.EntityDatabase.GetCollection().CreateEntity(bp);
+        }
+    }
+
+    public void Depopulate()
+    {
+
     }
     #endregion
 

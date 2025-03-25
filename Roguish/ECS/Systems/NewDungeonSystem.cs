@@ -10,7 +10,7 @@ namespace Roguish.ECS.Systems;
 internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
 {
     private readonly MapGenerator _mapgen;
-    static DungeonSurface? _dungeon;
+    static DungeonSurface _dungeon = null!;
 
     public NewDungeonSystem(MapGenerator mapgen, DungeonSurface dungeon)
     {
@@ -35,5 +35,6 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
                 }
             }
         }
+        _dungeon.Populate(eventData.NewLevel);
     }
 }

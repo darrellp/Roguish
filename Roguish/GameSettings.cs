@@ -31,5 +31,7 @@ public static class GameSettings
     public static Color FloorColor = Color.Orange;
     public static Color WallColor = Color.Blue;
     public const int FovRadius = 20;
+    public const int MonstersPerLevel = 20;
+
     #endregion
 }
