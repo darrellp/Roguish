@@ -174,6 +174,10 @@ public class DungeonSurface : ScreenSurface
         {
             var x = _rng.NextInt(Width);
             var y = _rng.NextInt(Height);
+            if (_entityManager.Entities.Select(e => e.Position).Any(p => p.X == x && p.Y == y))
+            {
+                continue;
+            }
 
             if (_mapgen.Walkable(x, y))
             {

@@ -21,18 +21,29 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
     public void Process(NewDungeonEvent eventData)
     {
         Fov = new FOV(_mapgen.WallFloorValues);
-        foreach (var item in EcsApp.LevelItems)
+        foreach (var item in EcsApp.LevelItems.ToArray())
         {
             if (item.HasComponent(typeof(IsPlayerControlledComponent)) && item.HasComponent(typeof(DisplayComponent)))
             {
-                if (item.HasComponent(typeof(PositionComponent)))
+                if (!item.HasComponent(typeof(PositionComponent)))
                 {
-                    var posCmp = item.GetComponent(typeof(PositionComponent)) as PositionComponent;
-                    Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
-                    posCmp.FDrawFullFov = true;
-                    Debug.Assert(_dungeon != null, nameof(_dungeon) + " != null");
-                    posCmp!.Position.SetValueAndForceNotify(_dungeon.FindRandomEmptyPoint());
+                    continue;
                 }
+                var posCmp = item.GetComponent(typeof(PositionComponent)) as PositionComponent;
+                Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
+                posCmp.FDrawFullFov = true;
+                Debug.Assert(_dungeon != null, nameof(_dungeon) + " != null");
+                posCmp!.Position.SetValueAndForceNotify(_dungeon.FindRandomEmptyPoint());
+            }
+            else
+            {
+                if (item.HasComponent(typeof(DisplayComponent)))
+                {
+                    var displayCmp = item.GetComponent(typeof(DisplayComponent)) as DisplayComponent;
+                    _dungeon.RemoveScEntity(displayCmp.ScEntity);
+                }
+
+                EcsApp.EntityDatabase.GetCollection().RemoveEntity(item.Id);
             }
         }
         _dungeon.Populate(eventData.NewLevel);
