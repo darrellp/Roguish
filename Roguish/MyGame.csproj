@@ -35,4 +35,13 @@
     <Folder Include="ECS\Blueprints\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Fonts\Haberdash_curses_12x12.font">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Fonts\Haberdash_curses_12x12.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

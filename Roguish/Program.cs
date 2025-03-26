@@ -55,6 +55,7 @@ internal static class Program
 
         return new Builder()
             .SetScreenSize(GameSettings.GameWidth, GameSettings.GameHeight)
+            .ConfigureFonts("Fonts/Haberdash_curses_12x12.font")
             .OnStart(Start)
             .OnEnd(End);
     }

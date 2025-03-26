@@ -101,6 +101,11 @@ public class DungeonSurface : ScreenSurface
         return scEntity;
     }
 
+    public IEnumerable<ScEntity> GetEntities()
+    {
+        return _entityManager.Entities;
+    }
+
     public ScEntity CreateScEntity(Color foreground, Point pt, int chGlyph, int zOrder)
     {
         var scEntity = new ScEntity(new ScEntity.SingleCell(foreground, Color.Transparent, chGlyph), zOrder)
@@ -119,7 +124,6 @@ public class DungeonSurface : ScreenSurface
     #endregion
 
     #region Mapping
-
     private void CenterView(Point pt)
     {
         var idealPt = pt - new Point(ViewWidth / 2, ViewHeight / 2);
@@ -189,7 +193,6 @@ public class DungeonSurface : ScreenSurface
     #endregion
 
     #region Populate
-
     // Player has been placed, FOV calculated
     public void Populate(int iLevel)
     {
@@ -198,11 +201,6 @@ public class DungeonSurface : ScreenSurface
             var bp = MonsterInfo.GetBlueprint(iLevel, this);
             EcsApp.EntityDatabase.GetCollection().CreateEntity(bp);
         }
-    }
-
-    public void Depopulate()
-    {
-
     }
     #endregion
 

@@ -22,14 +22,20 @@ internal class MovementSystem : IReactToEntitySystem
         var posCmp = entity.GetComponent<PositionComponent>();
         var pos = posCmp.Position.Value;
         scEntity.Position = pos;
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (Fov == null || !entity.HasComponent(typeof(IsPlayerControlledComponent)))
+        if (Fov == null)
         {
             return;
         }
-
-        Fov.Calculate(pos, GameSettings.FovRadius);
-        DungeonSurface.SignalNewFov(posCmp.FDrawFullFov);
-        posCmp.FDrawFullFov = false;
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (entity.HasComponent(typeof(IsPlayerControlledComponent)))
+        {
+            Fov.Calculate(pos, GameSettings.FovRadius);
+            DungeonSurface.SignalNewFov(posCmp.FDrawFullFov);
+            posCmp.FDrawFullFov = false;
+        }
+        else if (entity.HasComponent(typeof(DisplayComponent)))
+        {
+            entity.GetComponent<DisplayComponent>().ScEntity.IsVisible = Fov.CurrentFOV.Contains(pos);
+        }
     }
 }

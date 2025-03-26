@@ -1,0 +1,11 @@
+﻿{
+  "$type": "SadConsole.SadFont, SadConsole",
+  "Name": "Haberdash_curses_12x12",
+  "FilePath": "Haberdash_curses_12x12.png",
+  "GlyphHeight": 12,
+  "GlyphPadding": 0,
+  "GlyphWidth": 12,
+  "SolidGlyphIndex": 219,
+  "Columns": 16,
+  "IsSadExtended": false
+}

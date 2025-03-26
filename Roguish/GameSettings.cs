@@ -4,11 +4,11 @@ public static class GameSettings
     #region Positioning
     // Starting size for the entire game
     public const int GameWidth = 90;
-    public const int GameHeight = 41;
+    public const int GameHeight = 91;
 
     // Size of the dungeon
-    public const int DungeonWidth = 200;
-    public const int DungeonHeight = 60;
+    public const int DungeonWidth = 90;
+    public const int DungeonHeight = 90;
 
     // Starting size of the window into the dungeon
     public static int DungeonViewWidth { get; } = GameWidth;
@@ -30,7 +30,7 @@ public static class GameSettings
     public static Color ClearColor = Color.Black;
     public static Color FloorColor = Color.Orange;
     public static Color WallColor = Color.Blue;
-    public const int FovRadius = 20;
+    public const int FovRadius = 10;
     public const int MonstersPerLevel = 20;
 
     #endregion
