@@ -6,8 +6,9 @@ using EcsRx.Extensions;
 
 namespace Roguish;
 
-enum MonsterType
+public enum MonsterType
 {
+    Player,
     Rat,
     Goblin,
     Orc,
@@ -25,6 +26,7 @@ internal record MonsterInfo
     private Color Color { get; init; } = Color.White;
     private int HealthMin { get; init; } = 1;
     private int HealthMax { get; init; } = 1;
+    private MonsterType MonsterType { get; init; } = MonsterType.Rat;
 
     private static readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
 
@@ -61,12 +63,13 @@ internal record MonsterInfo
             Color.DarkRed)
     ];
 
-    public static IBlueprint PlayerBlueprint(int maxHealth, DungeonSurface dungeon)
+    public static IBlueprint GetPlayerBlueprint(int maxHealth, DungeonSurface dungeon)
     {
         var pos = new Point(0, 0);
-        var scEntity = dungeon.CreateScEntity(Color.White, pos, '@', 100);
-        return new MonsterBlueprint
+        var scEntity = dungeon.CreateScEntity(Color.White, pos, 1, 100);
+        return new PlayerBlueprint
         {
+            MonsterType = MonsterType.Player,
             Name = "Player",
             Description = "It's you silly!",
             MaxHealth = maxHealth,
@@ -126,16 +129,44 @@ internal record MonsterInfo
             Name = info.Name,
             Description = info.Description,
             MaxHealth = maxHealth,
-            ScEntity = scEntity
+            ScEntity = scEntity,
+            MonsterType = info.MonsterType,
         };
     }
 
-    public class MonsterBlueprint : IBlueprint
+    public class PlayerBlueprint : IBlueprint
     {
         public required string Name { get; set; }
         public required string Description { get; set; }
         public required int MaxHealth { get; set; }
         public required ScEntity ScEntity { get; set; }
+        public required MonsterType MonsterType { get; set; }
+
+        public void Apply(EcsEntity entity)
+        {
+            entity.AddComponent(new DescriptionComponent(Name, Description));
+            entity.AddComponent(new HealthComponent(MaxHealth));
+            entity.AddComponent(new DisplayComponent(ScEntity));
+            entity.AddComponent(new LevelItemComponent());
+            entity.AddComponent(new PositionComponent(ScEntity.Position));
+        }
+    }
+
+    public class MonsterBlueprint : PlayerBlueprint, IBlueprint
+    {
+        public new void Apply(EcsEntity entity)
+        {
+            base.Apply(entity);
+            entity.AddComponent(new EnemyComponent(MonsterType));
+        }
+    }
+    public class bp : IBlueprint
+    {
+        public required string Name { get; set; }
+        public required string Description { get; set; }
+        public required int MaxHealth { get; set; }
+        public required ScEntity ScEntity { get; set; }
+        public required MonsterType MonsterType { get; set; }
 
         public void Apply(EcsEntity entity)
         {
@@ -144,6 +175,7 @@ internal record MonsterInfo
             entity.AddComponent(new DisplayComponent(ScEntity));
             entity.AddComponent(new LevelItemComponent());
             entity.AddComponent(new PositionComponent(ScEntity.Position));
+            entity.AddComponent(new EnemyComponent(MonsterType));
         }
     }
 }

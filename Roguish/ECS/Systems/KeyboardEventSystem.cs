@@ -39,6 +39,10 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
 
     private void ProcessKey(Keys key)
     {
+        if (key == Keys.D5)
+        {
+            DungeonSurface.SignalNewFov(false);
+        }
         switch (key)
         {
             case Keys.Up:

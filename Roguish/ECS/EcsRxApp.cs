@@ -16,15 +16,17 @@ internal class EcsRxApp : EcsRxApplication
 {
     public IObservableGroup PlayerGroup = null!;
     public IObservableGroup LevelItems = null!;
+    public IObservableGroup EnemiesGroup = null!;
 
     protected override void ApplicationStarted()
     {
-        PlayerGroup = Program.GetGroup(typeof(IsPlayerControlledComponent));
-        LevelItems = Program.GetGroup(typeof(LevelItemComponent));
+        PlayerGroup = GetGroup(typeof(IsPlayerControlledComponent));
+        LevelItems = GetGroup(typeof(LevelItemComponent));
+        EnemiesGroup = GetGroup(typeof(EnemyComponent));
 
         var collection = EntityDatabase.GetCollection();
         var dungeon = Program.Kernel.Get<DungeonSurface>();
-        var entity = collection.CreateEntity(MonsterInfo.PlayerBlueprint(20, dungeon));
+        var entity = collection.CreateEntity(MonsterInfo.GetPlayerBlueprint(20, dungeon));
         entity.AddComponent(new IsPlayerControlledComponent());
     }
 

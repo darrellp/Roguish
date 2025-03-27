@@ -21,6 +21,11 @@ internal class MovementSystem : IReactToEntitySystem
         var scEntity = entity.GetComponent<DisplayComponent>().ScEntity;
         var posCmp = entity.GetComponent<PositionComponent>();
         var pos = posCmp.Position.Value;
+        if (pos == new Point())
+        {
+            // Uninitialized position
+            return;
+        }
         scEntity.Position = pos;
         if (Fov == null)
         {
@@ -35,7 +40,16 @@ internal class MovementSystem : IReactToEntitySystem
         }
         else if (entity.HasComponent(typeof(DisplayComponent)))
         {
-            entity.GetComponent<DisplayComponent>().ScEntity.IsVisible = Fov.CurrentFOV.Contains(pos);
+            var playerDelta = pos - EcsApp.PlayerPos;
+            var deltaModulus = playerDelta.X * playerDelta.X + playerDelta.Y * playerDelta.Y;
+            if (deltaModulus > GameSettings.FovRadius * GameSettings.FovRadius)
+            {
+                entity.GetComponent<DisplayComponent>().ScEntity.IsVisible = false;
+            }
+            else
+            {
+                entity.GetComponent<DisplayComponent>().ScEntity.IsVisible = Fov.CurrentFOV.Contains(pos);
+            }
         }
     }
 }

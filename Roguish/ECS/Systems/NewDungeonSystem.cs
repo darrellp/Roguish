@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
+using GoRogue.DiceNotation.Terms;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using Roguish.Map_Generation;
 using SystemsRx.Systems.Conventional;
+using EcsRx.Extensions;
 
 namespace Roguish.ECS.Systems;
 
@@ -20,32 +22,34 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
 
     public void Process(NewDungeonEvent eventData)
     {
+        // Get the FOV for the new dungeon
         Fov = new FOV(_mapgen.WallFloorValues);
+
+        // Delete the old stuff in the old dungeon floor
         foreach (var item in EcsApp.LevelItems.ToArray())
         {
-            if (item.HasComponent(typeof(IsPlayerControlledComponent)) && item.HasComponent(typeof(DisplayComponent)))
+            if (item.HasComponent<IsPlayerControlledComponent>())
             {
-                if (!item.HasComponent(typeof(PositionComponent)))
-                {
-                    continue;
-                }
-                var posCmp = item.GetComponent(typeof(PositionComponent)) as PositionComponent;
-                Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
-                posCmp.FDrawFullFov = true;
-                Debug.Assert(_dungeon != null, nameof(_dungeon) + " != null");
-                posCmp!.Position.SetValueAndForceNotify(_dungeon.FindRandomEmptyPoint());
+                continue;
             }
-            else
+            if (item.HasComponent<DisplayComponent>())
             {
-                if (item.HasComponent(typeof(DisplayComponent)))
-                {
-                    var displayCmp = item.GetComponent(typeof(DisplayComponent)) as DisplayComponent;
-                    _dungeon.RemoveScEntity(displayCmp.ScEntity);
-                }
+                var displayCmp = item.GetComponent(typeof(DisplayComponent)) as DisplayComponent;
+                _dungeon.RemoveScEntity(displayCmp.ScEntity);
+            }
 
-                EcsApp.EntityDatabase.GetCollection().RemoveEntity(item.Id);
-            }
+            EcsApp.EntityDatabase.GetCollection().RemoveEntity(item.Id);
         }
+
+        // Set up the player in their new position
+        var player = EcsApp.PlayerGroup[0];
+        var posCmp = player.GetComponent<PositionComponent>();
+        Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
+        posCmp.FDrawFullFov = true;
+        Debug.Assert(_dungeon != null, nameof(_dungeon) + " != null");
+        posCmp!.Position.SetValueAndForceNotify(_dungeon.FindRandomEmptyPoint());
+
+        // Repopulate the new dungeon
         _dungeon.Populate(eventData.NewLevel);
     }
 }
