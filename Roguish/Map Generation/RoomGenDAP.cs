@@ -8,8 +8,8 @@ namespace Roguish.Map_Generation;
 // ReSharper disable once InconsistentNaming
 internal class RoomGenDAP : GenerationStep
 {
-    public int SuperCellWidth = 20;
-    public int SuperCellHeight = 10;
+    public int SuperCellWidth = 15;
+    public int SuperCellHeight = 15;
     public int MinRoomWidth = 5;
     public int MinRoomHeight = 5;
     public string? WallFloorComponentTag;

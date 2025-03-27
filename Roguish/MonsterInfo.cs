@@ -66,7 +66,7 @@ internal record MonsterInfo
     public static IBlueprint GetPlayerBlueprint(int maxHealth, DungeonSurface dungeon)
     {
         var pos = new Point(0, 0);
-        var scEntity = dungeon.CreateScEntity(Color.White, pos, 1, 100);
+        var scEntity = dungeon.CreateScEntity(Color.White, pos, 2, 100);
         return new PlayerBlueprint
         {
             MonsterType = MonsterType.Player,

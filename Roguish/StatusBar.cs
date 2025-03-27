@@ -64,6 +64,13 @@ internal class StatusBar : ScreenSurface
     {
         Dungeon.IsFocused = true;
         Dungeon.DrawFov = !Dungeon.DrawFov;
+        if (!Dungeon.DrawFov)
+        {
+            foreach (var scEntity in Dungeon.GetEntities())
+            {
+                scEntity.IsVisible = true;
+            }
+        }
     }
     #endregion
 }

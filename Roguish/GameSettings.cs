@@ -16,7 +16,7 @@ public static class GameSettings
 
     // How close we can walk to the edges before scrolling starts
     public const int BorderWidthX = 7;
-    public const int BorderWidthY = 5;
+    public const int BorderWidthY = 7;
 
     // Status bar size
     public static int SbWidth { get; } = GameWidth;

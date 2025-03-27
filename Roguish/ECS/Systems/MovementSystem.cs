@@ -6,9 +6,12 @@ using Roguish.ECS.Components;
 
 namespace Roguish.ECS.Systems;
 
-internal class MovementSystem : IReactToEntitySystem
+internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
 {
+    private DungeonSurface _dungeon = dungeon;
+
     public IGroup Group => new Group(typeof(PositionComponent), typeof(DisplayComponent));
+
     public IObservable<EcsEntity> ReactToEntity(EcsEntity entity)
     {
         var positionComponent = entity.GetComponent<PositionComponent>();
@@ -38,7 +41,7 @@ internal class MovementSystem : IReactToEntitySystem
             DungeonSurface.SignalNewFov(posCmp.FDrawFullFov);
             posCmp.FDrawFullFov = false;
         }
-        else if (entity.HasComponent(typeof(DisplayComponent)))
+        else if (_dungeon.DrawFov && entity.HasComponent(typeof(DisplayComponent)))
         {
             var playerDelta = pos - EcsApp.PlayerPos;
             var deltaModulus = playerDelta.X * playerDelta.X + playerDelta.Y * playerDelta.Y;
