@@ -8,14 +8,14 @@ namespace Roguish.ECS.Systems;
 
 internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
 {
-    private DungeonSurface _dungeon = dungeon;
+    private readonly DungeonSurface _dungeon = dungeon;
 
     public IGroup Group => new Group(typeof(PositionComponent), typeof(DisplayComponent));
 
     public IObservable<EcsEntity> ReactToEntity(EcsEntity entity)
     {
         var positionComponent = entity.GetComponent<PositionComponent>();
-        var observable = (IObservable<Point>)positionComponent.Position;
+        IObservable<Point> observable = positionComponent.Position;
         return observable.Select(_ => entity);
     }
 
@@ -30,11 +30,11 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
             return;
         }
         scEntity.Position = pos;
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (Fov == null)
         {
             return;
         }
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (entity.HasComponent(typeof(IsPlayerControlledComponent)))
         {
             Fov.Calculate(pos, GameSettings.FovRadius);

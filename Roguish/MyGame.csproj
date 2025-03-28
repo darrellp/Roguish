@@ -23,6 +23,7 @@
     <PackageReference Include="EcsRx.Plugins.Views" Version="8.0.184" />
     <PackageReference Include="GoRogue" Version="3.0.0-beta09-debug" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Ninject" Version="3.3.6" />
     <PackageReference Include="SadConsole.Host.MonoGame" Version="10.5.0" />
     <PackageReference Include="SadConsole.Extended" Version="10.5.0" />
@@ -40,6 +41,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Fonts\Haberdash_curses_12x12.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="JSON\monsters.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -9,7 +9,6 @@ using SadConsole.Entities;
 using SadConsole.Input;
 using ShaiRandom.Generators;
 using SystemsRx.Events;
-using static Microsoft.Xna.Framework.Graphics.SpriteFont;
 using Path = GoRogue.Pathing.Path;
 
 // ReSharper disable IdentifierTypo
@@ -492,5 +491,4 @@ public class DungeonSurface : ScreenSurface
         }
     }
     #endregion
-
 }

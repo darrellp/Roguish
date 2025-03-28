@@ -1,0 +1,67 @@
+﻿[
+  {
+    "MonsterType": "Rat",
+    "Name": "Rat",
+    "Description": "Furry little rodent",
+    "StartLevel": 0,
+    "EndLevel": 3,
+    "HealthMin": 10,
+    "HealthMax": 15,
+    "Glyph": 114,
+    "Color": {
+      "_packedValue": 0xff00ffff
+    }
+  },
+  {
+    "MonsterType": "Goblin",
+    "Name": "Goblin",
+    "Description": "Ugly green bugger",
+    "StartLevel": 2,
+    "EndLevel": 5,
+    "HealthMin": 10,
+    "HealthMax": 15,
+    "Glyph": 103,
+    "Color": {
+      "_packedValue": 0xff00ff00
+    }
+  },
+  {
+    "MonsterType": "Orc",
+    "Name": "Orc",
+    "Description": "Something from your nightmares",
+    "StartLevel": 4,
+    "EndLevel": 7,
+    "HealthMin": 10,
+    "HealthMax": 15,
+    "Glyph": 111,
+    "Color": {
+      "_packedValue": 0xff0000ff
+    }
+  },
+  {
+    "MonsterType": "Troll",
+    "Name": "Troll",
+    "Description": "Big, strong and dumb",
+    "StartLevel": 6,
+    "EndLevel": 9,
+    "HealthMin": 10,
+    "HealthMax": 15,
+    "Glyph": 116,
+    "Color": {
+      "_packedValue": 0xff80ff80
+    }
+  },
+  {
+    "MonsterType": "Dragon",
+    "Name": "Dragon",
+    "Description": "Scaly fire breathing lizard",
+    "StartLevel": 8,
+    "EndLevel": 10,
+    "HealthMin": 10,
+    "HealthMax": 15,
+    "Glyph": 100,
+    "Color": {
+      "_packedValue": 0xff8080ff
+    }
+  }
+]

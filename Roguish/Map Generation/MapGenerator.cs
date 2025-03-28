@@ -1,5 +1,4 @@
 ﻿using GoRogue.MapGeneration;
-using Ninject;
 using SadRogue.Primitives.GridViews;
 
 namespace Roguish.Map_Generation;

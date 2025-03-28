@@ -3,6 +3,7 @@ using GoRogue.Random;
 using Roguish.ECS.Components;
 using ShaiRandom.Generators;
 using EcsRx.Extensions;
+using Newtonsoft.Json;
 
 namespace Roguish;
 
@@ -16,52 +17,19 @@ public enum MonsterType
     Dragon
 };
 
-internal record MonsterInfo
+internal class MonsterInfo
 {
-    private string Name { get; init; } = "UnnamedMonster";
-    private string Description { get; init; } = "A monster";
-    private int StartLevel { get; init; } = 0;
-    private int EndLevel { get; init; } = 0;
-    private int Glyph { get; init; } = 0;
-    private Color Color { get; init; } = Color.White;
-    private int HealthMin { get; init; } = 1;
-    private int HealthMax { get; init; } = 1;
-    private MonsterType MonsterType { get; init; } = MonsterType.Rat;
+    public string Name { get; set; } = "UnnamedMonster";
+    public string Description { get; set; } = "A monster";
+    public int StartLevel { get; set; }
+    public int EndLevel { get; set; }
+    public int Glyph { get; set; }
+    public Color Color { get; set; } = Color.White;
+    public int HealthMin { get; set; } = 1;
+    public int HealthMax { get; set; } = 1;
+    public MonsterType MonsterType { get; set; } = MonsterType.Player;
 
-    private static readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
-
-    private static readonly List<MonsterInfo> MonsterList = [
-        new MonsterInfo(MonsterType.Rat,
-            "Rat", "Furry little rodent",
-            10, 15,
-            0, 3, 
-            'r', 
-            Color.Yellow),
-        new MonsterInfo(MonsterType.Goblin, 
-            "Goblin", "Ugly green bugger",
-            10, 15,
-            2, 5, 
-            'g', 
-            Color.Green),
-        new MonsterInfo(MonsterType.Orc, 
-            "Orc", "Something from your nightmares",
-            10, 15,
-            4, 7, 
-            'o', 
-            Color.Red),
-        new MonsterInfo(MonsterType.Troll, 
-            "Troll", "Big, strong and dumb",
-            10, 15,
-            6, 9, 
-            't', 
-            Color.DarkGreen),
-        new MonsterInfo(MonsterType.Dragon, 
-            "Dragon", "Scaly fire breathing lizard",
-            10, 15,
-            8, 10, 
-            'd', 
-            Color.DarkRed)
-    ];
+    private static readonly IEnhancedRandom Rng = GlobalRandom.DefaultRNG;
 
     public static IBlueprint GetPlayerBlueprint(int maxHealth, DungeonSurface dungeon)
     {
@@ -81,7 +49,10 @@ internal record MonsterInfo
 
    static MonsterInfo()
     {
-        foreach (var monsterInfo in MonsterList)
+        var jsonMonsters = File.ReadAllText("JSON/monsters.json");
+        var monsterList = JsonConvert.DeserializeObject<List<MonsterInfo>>(jsonMonsters);
+
+        foreach (var monsterInfo in monsterList)
         {
             for (var i = monsterInfo.StartLevel; i <= monsterInfo.EndLevel; i++)
             {
@@ -94,34 +65,16 @@ internal record MonsterInfo
         }
     }
 
-    public MonsterInfo(
-        MonsterType type, 
-        string name, string description,
-        int healthMin, int healthMax,
-        int startLevel, int endLevel, 
-        int glyph, 
-        Color color)
-    {
-        Name = name;
-        StartLevel = startLevel;
-        EndLevel = endLevel;
-        Glyph = glyph;
-        Color = color;
-        Description = description;
-        HealthMin = healthMin;
-        HealthMax = healthMax;
-    }
-
     private static MonsterInfo PickMonsterForLevel(int iLevel)
     {
         var available = MpLevelToMonsters[iLevel];
-        return available[_rng.NextInt(available.Count)];
+        return available[Rng.NextInt(available.Count)];
     }
 
     public static IBlueprint GetBlueprint(int iLevel, DungeonSurface dungeon)
     {
         var info = PickMonsterForLevel(iLevel);
-        var maxHealth = _rng.NextInt(info.HealthMin, info.HealthMax + 1);
+        var maxHealth = Rng.NextInt(info.HealthMin, info.HealthMax + 1);
         var pos = dungeon.FindRandomEmptyPoint();
         var scEntity = dungeon.CreateScEntity(info.Color, pos, info.Glyph, 0);
         return new MonsterBlueprint
@@ -157,24 +110,6 @@ internal record MonsterInfo
         public new void Apply(EcsEntity entity)
         {
             base.Apply(entity);
-            entity.AddComponent(new EnemyComponent(MonsterType));
-        }
-    }
-    public class bp : IBlueprint
-    {
-        public required string Name { get; set; }
-        public required string Description { get; set; }
-        public required int MaxHealth { get; set; }
-        public required ScEntity ScEntity { get; set; }
-        public required MonsterType MonsterType { get; set; }
-
-        public void Apply(EcsEntity entity)
-        {
-            entity.AddComponent(new DescriptionComponent( Name, Description));
-            entity.AddComponent(new HealthComponent( MaxHealth));
-            entity.AddComponent(new DisplayComponent(ScEntity));
-            entity.AddComponent(new LevelItemComponent());
-            entity.AddComponent(new PositionComponent(ScEntity.Position));
             entity.AddComponent(new EnemyComponent(MonsterType));
         }
     }
