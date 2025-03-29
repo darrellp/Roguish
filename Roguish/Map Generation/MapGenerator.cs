@@ -33,12 +33,24 @@ public class MapGenerator
         WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
         Walls = generator.Context.GetFirst<ISettableGridView<bool>>("Walls");
         Areas = generator.Context.GetFirst<Area[]>("Areas");
+        ClearEntityMap();
     }
 
     public static void SetScEntityPosition(ScEntity scEntity, Point posOld, Point posNew)
     {
         ScEntityMap[posOld.X, posOld.Y] = null;
         ScEntityMap[posNew.X, posNew.Y] = scEntity;
+    }
+
+    public static void ClearEntityMap()
+    {
+        for (var iX = 0; iX < GameSettings.DungeonWidth; iX++)
+        {
+            for (var iY = 0; iY < GameSettings.DungeonHeight; iY++)
+            {
+                ScEntityMap[iX, iY] = null;
+            }
+        }
     }
 
     public static int BaseGlyphAt(int iX, int iY)
