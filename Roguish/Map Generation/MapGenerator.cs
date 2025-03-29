@@ -1,6 +1,5 @@
 ﻿using GoRogue.MapGeneration;
 using GoRogue.Random;
-using SadConsole.Entities;
 using SadRogue.Primitives.GridViews;
 using ShaiRandom.Generators;
 
@@ -65,12 +64,7 @@ public class MapGenerator
         {
             var x = _rng.NextInt(GameSettings.DungeonWidth);
             var y = _rng.NextInt(GameSettings.DungeonHeight);
-            if (ScEntityMap[x, y] != null)
-            {
-                continue;
-            }
-
-            if (IsWalkable(x, y))
+            if (ScEntityMap[x, y] == null && IsWalkable(x, y))
             {
                 return new Point(x, y);
             }

@@ -17,12 +17,14 @@ internal class EcsRxApp : EcsRxApplication
     public IObservableGroup PlayerGroup = null!;
     public IObservableGroup LevelItems = null!;
     public IObservableGroup EnemiesGroup = null!;
+    public IObservableGroup TaskedGroup = null!;
 
     protected override void ApplicationStarted()
     {
         PlayerGroup = GetGroup(typeof(IsPlayerControlledComponent));
         LevelItems = GetGroup(typeof(LevelItemComponent));
         EnemiesGroup = GetGroup(typeof(EnemyComponent));
+        TaskedGroup = GetGroup(typeof(TaskComponent));
 
         var collection = EntityDatabase.GetCollection();
         var dungeon = Program.Kernel.Get<DungeonSurface>();

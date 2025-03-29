@@ -434,7 +434,6 @@ public class DungeonSurface : ScreenSurface
     public static void SignalNewFov(bool fDrawFullFov)
     {
         Debug.Assert(Dungeon != null, "Null dungeon in SignalNewFov");
-        _eventSystem.Publish(new NewTurnEvent());
         if (fDrawFullFov)
         {
             foreach (var point in Fov.CurrentFOV)

@@ -5,6 +5,7 @@ using Roguish.ECS.Components;
 using ShaiRandom.Generators;
 using EcsRx.Extensions;
 using Newtonsoft.Json;
+using Roguish.ECS.Systems;
 
 namespace Roguish;
 
@@ -42,7 +43,8 @@ internal class MonsterInfo
             Name = "Player",
             Description = "It's you silly!",
             MaxHealth = maxHealth,
-            ScEntity = scEntity
+            ScEntity = scEntity,
+            Task = null
         };
     }
 
@@ -79,6 +81,7 @@ internal class MonsterInfo
         var maxHealth = Rng.NextInt(info.HealthMin, info.HealthMax + 1);
         var pos = dungeon.Mapgen.FindRandomEmptyPoint();
         var scEntity = dungeon.CreateScEntity(info.Color, pos, info.Glyph, 0);
+        TaskComponent? task = null;
         return new MonsterBlueprint
         {
             Name = info.Name,
@@ -86,6 +89,7 @@ internal class MonsterInfo
             MaxHealth = maxHealth,
             ScEntity = scEntity,
             MonsterType = info.MonsterType,
+            Task = task
         };
     }
 
@@ -96,6 +100,7 @@ internal class MonsterInfo
         public required int MaxHealth { get; set; }
         public required ScEntity ScEntity { get; set; }
         public required MonsterType MonsterType { get; set; }
+        public required TaskComponent? Task { get; set; }
 
         public void Apply(EcsEntity entity)
         {
@@ -113,6 +118,7 @@ internal class MonsterInfo
         {
             base.Apply(entity);
             entity.AddComponent(new EnemyComponent(MonsterType));
+            entity.AddComponent(new TaskComponent(100, NewTurnEventSystem.DefaultMonsterMove));
         }
     }
 }

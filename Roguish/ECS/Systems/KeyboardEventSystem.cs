@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using Roguish.Map_Generation;
 using SadConsole.Input;
 using SystemsRx.Systems.Conventional;
+using EcsRx.Extensions;
 
 namespace Roguish.ECS.Systems;
 internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem<KeyboardEvent>
@@ -40,14 +42,15 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
 
     private void ProcessKey(Keys key)
     {
-        if (key == Keys.D5)
-        {
-            DungeonSurface.SignalNewFov(false);
-        }
+        var ptMove = Point.Zero;
+
         switch (key)
         {
+            case Keys.D5:
+                break;
+
             case Keys.Up:
-                MovePlayer(new Point(0, -1));
+                ptMove = new Point(0, -1);
                 break;
 
             case Keys.Down:
@@ -78,7 +81,25 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
                 MovePlayer(new Point(-1, 1));
                 break;
         }
-        dungeon.KeepPlayerInView();
+
+        var player = EcsApp.PlayerGroup.First();
+        Debug.Assert(player != null);
+        var newTicks = NewTurnEventSystem.Ticks + 100ul;
+        var action = MovePlayerClosure(ptMove);
+        var newTask = new TaskComponent(newTicks, action);
+
+        player.AddComponent<TaskComponent>(newTask);
+        EcsApp.EventSystem.Publish(new NewTurnEvent());
+
+    }
+
+    Func<EcsEntity, TaskComponent?>? MovePlayerClosure(Point ptMove)
+    {
+        return _ =>
+        {
+            MovePlayer(ptMove);
+            return null;
+        };
     }
 
     private void MovePlayer(Point ptMove)
@@ -91,5 +112,6 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         {
             positionCmp.Position.SetValueAndForceNotify(newPosition);
         }
+        dungeon.KeepPlayerInView();
     }
 }
