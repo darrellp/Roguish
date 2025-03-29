@@ -20,7 +20,7 @@ public class DungeonSurface : ScreenSurface
     #region Fields/Properties
 
     private static DungeonSurface? Dungeon { get; set; }
-    private MapGenerator _mapgen;
+    public MapGenerator Mapgen;
     public bool DrawPath { get; set; }
 
     // ReSharper disable InconsistentNaming
@@ -78,7 +78,7 @@ public class DungeonSurface : ScreenSurface
         _entityManager = new EntityManager();
         SadComponents.Add(_entityManager);
         _eventSystem = eventSystem;
-        _mapgen = mapgen;
+        Mapgen = mapgen;
         _revealed = new bool[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
         IsFocused = true;
         Dungeon = this;
@@ -165,30 +165,6 @@ public class DungeonSurface : ScreenSurface
             ViewPosition = new Point(x, y);
         }
     }
-
-    public Point FindRandomEmptyPoint()
-    {
-        if (_mapgen == null)
-        {
-            throw new InvalidOperationException("FindRandomEmptyPoint called before map generation");
-        }
-
-        while (true)
-        {
-            var x = _rng.NextInt(Width);
-            var y = _rng.NextInt(Height);
-            if (_entityManager.Entities.Select(e => e.Position).Any(p => p.X == x && p.Y == y))
-            {
-                continue;
-            }
-
-            if (_mapgen.Walkable(x, y))
-            {
-                return new Point(x, y);
-            }
-        }
-    }
-
     #endregion
 
     #region Populate
@@ -203,13 +179,6 @@ public class DungeonSurface : ScreenSurface
     }
     #endregion
 
-    #region Queries
-    public bool IsWalkable(Point pt)
-    {
-        return _mapgen.Walkable(pt.X, pt.Y);
-    }
-    #endregion
-
     #region Event Handlers
 
     private void MouseButtonClickedHandler(object? sender, MouseScreenObjectState state)
@@ -217,11 +186,11 @@ public class DungeonSurface : ScreenSurface
         _eventSystem.Publish(new KeyboardEvent(null) { RetrieveFromQueue = false });
 
         var posDest = state.CellPosition;
-        if ((_drawFov && !_revealed[posDest.X, posDest.Y]) || !_mapgen.Walkable(posDest.X, posDest.Y))
+        if ((_drawFov && !_revealed[posDest.X, posDest.Y]) || !MapGenerator.IsWalkable(posDest))
         {
             return;
         }
-        var aStar = new AStar(_mapgen.WallFloorValues, Distance.Manhattan);
+        var aStar = new AStar(MapGenerator.WallFloorValues, Distance.Manhattan);
         var path = aStar.ShortestPath(EcsApp.PlayerPos, posDest);
         Debug.Assert(path != null, "Path finding returned null");
         EnqueuePath(path);
@@ -292,7 +261,7 @@ public class DungeonSurface : ScreenSurface
     public void FillSurface(DungeonSurface? surface)
     {
         // Create a new dungeon
-        _mapgen.Generate();
+        Mapgen.Generate();
 
         // Nothing has been revealed yet
         for (var iX = 0; iX < GameSettings.DungeonWidth; iX++)
@@ -312,11 +281,6 @@ public class DungeonSurface : ScreenSurface
         // Make sure our hero is front and center
         CenterView(EcsApp.PlayerPos);
     }
-    private int GlyphAt(int iX, int iY)
-    {
-        return _mapgen.Walkable(iX, iY) ? '.' : 0;
-    }
-
     public void DrawMap(bool fCenter = true)
     {
         this.Fill(new Rectangle(0, 0, Width, Height), DrawFov ? Color.Black : FloorColor, Color.Black, '.', Mirror.None);
@@ -329,16 +293,16 @@ public class DungeonSurface : ScreenSurface
             {
                 if (DrawFov && !_revealed[iX, iY])
                 {
-                    var appearance = new ColoredGlyph(Color.Black, Color.Black, GlyphAt(iX, iY));
+                    var appearance = new ColoredGlyph(Color.Black, Color.Black, MapGenerator.BaseGlyphAt(iX, iY));
                     DrawGlyph(appearance, iX, iY);
                     continue;
                 }
 
-                if (_mapgen.Wall(iX, iY))
+                if (Mapgen.Wall(iX, iY))
                 {
                     DrawGlyph(wallAppearance, iX, iY);
                 }
-                else if (_mapgen.Walkable(iX, iY))
+                else if (MapGenerator.IsWalkable(iX, iY))
                 {
                     DrawGlyph(floorAppearance, iX, iY);
                 }
@@ -370,12 +334,12 @@ public class DungeonSurface : ScreenSurface
         {
             for (var iY = 0; iY < Height; iY++)
             {
-                if (!fFoundStart && _mapgen.Walkable(iX, iY))
+                if (!fFoundStart && MapGenerator.IsWalkable(iX, iY))
                 {
                     ptStart = new Point(iX, iY);
                     fFoundStart = true;
                 }
-                if (!fFoundEnd && _mapgen.Walkable(Width - 1 - iX, Height - 1 - iY))
+                if (!fFoundEnd && MapGenerator.IsWalkable(Width - 1 - iX, Height - 1 - iY))
                 {
                     ptEnd = new Point(Width - 1 - iX, Height - 1 - iY);
                     fFoundEnd = true;
@@ -390,7 +354,7 @@ public class DungeonSurface : ScreenSurface
                 break;
             }
         }
-        var aStar = new AStar(_mapgen.WallFloorValues, Distance.Manhattan);
+        var aStar = new AStar(MapGenerator.WallFloorValues, Distance.Manhattan);
         var path = aStar.ShortestPath(ptStart, ptEnd);
         if (path != null)
         {
@@ -447,7 +411,7 @@ public class DungeonSurface : ScreenSurface
         {
             return;
         }
-        var (clrWall, clrFloor) = fSeen ? (wallColor: WallColor, floorColor: FloorColor) : (dimWallColor: DimWallColor, dimFloorColor: DimFloorColor);
+        var (clrWall, clrFloor) = fSeen ? (WallColor, FloorColor) : (DimWallColor, DimFloorColor);
 
         var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
         Debug.Assert(glyph != null);

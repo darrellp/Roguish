@@ -1,4 +1,5 @@
-﻿using EcsRx.Blueprints;
+﻿using System.Diagnostics;
+using EcsRx.Blueprints;
 using GoRogue.Random;
 using Roguish.ECS.Components;
 using ShaiRandom.Generators;
@@ -52,6 +53,7 @@ internal class MonsterInfo
         var jsonMonsters = File.ReadAllText("JSON/monsters.json");
         var monsterList = JsonConvert.DeserializeObject<List<MonsterInfo>>(jsonMonsters);
 
+        Debug.Assert(monsterList != null, nameof(monsterList) + " != null");
         foreach (var monsterInfo in monsterList)
         {
             for (var i = monsterInfo.StartLevel; i <= monsterInfo.EndLevel; i++)
@@ -75,7 +77,7 @@ internal class MonsterInfo
     {
         var info = PickMonsterForLevel(iLevel);
         var maxHealth = Rng.NextInt(info.HealthMin, info.HealthMax + 1);
-        var pos = dungeon.FindRandomEmptyPoint();
+        var pos = dungeon.Mapgen.FindRandomEmptyPoint();
         var scEntity = dungeon.CreateScEntity(info.Color, pos, info.Glyph, 0);
         return new MonsterBlueprint
         {

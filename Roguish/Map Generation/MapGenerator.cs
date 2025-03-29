@@ -1,14 +1,23 @@
 ﻿using GoRogue.MapGeneration;
+using GoRogue.Random;
+using SadConsole.Entities;
 using SadRogue.Primitives.GridViews;
+using ShaiRandom.Generators;
 
 namespace Roguish.Map_Generation;
 public class MapGenerator
 {
-    public ISettableGridView<bool> WallFloorValues { get; set; } = null!;
+    public static ISettableGridView<bool> WallFloorValues { get; set; } = null!;
+    public static ScEntity?[,] ScEntityMap = new ScEntity?[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
+
     public ISettableGridView<bool> Walls { get; set; } = null!;
     public Area[] Areas { get; set; } = null!;
-    public bool Walkable(int x, int y) => WallFloorValues[x, y];
+    public static bool IsWalkable(int x, int y) => WallFloorValues[x, y];
+    public static bool IsWalkable(Point pt) => WallFloorValues[pt];
     public bool Wall(int x, int y) => Walls[x, y];
+
+    private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
+
 
     public void Generate()
     {
@@ -25,5 +34,37 @@ public class MapGenerator
         Walls = generator.Context.GetFirst<ISettableGridView<bool>>("Walls");
         Areas = generator.Context.GetFirst<Area[]>("Areas");
     }
+
+    public static void SetScEntityPosition(ScEntity scEntity, Point posOld, Point posNew)
+    {
+        ScEntityMap[posOld.X, posOld.Y] = null;
+        ScEntityMap[posNew.X, posNew.Y] = scEntity;
+    }
+
+    public static int BaseGlyphAt(int iX, int iY)
+    {
+        return IsWalkable(iX, iY) ? '.' : 0;
+    }
+
+
+    public Point FindRandomEmptyPoint()
+    {
+        while (true)
+        {
+            var x = _rng.NextInt(GameSettings.DungeonWidth);
+            var y = _rng.NextInt(GameSettings.DungeonHeight);
+            if (ScEntityMap[x, y] != null)
+            {
+                continue;
+            }
+
+            if (IsWalkable(x, y))
+            {
+                return new Point(x, y);
+            }
+        }
+    }
+
+
 }
 

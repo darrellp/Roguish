@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
+using Roguish.Map_Generation;
 using SadConsole.Input;
 using SystemsRx.Systems.Conventional;
 
@@ -86,7 +87,7 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         var positionCmp = (PositionComponent)player.GetComponent(typeof(PositionComponent));
         var position = positionCmp.Position.Value;
         var newPosition = position + ptMove;
-        if (dungeon.IsWalkable(newPosition))
+        if (MapGenerator.IsWalkable(newPosition))
         {
             positionCmp.Position.SetValueAndForceNotify(newPosition);
         }

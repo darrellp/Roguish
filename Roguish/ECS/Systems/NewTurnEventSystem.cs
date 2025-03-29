@@ -9,6 +9,7 @@ using SystemsRx.Systems.Conventional;
 using EcsRx.Extensions;
 using GoRogue.Random;
 using ShaiRandom.Generators;
+using Roguish.Map_Generation;
 
 
 namespace Roguish.ECS.Systems;
@@ -43,7 +44,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         var pos = posCmp.Position.Value;
         var moves = pos.
             Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false).
-            Where(p => _dungeon.IsWalkable(p)).
+            Where(MapGenerator.IsWalkable).
             ToArray();
         posCmp.Position.Value = moves[_rng.NextInt(moves.Length)];
     }

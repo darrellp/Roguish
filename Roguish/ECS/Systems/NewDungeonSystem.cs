@@ -23,7 +23,7 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
     public void Process(NewDungeonEvent eventData)
     {
         // Get the FOV for the new dungeon
-        Fov = new FOV(_mapgen.WallFloorValues);
+        Fov = new FOV(MapGenerator.WallFloorValues);
 
         // Delete the old stuff in the old dungeon floor
         foreach (var item in EcsApp.LevelItems.ToArray())
@@ -35,7 +35,7 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
             if (item.HasComponent<DisplayComponent>())
             {
                 var displayCmp = item.GetComponent(typeof(DisplayComponent)) as DisplayComponent;
-                _dungeon.RemoveScEntity(displayCmp.ScEntity);
+                _dungeon.RemoveScEntity(displayCmp!.ScEntity);
             }
 
             EcsApp.EntityDatabase.GetCollection().RemoveEntity(item.Id);
@@ -47,7 +47,7 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
         Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
         posCmp.FDrawFullFov = true;
         Debug.Assert(_dungeon != null, nameof(_dungeon) + " != null");
-        posCmp!.Position.SetValueAndForceNotify(_dungeon.FindRandomEmptyPoint());
+        posCmp!.Position.SetValueAndForceNotify(_mapgen.FindRandomEmptyPoint());
 
         // Repopulate the new dungeon
         _dungeon.Populate(eventData.NewLevel);

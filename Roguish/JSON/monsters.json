@@ -16,7 +16,7 @@
     "MonsterType": "Goblin",
     "Name": "Goblin",
     "Description": "Ugly green bugger",
-    "StartLevel": 2,
+    "StartLevel": 0,
     "EndLevel": 5,
     "HealthMin": 10,
     "HealthMax": 15,
