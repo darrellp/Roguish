@@ -54,31 +54,31 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
                 break;
 
             case Keys.Down:
-                MovePlayer(new Point(0, 1));
+                ptMove = new Point(0, 1);
                 break;
 
             case Keys.Left:
-                MovePlayer(new Point(-1, 0));
+                ptMove = new Point(-1, 0);
                 break;
 
             case Keys.Right:
-                MovePlayer(new Point(1, 0));
+                ptMove = new Point(1, 0);
                 break;
 
             case Keys.PageUp:
-                MovePlayer(new Point(1, -1));
+                ptMove = new Point(1, -1);
                 break;
 
             case Keys.PageDown:
-                MovePlayer(new Point(1, 1));
+                ptMove = new Point(1, 1);
                 break;
 
             case Keys.Home:
-                MovePlayer(new Point(-1, -1));
+                ptMove = new Point(-1, -1);
                 break;
 
             case Keys.End:
-                MovePlayer(new Point(-1, 1));
+                ptMove = new Point(-1, 1);
                 break;
         }
 
