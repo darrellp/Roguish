@@ -44,16 +44,21 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
         }
         else if (dungeon.DrawFov && entity.HasComponent(typeof(DisplayComponent)))
         {
-            var playerDelta = posNew - EcsApp.PlayerPos;
-            var deltaModulus = playerDelta.X * playerDelta.X + playerDelta.Y * playerDelta.Y;
-            if (deltaModulus > GameSettings.FovRadius * GameSettings.FovRadius)
-            {
-                entity.GetComponent<DisplayComponent>().ScEntity.IsVisible = false;
-            }
-            else
-            {
-                entity.GetComponent<DisplayComponent>().ScEntity.IsVisible = Fov.CurrentFOV.Contains(posNew);
-            }
+            DetermineVisibility(scEntity);
+        }
+    }
+
+    internal static void DetermineVisibility(ScEntity entity)
+    {
+        var playerDelta = entity.Position - EcsApp.PlayerPos;
+        var deltaModulus = playerDelta.X * playerDelta.X + playerDelta.Y * playerDelta.Y;
+        if (deltaModulus > GameSettings.FovRadius * GameSettings.FovRadius)
+        {
+            entity.IsVisible = false;
+        }
+        else
+        {
+            entity.IsVisible = Fov.CurrentFOV.Contains(entity.Position);
         }
     }
 }

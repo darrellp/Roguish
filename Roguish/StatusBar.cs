@@ -71,6 +71,13 @@ internal class StatusBar : ScreenSurface
                 scEntity.IsVisible = true;
             }
         }
+        else
+        {
+            foreach (var scEntity in Dungeon.GetEntities())
+            {
+                MovementSystem.DetermineVisibility(scEntity);
+            }
+        }
     }
     #endregion
 }

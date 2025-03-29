@@ -58,12 +58,14 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
     internal static TaskComponent DefaultMonsterMove(EcsEntity enemy)
     {
         var posCmp = enemy.GetComponent<PositionComponent>();
+        var agentCmp = enemy.GetComponent<AgentComponent>();
+        var taskCmp = enemy.GetComponent<TaskComponent>();
         var pos = posCmp.Position.Value;
         var moves = pos.
             Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false).
             Where(MapGenerator.IsWalkable).
             ToArray();
         posCmp.Position.Value = moves[GlobalRandom.DefaultRNG.NextInt(moves.Length)];
-        return new TaskComponent(Ticks + 100, DefaultMonsterMove);
+        return new TaskComponent(taskCmp.FireOn + agentCmp.MoveTime, DefaultMonsterMove);
     }
 }

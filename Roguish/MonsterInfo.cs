@@ -116,9 +116,10 @@ internal class MonsterInfo
     {
         public new void Apply(EcsEntity entity)
         {
+            const int monsterMoveTime = 100;
             base.Apply(entity);
-            entity.AddComponent(new EnemyComponent(MonsterType));
-            entity.AddComponent(new TaskComponent(100, NewTurnEventSystem.DefaultMonsterMove));
+            entity.AddComponent(new AgentComponent(MonsterType, monsterMoveTime));
+            entity.AddComponent(new TaskComponent(monsterMoveTime, NewTurnEventSystem.DefaultMonsterMove));
         }
     }
 }
