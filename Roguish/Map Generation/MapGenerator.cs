@@ -75,7 +75,6 @@ public class MapGenerator
         return IsWalkable(iX, iY) ? '.' : 0;
     }
 
-
     public Point FindRandomEmptyPoint()
     {
         while (true)
@@ -99,20 +98,15 @@ public class MapGenerator
 
         if (fovLevel == LevelOfFov.Lit && IsAgentAt(pt))
         {
-            var collection = EcsApp.EntityDatabase.GetCollection();
-            var ecsEntity = collection.GetEntity(AgentMap[pt.X, pt.Y]);
+            var ecsEntity = EcsApp.EntityDatabase.GetEntity(AgentMap[pt.X, pt.Y]);
+            // ReSharper disable once InvertIf
             if (ecsEntity.HasComponent<AgentComponent>())
             {
                 var agentCmp = ecsEntity.GetComponent<AgentComponent>();
                 var agentInfo = AgentInfo.InfoFromType(agentCmp.AgentType);
                 return agentInfo.Name;
             }
-            if (ecsEntity.HasComponent<IsPlayerControlledComponent>())
-            {
-                return "player";
-            }
-
-            return "unknown agent";
+            return ecsEntity.HasComponent<IsPlayerControlledComponent>() ? "player" : "unknown agent";
         }
         else if (IsWalkable(pt))
         {

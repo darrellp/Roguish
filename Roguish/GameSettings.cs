@@ -1,5 +1,6 @@
 ﻿namespace Roguish;
-public static class GameSettings
+
+internal static class GameSettings
 {
     #region Positioning
     // Starting size for the entire game

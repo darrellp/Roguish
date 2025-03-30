@@ -10,7 +10,8 @@ using Roguish.Screens;
 
 namespace Roguish;
 
-public enum AgentType
+#region Enums
+internal enum AgentType
 {
     Player,
     Rat,
@@ -19,9 +20,11 @@ public enum AgentType
     Troll,
     Dragon
 };
+#endregion
 
 internal class AgentInfo
 {
+    #region Public Properties
     public string Name { get; set; } = "UnnamedAgent";
     public string Description { get; set; } = "An agent";
     public int StartLevel { get; set; }
@@ -31,28 +34,16 @@ internal class AgentInfo
     public int HealthMin { get; set; } = 1;
     public int HealthMax { get; set; } = 1;
     public AgentType AgentType { get; set; } = AgentType.Player;
+    #endregion
 
+    #region Private Fields
     private static readonly Dictionary<int, List<AgentInfo>> MpLevelToAgents = new();
     private static readonly Dictionary<AgentType, AgentInfo> MpTypeToInfo = new();
-
     private static readonly IEnhancedRandom Rng = GlobalRandom.DefaultRNG;
+    #endregion
 
-    public static IBlueprint GetPlayerBlueprint(int maxHealth, DungeonSurface dungeon)
-    {
-        var pos = new Point(0, 0);
-        var scEntity = dungeon.CreateScEntity(Color.White, pos, 2, 100);
-        return new PlayerBlueprint
-        {
-            AgentType = AgentType.Player,
-            Name = "Player",
-            Description = "It's you silly!",
-            MaxHealth = maxHealth,
-            ScEntity = scEntity,
-            Task = null
-        };
-    }
-
-   static AgentInfo()
+    #region Static Constructor
+    static AgentInfo()
     {
         var jsonMonsters = File.ReadAllText("JSON/monsters.json");
         var agentList = JsonConvert.DeserializeObject<List<AgentInfo>>(jsonMonsters);
@@ -71,18 +62,37 @@ internal class AgentInfo
             }
         }
     }
+    #endregion
 
-    private static AgentInfo PickMonsterForLevel(int iLevel)
+    #region Queries
+    private static AgentInfo PickAgentForLevel(int iLevel)
     {
         var available = MpLevelToAgents[iLevel];
         return available[Rng.NextInt(available.Count)];
     }
 
-    public static AgentInfo InfoFromType(AgentType type) => MpTypeToInfo[type];
+    internal static AgentInfo InfoFromType(AgentType type) => MpTypeToInfo[type];
+    #endregion
 
-    public static IBlueprint GetBlueprint(int iLevel, DungeonSurface dungeon)
+    #region Blueprints
+    internal static IBlueprint GetPlayerBlueprint(int maxHealth, DungeonSurface dungeon)
     {
-        var info = PickMonsterForLevel(iLevel);
+        var pos = new Point(0, 0);
+        var scEntity = dungeon.CreateScEntity(Color.White, pos, 2, 100);
+        return new PlayerBlueprint
+        {
+            AgentType = AgentType.Player,
+            Name = "Player",
+            Description = "It's you silly!",
+            MaxHealth = maxHealth,
+            ScEntity = scEntity,
+            Task = null
+        };
+    }
+
+    internal static IBlueprint GetBlueprint(int iLevel, DungeonSurface dungeon)
+    {
+        var info = PickAgentForLevel(iLevel);
         var maxHealth = Rng.NextInt(info.HealthMin, info.HealthMax + 1);
         var pos = dungeon.Mapgen.FindRandomEmptyPoint();
         var scEntity = dungeon.CreateScEntity(info.Color, pos, info.Glyph, 0);
@@ -98,7 +108,7 @@ internal class AgentInfo
         };
     }
 
-    public class PlayerBlueprint : IBlueprint
+    internal class PlayerBlueprint : IBlueprint
     {
         public required string Name { get; set; }
         public required string Description { get; set; }
@@ -117,7 +127,7 @@ internal class AgentInfo
         }
     }
 
-    public class AgentBlueprint : PlayerBlueprint, IBlueprint
+    internal class AgentBlueprint : PlayerBlueprint, IBlueprint
     {
         public new void Apply(EcsEntity entity)
         {
@@ -127,4 +137,5 @@ internal class AgentInfo
             entity.AddComponent(new TaskComponent(agentMoveTime, NewTurnEventSystem.DefaultAgentMove));
         }
     }
+    #endregion
 }
