@@ -8,6 +8,14 @@ internal static class Bindings
     public static Dictionary<string, ControlBase> Controls { get; } = [];
 
     public static List<Binding> BindingList { get; } = [
+        new Binding<string>
+        {
+            Screen = typeof(InfoBar),
+            Position = new Point(0, 0),
+            Control = new Label(GameSettings.IbWidth),
+            BindValue = InfoBar.Description,
+            Observer = MoveStringToLabel,
+        },
         new()
         {
             Screen = typeof(StatusBar), 
@@ -36,7 +44,7 @@ internal static class Bindings
             Position = new Point(45, 0),
             Control = new Button(10) {Text = "FOV", FocusOnMouseClick = false},
             Command = StatusBar.FovClick,
-        }
+        },
     ];
 
     public static void Bind()
@@ -87,5 +95,12 @@ internal static class Bindings
         {
             keyValue.Key.SadComponents.Add(keyValue.Value);
         }
+    }
+
+    // Common handlers
+    public static Action<string> MoveStringToLabel(ControlBase c)
+    {
+        var label = c as Label;
+        return (string str) => label!.DisplayText = str;
     }
 }

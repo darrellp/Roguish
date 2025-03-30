@@ -3,8 +3,7 @@ global using ScEntity = SadConsole.Entities.Entity;
 global using EcsComponent = EcsRx.Components.IComponent;
 global using FOV = GoRogue.FOV.RecursiveShadowcastingBooleanBasedFOV;
 global using static Roguish.Program;
-
-
+using System.ComponentModel;
 using EcsRx.Groups.Observable;
 using EcsRx.Infrastructure.Extensions;
 using Ninject;
@@ -45,6 +44,7 @@ internal static class Program
         Kernel.Bind<DungeonSurface>().ToSelf().InSingletonScope();
         Kernel.Bind<TopContainer>().ToSelf().InSingletonScope();
         Kernel.Bind<MapGenerator>().ToSelf().InSingletonScope();
+        Kernel.Bind<InfoBar>().ToSelf().InSingletonScope();
     }
 
     public static Builder SetupGame()
@@ -61,19 +61,23 @@ internal static class Program
     }
     private static void End(object? sender, GameHost e)
     {
-        Program.EcsApp.StopApplication();
+        EcsApp.StopApplication();
     }
 
     private static void Start(object? sender, GameHost e)
     {
-        Program.EcsApp.StartApplication();
+        EcsApp.StartApplication();
 
-        var container = Program.Kernel.Get<TopContainer>();
+        var container = Kernel.Get<TopContainer>();
         Game.Instance.Screen = container;
-        var ds = Program.Kernel.Get<DungeonSurface>();
+        var ds = Kernel.Get<DungeonSurface>();
+        ds.Position = new Point(GameSettings.IbWidth, 0);
         container.Children.Add(ds);
-        var sb = Program.Kernel.Get<StatusBar>();
+        var sb = Kernel.Get<StatusBar>();
         container.Children.Add(sb);
+        var ib = Kernel.Get<InfoBar>();
+        ib.Position = Point.Zero;
+        container.Children.Add(ib);
 
         ds.FillSurface(ds);
         MVVM.Bindings.Bind();

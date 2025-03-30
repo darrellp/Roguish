@@ -71,6 +71,38 @@ public class MapGenerator
         }
     }
 
+    public string GetDescription(Point pt)
+    {
+        var fovLevel = DungeonSurface.GetFov(pt);
+        if (fovLevel == LevelOfFov.Unseen)
+        {
+            return "";
+        }
 
+        if (fovLevel == LevelOfFov.Lit && ScEntityMap[pt.X, pt.Y] != null)
+        {
+            // TODO: This needs to be way more organized and expandable
+            var glyph = ScEntityMap[pt.X, pt.Y].AppearanceSingle.Appearance.GlyphCharacter;
+            return glyph switch
+            {
+                'r' => "rat",
+                'g' => "goblin",
+                (char)2 => "player",
+                _ => "unknown",
+            };
+        }
+        else if (IsWalkable(pt))
+        {
+            return "floor";
+        }
+        else if (Wall(pt.X, pt.Y))
+        {
+            return "wall";
+        }
+        else
+        {
+            return "";
+        }
+    }
 }
 

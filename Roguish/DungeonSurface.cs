@@ -15,6 +15,13 @@ using Path = GoRogue.Pathing.Path;
 
 namespace Roguish;
 
+public enum LevelOfFov
+{
+    Unseen,
+    Seen,
+    Lit,
+}
+
 public class DungeonSurface : ScreenSurface
 {
     #region Fields/Properties
@@ -48,10 +55,9 @@ public class DungeonSurface : ScreenSurface
     };
 
     private readonly EntityManager _entityManager;
-    private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
     private static IEventSystem _eventSystem = null!;
-    private readonly bool[,] _revealed;
-    private bool _drawFov = true;
+    private static bool[,] _revealed = new bool[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
+    private static bool _drawFov = true;
 
     public bool DrawFov
     {
@@ -79,7 +85,6 @@ public class DungeonSurface : ScreenSurface
         SadComponents.Add(_entityManager);
         _eventSystem = eventSystem;
         Mapgen = mapgen;
-        _revealed = new bool[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
         IsFocused = true;
         Dungeon = this;
         UseMouse = true;
@@ -237,6 +242,8 @@ public class DungeonSurface : ScreenSurface
     {
         var sb = Kernel.Get<StatusBar>();
         sb.ReportMousePos(state.CellPosition);// + ViewPosition);
+        var ib = Kernel.Get<InfoBar>();
+        ib.SetDescription(Mapgen.GetDescription(state.CellPosition));
     }
 
     public override void LostMouse(MouseScreenObjectState state)
@@ -394,6 +401,15 @@ public class DungeonSurface : ScreenSurface
     #endregion
 
     #region FOV
+    public static LevelOfFov GetFov(Point pt)
+    {
+        if (!_drawFov)
+        {
+            return LevelOfFov.Lit;
+        }
+        return Fov.CurrentFOV.Contains(pt) ? LevelOfFov.Lit : _revealed[pt.X, pt.Y] ? LevelOfFov.Seen : LevelOfFov.Unseen;
+    }
+
     public void MarkSeen(Point pt)
     {
         MarkFov(pt, true);
