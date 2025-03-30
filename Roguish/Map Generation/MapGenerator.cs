@@ -1,5 +1,8 @@
-﻿using GoRogue.MapGeneration;
+﻿using System.Diagnostics;
+using GoRogue.MapGeneration;
 using GoRogue.Random;
+using Roguish.ECS.Components;
+using EcsRx.Extensions;
 using SadRogue.Primitives.GridViews;
 using ShaiRandom.Generators;
 
@@ -7,7 +10,7 @@ namespace Roguish.Map_Generation;
 public class MapGenerator
 {
     public static ISettableGridView<bool> WallFloorValues { get; set; } = null!;
-    public static ScEntity?[,] ScEntityMap = new ScEntity?[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
+    public static int[,] AgentMap = new int[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
 
     public ISettableGridView<bool> Walls { get; set; } = null!;
     public Area[] Areas { get; set; } = null!;
@@ -17,6 +20,10 @@ public class MapGenerator
 
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
 
+    static MapGenerator()
+    {
+        ClearEntityMap();
+    }
 
     public void Generate()
     {
@@ -35,10 +42,20 @@ public class MapGenerator
         ClearEntityMap();
     }
 
-    public static void SetScEntityPosition(ScEntity scEntity, Point posOld, Point posNew)
+    public static void SetAgentPosition(int id, Point posOld, Point posNew)
     {
-        ScEntityMap[posOld.X, posOld.Y] = null;
-        ScEntityMap[posNew.X, posNew.Y] = scEntity;
+        AgentMap[posOld.X, posOld.Y] = -1;
+        AgentMap[posNew.X, posNew.Y] = id;
+    }
+
+    public bool IsAgentAt(int x, int y)
+    {
+        return AgentMap[x, y] >= 0;
+    }
+
+    public bool IsAgentAt(Point pt)
+    {
+        return IsAgentAt(pt.X, pt.Y);
     }
 
     public static void ClearEntityMap()
@@ -47,7 +64,7 @@ public class MapGenerator
         {
             for (var iY = 0; iY < GameSettings.DungeonHeight; iY++)
             {
-                ScEntityMap[iX, iY] = null;
+                AgentMap[iX, iY] = -1;
             }
         }
     }
@@ -64,7 +81,7 @@ public class MapGenerator
         {
             var x = _rng.NextInt(GameSettings.DungeonWidth);
             var y = _rng.NextInt(GameSettings.DungeonHeight);
-            if (ScEntityMap[x, y] == null && IsWalkable(x, y))
+            if (!IsAgentAt(x, y) && IsWalkable(x, y))
             {
                 return new Point(x, y);
             }
@@ -79,10 +96,14 @@ public class MapGenerator
             return "";
         }
 
-        if (fovLevel == LevelOfFov.Lit && ScEntityMap[pt.X, pt.Y] != null)
+        if (fovLevel == LevelOfFov.Lit && IsAgentAt(pt))
         {
             // TODO: This needs to be way more organized and expandable
-            var glyph = ScEntityMap[pt.X, pt.Y].AppearanceSingle.Appearance.GlyphCharacter;
+            var collection = EcsApp.EntityDatabase.GetCollection();
+            var ecsEntity = collection.GetEntity(AgentMap[pt.X, pt.Y]);
+            var displayCmp = ecsEntity.GetComponent<DisplayComponent>();
+            Debug.Assert(displayCmp.ScEntity.AppearanceSingle != null, "displayCmp.ScEntity.AppearanceSingle != null");
+            var glyph = displayCmp.ScEntity.AppearanceSingle.Appearance.GlyphCharacter;
             return glyph switch
             {
                 'r' => "rat",

@@ -30,7 +30,7 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
             return;
         }
         scEntity.Position = posNew;
-        MapGenerator.SetScEntityPosition(scEntity, posOld, posNew);
+        MapGenerator.SetAgentPosition(entity.Id, posOld, posNew);
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (Fov == null)
         {
