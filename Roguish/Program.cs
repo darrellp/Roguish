@@ -3,7 +3,6 @@ global using ScEntity = SadConsole.Entities.Entity;
 global using EcsComponent = EcsRx.Components.IComponent;
 global using FOV = GoRogue.FOV.RecursiveShadowcastingBooleanBasedFOV;
 global using static Roguish.Program;
-using System.ComponentModel;
 using EcsRx.Groups.Observable;
 using EcsRx.Infrastructure.Extensions;
 using Ninject;
@@ -11,6 +10,7 @@ using Roguish.ECS;
 using Roguish.Map_Generation;
 using SadConsole.Configuration;
 using SystemsRx.Infrastructure.Ninject.Extensions;
+using Roguish.Screens;
 
 namespace Roguish;
 internal static class Program

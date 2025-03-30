@@ -8,6 +8,7 @@ using SystemsRx.Infrastructure.Dependencies;
 using SystemsRx.Infrastructure.Ninject;
 using SystemsRx.Infrastructure.Ninject.Extensions;
 using EcsRx.Extensions;
+using Roguish.Screens;
 // ReSharper disable IdentifierTypo
 
 namespace Roguish.ECS;

@@ -5,6 +5,7 @@ using Roguish.ECS.Components;
 using EcsRx.Extensions;
 using SadRogue.Primitives.GridViews;
 using ShaiRandom.Generators;
+using Roguish.Screens;
 
 namespace Roguish.Map_Generation;
 public class MapGenerator

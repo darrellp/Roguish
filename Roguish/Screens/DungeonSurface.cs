@@ -13,7 +13,7 @@ using Path = GoRogue.Pathing.Path;
 
 // ReSharper disable IdentifierTypo
 
-namespace Roguish;
+namespace Roguish.Screens;
 
 public enum LevelOfFov
 {
@@ -191,7 +191,7 @@ public class DungeonSurface : ScreenSurface
         _eventSystem.Publish(new KeyboardEvent(null) { RetrieveFromQueue = false });
 
         var posDest = state.CellPosition;
-        if ((_drawFov && !_revealed[posDest.X, posDest.Y]) || !MapGenerator.IsWalkable(posDest))
+        if (_drawFov && !_revealed[posDest.X, posDest.Y] || !MapGenerator.IsWalkable(posDest))
         {
             return;
         }
@@ -213,7 +213,7 @@ public class DungeonSurface : ScreenSurface
                 (1, 0) => Keys.Right,
                 (1, 1) => Keys.PageDown,
                 (0, 1) => Keys.Down,
-                (-1,-1) => Keys.End,
+                (-1, -1) => Keys.End,
                 (-1, 0) => Keys.Left,
                 (-1, 1) => Keys.Home,
                 _ => Keys.None

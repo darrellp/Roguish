@@ -6,6 +6,7 @@ using Roguish.Map_Generation;
 using SadConsole.Input;
 using SystemsRx.Systems.Conventional;
 using EcsRx.Extensions;
+using Roguish.Screens;
 
 namespace Roguish.ECS.Systems;
 internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem<KeyboardEvent>

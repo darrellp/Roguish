@@ -1,8 +1,9 @@
-﻿using SadConsole.UI;
+﻿using Roguish.Screens;
+using SadConsole.UI;
 using SadConsole.UI.Controls;
 using Label = SadConsole.UI.Controls.Label;
 
-namespace Roguish.MVVM ;
+namespace Roguish.MVVM;
 internal static class Bindings
 {
     public static Dictionary<string, ControlBase> Controls { get; } = [];

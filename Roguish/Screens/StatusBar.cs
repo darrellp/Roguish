@@ -5,7 +5,7 @@ using SystemsRx.ReactiveData;
 
 // ReSharper disable IdentifierTypo
 
-namespace Roguish;
+namespace Roguish.Screens;
 
 internal class StatusBar : ScreenSurface
 {
@@ -38,13 +38,13 @@ internal class StatusBar : ScreenSurface
 
     public static EventHandler RedrawClick = (_, _) =>
     {
-        Dungeon.FillSurface(Program.Kernel.Get<DungeonSurface>());
+        Dungeon.FillSurface(Kernel.Get<DungeonSurface>());
         Dungeon.IsFocused = true;
     };
 
     public static EventHandler DrawPathClick = (c, _) =>
     {
-        Dungeon.DrawPath = !((c as CheckBox)!).IsSelected;
+        Dungeon.DrawPath = !(c as CheckBox)!.IsSelected;
         Dungeon.DrawMap();
         Dungeon.IsFocused = true;
         DungeonSurface.SignalNewFov(true);
@@ -53,7 +53,7 @@ internal class StatusBar : ScreenSurface
     public static Action<Point> GetMousePosObserver(ControlBase c)
     {
         var label = c as Label;
-        return (Point ptMouse) =>
+        return (ptMouse) =>
         {
             var text = string.Format(PositionFormat, ptMouse.X, ptMouse.Y);
             label!.DisplayText = text;

@@ -3,7 +3,7 @@ using SadConsole.Host;
 using Game = SadConsole.Game;
 // ReSharper disable IdentifierTypo
 
-namespace Roguish;
+namespace Roguish.Screens;
 internal class TopContainer : ScreenObject
 {
     public TopContainer()
@@ -22,7 +22,7 @@ internal class TopContainer : ScreenObject
 
     private void Game_WindowResized(object? sender, EventArgs e)
     {
-        var dungeonSurface = Program.Kernel.Get<DungeonSurface>();
+        var dungeonSurface = Kernel.Get<DungeonSurface>();
         var chWidth = Game.Instance.MonoGameInstance.Window.ClientBounds.Width / dungeonSurface.FontSize.X;
         chWidth = Math.Min(GameSettings.DungeonWidth, Math.Max(80, chWidth));
         var chHeight = Game.Instance.MonoGameInstance.Window.ClientBounds.Height / dungeonSurface.FontSize.Y;
@@ -45,7 +45,7 @@ internal class TopContainer : ScreenObject
 
         DungeonSurface.SignalNewFov(true);
 
-        var sb = Program.Kernel.Get<StatusBar>();
+        var sb = Kernel.Get<StatusBar>();
         var resizableStatusBar = (ICellSurfaceResize)sb.Surface;
         sb.Position = new Point(0, chHeight - GameSettings.SbHeight);
         resizableStatusBar.Resize(chWidth, GameSettings.SbHeight, false);

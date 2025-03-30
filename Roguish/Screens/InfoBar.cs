@@ -1,6 +1,6 @@
 ﻿using SystemsRx.ReactiveData;
 
-namespace Roguish;
+namespace Roguish.Screens;
 internal class InfoBar : ScreenSurface
 {
     #region Members

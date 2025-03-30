@@ -4,6 +4,7 @@ using EcsRx.Groups;
 using EcsRx.Groups.Observable;
 using EcsRx.Systems;
 using Roguish.ECS.Components;
+using Roguish.Screens;
 using SystemsRx.Attributes;
 
 namespace Roguish.ECS.Systems;
