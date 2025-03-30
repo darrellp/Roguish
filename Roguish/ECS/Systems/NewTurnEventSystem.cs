@@ -42,20 +42,12 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
             while (task.FireOn <= Ticks)
             {
                 Debug.Assert(task.Action != null, "task.Action != null");
-                task = task.Action(tasked);
-                Debug.Assert(task != null, nameof(task) + " != null");
-                ReplaceTask(tasked, task);
+                task.Action(tasked);
             }
         }
     }
 
-    private void ReplaceTask(EcsEntity entity, TaskComponent newTask)
-    {
-        entity.RemoveComponent<TaskComponent>();
-        entity.AddComponent(newTask);
-    }
-
-    internal static TaskComponent DefaultMonsterMove(EcsEntity enemy)
+    internal static void DefaultMonsterMove(EcsEntity enemy)
     {
         var posCmp = enemy.GetComponent<PositionComponent>();
         var agentCmp = enemy.GetComponent<AgentComponent>();
@@ -66,6 +58,8 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
             Where(MapGenerator.IsWalkable).
             ToArray();
         posCmp.Position.Value = moves[GlobalRandom.DefaultRNG.NextInt(moves.Length)];
-        return new TaskComponent(taskCmp.FireOn + agentCmp.MoveTime, DefaultMonsterMove);
+        taskCmp.FireOn = Ticks + agentCmp.MoveTime;
+        // Don't need this right now since it's not changing
+        // taskCmp.Action = DefaultMonsterMove;
     }
 }

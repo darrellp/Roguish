@@ -10,8 +10,17 @@
 /// <param name="action">   The action to take with arg of entity ID. </param>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-internal class TaskComponent(ulong fireOn, Func<EcsEntity, TaskComponent?>? action) : EcsComponent
+internal class TaskComponent(ulong fireOn, Action<EcsEntity>? action) : EcsComponent
 {
-    public ulong FireOn => fireOn;
-    public Func<EcsEntity, TaskComponent?>? Action => action;
+    public ulong FireOn
+    {
+        get => fireOn;
+        set => fireOn = value;
+    }
+
+    public Action<EcsEntity>? Action
+    {
+        get => action;
+        set => action = value;
+    }
 }

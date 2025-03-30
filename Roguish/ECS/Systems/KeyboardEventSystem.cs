@@ -87,18 +87,15 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         var newTicks = NewTurnEventSystem.Ticks + 100ul;
         var action = MovePlayerClosure(ptMove);
         var newTask = new TaskComponent(newTicks, action);
-
         player.AddComponent<TaskComponent>(newTask);
         EcsApp.EventSystem.Publish(new NewTurnEvent());
-
     }
 
-    Func<EcsEntity, TaskComponent?>? MovePlayerClosure(Point ptMove)
+    Action<EcsEntity>? MovePlayerClosure(Point ptMove)
     {
         return _ =>
         {
             MovePlayer(ptMove);
-            return null;
         };
     }
 
