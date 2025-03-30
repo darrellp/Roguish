@@ -1,6 +1,6 @@
 ﻿[
   {
-    "MonsterType": "Rat",
+    "AgentType": "Rat",
     "Name": "Rat",
     "Description": "Furry little rodent",
     "StartLevel": 0,
@@ -13,7 +13,7 @@
     }
   },
   {
-    "MonsterType": "Goblin",
+    "AgentType": "Goblin",
     "Name": "Goblin",
     "Description": "Ugly green bugger",
     "StartLevel": 0,
@@ -26,7 +26,7 @@
     }
   },
   {
-    "MonsterType": "Orc",
+    "AgentType": "Orc",
     "Name": "Orc",
     "Description": "Something from your nightmares",
     "StartLevel": 4,
@@ -39,7 +39,7 @@
     }
   },
   {
-    "MonsterType": "Troll",
+    "AgentType": "Troll",
     "Name": "Troll",
     "Description": "Big, strong and dumb",
     "StartLevel": 6,
@@ -52,7 +52,7 @@
     }
   },
   {
-    "MonsterType": "Dragon",
+    "AgentType": "Dragon",
     "Name": "Dragon",
     "Description": "Scaly fire breathing lizard",
     "StartLevel": 8,

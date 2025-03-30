@@ -28,7 +28,7 @@ internal class EcsRxApp : EcsRxApplication
 
         var collection = EntityDatabase.GetCollection();
         var dungeon = Program.Kernel.Get<DungeonSurface>();
-        var entity = collection.CreateEntity(MonsterInfo.GetPlayerBlueprint(20, dungeon));
+        var entity = collection.CreateEntity(AgentInfo.GetPlayerBlueprint(20, dungeon));
         entity.AddComponent(new IsPlayerControlledComponent());
     }
 

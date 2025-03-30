@@ -47,7 +47,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         }
     }
 
-    internal static void DefaultMonsterMove(EcsEntity enemy)
+    internal static void DefaultAgentMove(EcsEntity enemy)
     {
         var posCmp = enemy.GetComponent<PositionComponent>();
         var agentCmp = enemy.GetComponent<AgentComponent>();

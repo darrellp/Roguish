@@ -4,12 +4,12 @@
 
 internal class AgentComponent : EcsComponent
 {
-    public MonsterType MonsterType { get; set; }
+    public AgentType AgentType { get; set; }
     public ulong MoveTime { get; set; }
 
-    public AgentComponent(MonsterType monsterType, ulong moveTime)
+    public AgentComponent(AgentType agentType, ulong moveTime)
     {
-        MonsterType = monsterType;
+        AgentType = agentType;
         MoveTime=moveTime;
     }
 }

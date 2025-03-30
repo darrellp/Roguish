@@ -9,7 +9,7 @@ using Roguish.ECS.Systems;
 
 namespace Roguish;
 
-public enum MonsterType
+public enum AgentType
 {
     Player,
     Rat,
@@ -19,17 +19,20 @@ public enum MonsterType
     Dragon
 };
 
-internal class MonsterInfo
+internal class AgentInfo
 {
-    public string Name { get; set; } = "UnnamedMonster";
-    public string Description { get; set; } = "A monster";
+    public string Name { get; set; } = "UnnamedAgent";
+    public string Description { get; set; } = "An agent";
     public int StartLevel { get; set; }
     public int EndLevel { get; set; }
     public int Glyph { get; set; }
     public Color Color { get; set; } = Color.White;
     public int HealthMin { get; set; } = 1;
     public int HealthMax { get; set; } = 1;
-    public MonsterType MonsterType { get; set; } = MonsterType.Player;
+    public AgentType AgentType { get; set; } = AgentType.Player;
+
+    private static readonly Dictionary<int, List<AgentInfo>> MpLevelToAgents = new();
+    private static readonly Dictionary<AgentType, AgentInfo> MpTypeToInfo = new();
 
     private static readonly IEnhancedRandom Rng = GlobalRandom.DefaultRNG;
 
@@ -39,7 +42,7 @@ internal class MonsterInfo
         var scEntity = dungeon.CreateScEntity(Color.White, pos, 2, 100);
         return new PlayerBlueprint
         {
-            MonsterType = MonsterType.Player,
+            AgentType = AgentType.Player,
             Name = "Player",
             Description = "It's you silly!",
             MaxHealth = maxHealth,
@@ -48,32 +51,33 @@ internal class MonsterInfo
         };
     }
 
-    private static readonly Dictionary<int, List<MonsterInfo>> MpLevelToMonsters = new();
-
-   static MonsterInfo()
+   static AgentInfo()
     {
         var jsonMonsters = File.ReadAllText("JSON/monsters.json");
-        var monsterList = JsonConvert.DeserializeObject<List<MonsterInfo>>(jsonMonsters);
+        var agentList = JsonConvert.DeserializeObject<List<AgentInfo>>(jsonMonsters);
 
-        Debug.Assert(monsterList != null, nameof(monsterList) + " != null");
-        foreach (var monsterInfo in monsterList)
+        Debug.Assert(agentList != null, nameof(agentList) + " != null");
+        foreach (var agentInfo in agentList)
         {
-            for (var i = monsterInfo.StartLevel; i <= monsterInfo.EndLevel; i++)
+            MpTypeToInfo[agentInfo.AgentType] = agentInfo;
+            for (var i = agentInfo.StartLevel; i <= agentInfo.EndLevel; i++)
             {
-                if (!MpLevelToMonsters.ContainsKey(i))
+                if (!MpLevelToAgents.ContainsKey(i))
                 {
-                    MpLevelToMonsters[i] = [];
+                    MpLevelToAgents[i] = [];
                 }
-                MpLevelToMonsters[i].Add(monsterInfo);
+                MpLevelToAgents[i].Add(agentInfo);
             }
         }
     }
 
-    private static MonsterInfo PickMonsterForLevel(int iLevel)
+    private static AgentInfo PickMonsterForLevel(int iLevel)
     {
-        var available = MpLevelToMonsters[iLevel];
+        var available = MpLevelToAgents[iLevel];
         return available[Rng.NextInt(available.Count)];
     }
+
+    public static AgentInfo InfoFromType(AgentType type) => MpTypeToInfo[type];
 
     public static IBlueprint GetBlueprint(int iLevel, DungeonSurface dungeon)
     {
@@ -82,13 +86,13 @@ internal class MonsterInfo
         var pos = dungeon.Mapgen.FindRandomEmptyPoint();
         var scEntity = dungeon.CreateScEntity(info.Color, pos, info.Glyph, 0);
         TaskComponent? task = null;
-        return new MonsterBlueprint
+        return new AgentBlueprint
         {
             Name = info.Name,
             Description = info.Description,
             MaxHealth = maxHealth,
             ScEntity = scEntity,
-            MonsterType = info.MonsterType,
+            AgentType = info.AgentType,
             Task = task
         };
     }
@@ -99,7 +103,7 @@ internal class MonsterInfo
         public required string Description { get; set; }
         public required int MaxHealth { get; set; }
         public required ScEntity ScEntity { get; set; }
-        public required MonsterType MonsterType { get; set; }
+        public required AgentType AgentType { get; set; }
         public required TaskComponent? Task { get; set; }
 
         public void Apply(EcsEntity entity)
@@ -112,14 +116,14 @@ internal class MonsterInfo
         }
     }
 
-    public class MonsterBlueprint : PlayerBlueprint, IBlueprint
+    public class AgentBlueprint : PlayerBlueprint, IBlueprint
     {
         public new void Apply(EcsEntity entity)
         {
-            const int monsterMoveTime = 100;
+            const int agentMoveTime = 100;
             base.Apply(entity);
-            entity.AddComponent(new AgentComponent(MonsterType, monsterMoveTime));
-            entity.AddComponent(new TaskComponent(monsterMoveTime, NewTurnEventSystem.DefaultMonsterMove));
+            entity.AddComponent(new AgentComponent(AgentType, agentMoveTime));
+            entity.AddComponent(new TaskComponent(agentMoveTime, NewTurnEventSystem.DefaultAgentMove));
         }
     }
 }

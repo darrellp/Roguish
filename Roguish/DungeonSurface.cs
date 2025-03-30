@@ -176,9 +176,9 @@ public class DungeonSurface : ScreenSurface
     // Player has been placed, FOV calculated
     public void Populate(int iLevel)
     {
-        for (var iMonster = 0; iMonster < GameSettings.MonstersPerLevel; iMonster++)
+        for (var iAgent = 0; iAgent < GameSettings.MonstersPerLevel; iAgent++)
         {
-            var bp = MonsterInfo.GetBlueprint(iLevel, this);
+            var bp = AgentInfo.GetBlueprint(iLevel, this);
             EcsApp.EntityDatabase.GetCollection().CreateEntity(bp);
         }
     }

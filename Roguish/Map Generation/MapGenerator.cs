@@ -98,19 +98,20 @@ public class MapGenerator
 
         if (fovLevel == LevelOfFov.Lit && IsAgentAt(pt))
         {
-            // TODO: This needs to be way more organized and expandable
             var collection = EcsApp.EntityDatabase.GetCollection();
             var ecsEntity = collection.GetEntity(AgentMap[pt.X, pt.Y]);
-            var displayCmp = ecsEntity.GetComponent<DisplayComponent>();
-            Debug.Assert(displayCmp.ScEntity.AppearanceSingle != null, "displayCmp.ScEntity.AppearanceSingle != null");
-            var glyph = displayCmp.ScEntity.AppearanceSingle.Appearance.GlyphCharacter;
-            return glyph switch
+            if (ecsEntity.HasComponent<AgentComponent>())
             {
-                'r' => "rat",
-                'g' => "goblin",
-                (char)2 => "player",
-                _ => "unknown",
-            };
+                var agentCmp = ecsEntity.GetComponent<AgentComponent>();
+                var agentInfo = AgentInfo.InfoFromType(agentCmp.AgentType);
+                return agentInfo.Name;
+            }
+            if (ecsEntity.HasComponent<IsPlayerControlledComponent>())
+            {
+                return "player";
+            }
+
+            return "unknown agent";
         }
         else if (IsWalkable(pt))
         {
