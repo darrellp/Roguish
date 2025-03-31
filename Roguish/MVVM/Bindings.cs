@@ -1,4 +1,5 @@
-﻿using Roguish.Screens;
+﻿using System.Diagnostics;
+using Roguish.Screens;
 using SadConsole.UI;
 using SadConsole.UI.Controls;
 using Label = SadConsole.UI.Controls.Label;
@@ -6,17 +7,9 @@ using Label = SadConsole.UI.Controls.Label;
 namespace Roguish.MVVM;
 internal static class Bindings
 {
-    public static Dictionary<string, ControlBase> Controls { get; } = [];
+    public static Dictionary<string, ControlBase?> Controls { get; } = [];
 
     public static List<Binding> BindingList { get; } = [
-        new Binding<string>
-        {
-            Screen = typeof(InfoBar),
-            Position = new Point(0, 0),
-            Control = new Label(GameSettings.IbWidth),
-            BindValue = InfoBar.Description,
-            Observer = MoveStringToLabel,
-        },
         new()
         {
             Screen = typeof(StatusBar), 
@@ -46,6 +39,14 @@ internal static class Bindings
             Control = new Button(10) {Text = "FOV", FocusOnMouseClick = false},
             Command = StatusBar.FovClick,
         },
+        new Binding<string>
+        {
+            Screen = typeof(DescriptionConsole),
+            Position = new Point(0, 0),
+            Control = null,
+            BindValue = DescriptionConsole.Description,
+            Observer = MoveStringToConsole,
+        },
     ];
 
     public static void Bind()
@@ -55,6 +56,12 @@ internal static class Bindings
         foreach (var binding in BindingList)
         {
             var surface = binding.Surface;
+            if (binding.Control == null)
+            {
+                binding.SetBinding();
+                continue;
+            }
+
             binding.Control.Position = binding.Position;
             if (binding.Name != null)
             {
@@ -87,6 +94,9 @@ internal static class Bindings
                     controlHosts[surface].Add(label);
                     break;
 
+                case null:
+                    break;
+
                 default:
                     throw new NotImplementedException();
             }
@@ -99,9 +109,20 @@ internal static class Bindings
     }
 
     // Common handlers
-    public static Action<string> MoveStringToLabel(ControlBase c)
+    public static Action<string> MoveStringToLabel(object c)
     {
         var label = c as Label;
         return (string str) => label!.DisplayText = str;
+    }
+
+    public static Action<string> MoveStringToConsole(object c)
+    {
+        var console = c as Console;
+        Debug.Assert(console != null, nameof(console) + " != null");
+        return (string str) =>
+        {
+            console.Clear();
+            console!.Print(0, 0, str);
+        };
     }
 }

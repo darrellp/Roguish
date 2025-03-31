@@ -28,6 +28,11 @@ internal static class GameSettings
     public const int SbHeight = 1;
     public static Point SbPosition { get; } = new(0, GameHeight - 1);
 
+    // Description console info
+    public const int DescWidth = IbWidth;
+    public const int DescHeight = 3;
+    public static Point DescPosition { get; } = new(0, 0);
+
     #endregion
 
     #region Misc Settings

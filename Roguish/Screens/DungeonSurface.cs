@@ -242,8 +242,8 @@ public class DungeonSurface : ScreenSurface
     {
         var sb = Kernel.Get<StatusBar>();
         sb.ReportMousePos(state.CellPosition);// + ViewPosition);
-        var ib = Kernel.Get<InfoBar>();
-        ib.SetDescription(Mapgen.GetDescription(state.CellPosition));
+        var dc = Kernel.Get<DescriptionConsole>();
+        dc.SetDescription(Mapgen.GetDescription(state.CellPosition));
     }
 
     public override void LostMouse(MouseScreenObjectState state)

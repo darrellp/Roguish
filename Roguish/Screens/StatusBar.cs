@@ -50,7 +50,7 @@ internal class StatusBar : ScreenSurface
         DungeonSurface.SignalNewFov(true);
     };
 
-    public static Action<Point> GetMousePosObserver(ControlBase c)
+    public static Action<Point> GetMousePosObserver(object c)
     {
         var label = c as Label;
         return (ptMouse) =>

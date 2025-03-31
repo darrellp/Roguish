@@ -1,4 +1,5 @@
-﻿using Ninject;
+﻿using System.Diagnostics;
+using Ninject;
 using SadConsole.UI.Controls;
 using SystemsRx.ReactiveData;
 
@@ -9,7 +10,7 @@ internal class Binding
     public string? Name = null;
     public required Type Screen;
     public required Point Position;
-    public required ControlBase Control;
+    public required ControlBase? Control;
     public EventHandler? Command = null;
     public ScreenSurface Surface => (ScreenSurface)Program.Kernel.Get(Screen);
 
@@ -22,7 +23,7 @@ internal class Binding
 internal class Binding<T> : Binding
 {
     public ReactiveProperty<T>? BindValue = null;
-    public Func<ControlBase, Action<T>>? Observer = null;
+    public Func<object, Action<T>>? Observer = null;
 
     public override void SetBinding()
     {
@@ -30,7 +31,8 @@ internal class Binding<T> : Binding
         {
             throw new InvalidOperationException("Bound controls must have both BindValue and Observer");
         }
-        var observer = Observer!(Control);
+
+        var observer = Observer!((object?)Control ?? Surface);
         BindValue!.Subscribe(observer);
     }
 }

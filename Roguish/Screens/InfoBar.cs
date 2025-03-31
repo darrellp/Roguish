@@ -5,7 +5,6 @@ internal class InfoBar : ScreenSurface
 {
     #region Members
     public static DungeonSurface Dungeon = null!;
-    public static ReactiveProperty<string> Description = new("Testing!");
 
     #endregion
 
@@ -15,13 +14,6 @@ internal class InfoBar : ScreenSurface
         Dungeon = dungeon;
         Position = GameSettings.IbPosition;
         FocusOnMouseClick = false;
-    }
-    #endregion
-
-    #region Handlers
-    public void SetDescription(string description)
-    {
-        Description.SetValueAndForceNotify(description);
     }
     #endregion
 }
