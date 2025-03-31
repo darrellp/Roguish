@@ -93,7 +93,10 @@ public class MapGenerator
         var fovLevel = DungeonSurface.GetFov(pt);
         if (fovLevel == LevelOfFov.Unseen)
         {
-            return "";
+            return """
+                   ????
+                   You peer into the inky abyss!
+                   """;
         }
 
         if (fovLevel == LevelOfFov.Lit && IsAgentAt(pt))
@@ -103,22 +106,45 @@ public class MapGenerator
             if (ecsEntity.HasComponent<AgentComponent>())
             {
                 var agentCmp = ecsEntity.GetComponent<AgentComponent>();
+                var healthCmp = ecsEntity.GetComponent<HealthComponent>();
                 var agentInfo = AgentInfo.InfoFromType(agentCmp.AgentType);
-                return agentInfo.Name;
+                return $"""
+                       {agentInfo.Name}
+                       {agentInfo.Description}
+                       Hit Points: {healthCmp.CurrentHealth}
+                       """;
             }
-            return ecsEntity.HasComponent<IsPlayerControlledComponent>() ? "player" : "unknown agent";
+
+            var strPlayer = """
+                            Player
+                            It's you silly!
+                            """;
+            var strUnknown = """
+                             Unknown Agent
+                             How did they sneak in here?
+                             """;
+            return ecsEntity.HasComponent<IsPlayerControlledComponent>() ? strPlayer : strUnknown;
         }
         else if (IsWalkable(pt))
         {
-            return "floor";
+            return """
+                   floor
+                   Just a boring old floor.
+                   """;
         }
         else if (Wall(pt.X, pt.Y))
         {
-            return "wall";
+            return """
+                   wall
+                   To keep bad stuff out and good stuff in
+                   """;
         }
         else
         {
-            return "";
+            return """
+                   offscreen
+                   Nothing to see here - move along!
+                   """;
         }
     }
 }

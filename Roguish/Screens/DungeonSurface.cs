@@ -1,13 +1,11 @@
 ﻿using System.Diagnostics;
 using GoRogue.Pathing;
-using GoRogue.Random;
 using Ninject;
 using Roguish.ECS.Events;
 using Roguish.ECS.Systems;
 using Roguish.Map_Generation;
 using SadConsole.Entities;
 using SadConsole.Input;
-using ShaiRandom.Generators;
 using SystemsRx.Events;
 using Path = GoRogue.Pathing.Path;
 
@@ -22,7 +20,7 @@ public enum LevelOfFov
     Lit,
 }
 
-public class DungeonSurface : ScreenSurface
+internal class DungeonSurface : ScreenSurface
 {
     #region Fields/Properties
 
@@ -55,6 +53,8 @@ public class DungeonSurface : ScreenSurface
     };
 
     private readonly EntityManager _entityManager;
+    private StatusBar? _statusBar;
+    private DescriptionConsole? _descriptionConsole;
     private static IEventSystem _eventSystem = null!;
     private static bool[,] _revealed = new bool[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
     private static bool _drawFov = true;
@@ -238,18 +238,29 @@ public class DungeonSurface : ScreenSurface
         return true;
     }
 
+    public override void Update(TimeSpan delta)
+    {
+        // We can't have these injected because it forms a circular dependency
+        if (_statusBar == null)
+        {
+            _statusBar = Kernel.Get<StatusBar>();
+            _descriptionConsole = Kernel.Get<DescriptionConsole>();
+        }
+        base.Update(delta);
+    }
+
     protected override void OnMouseMove(MouseScreenObjectState state)
     {
-        var sb = Kernel.Get<StatusBar>();
-        sb.ReportMousePos(state.CellPosition);// + ViewPosition);
-        var dc = Kernel.Get<DescriptionConsole>();
-        dc.SetDescription(Mapgen.GetDescription(state.CellPosition));
+        if (_statusBar == null) return;
+        _statusBar.ReportMousePos(state.CellPosition);// + ViewPosition);
+        _descriptionConsole!.SetDescription(Mapgen.GetDescription(state.CellPosition));
     }
 
     public override void LostMouse(MouseScreenObjectState state)
     {
-        var sb = Kernel.Get<StatusBar>();
-        sb.ReportMousePos(new Point(0, 0));
+        if (_statusBar == null) return;
+        _statusBar.ReportMousePos(new Point(0, 0));
+        _descriptionConsole!.SetDescription("");
     }
     #endregion
 

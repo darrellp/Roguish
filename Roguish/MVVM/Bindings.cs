@@ -122,7 +122,11 @@ internal static class Bindings
         return (string str) =>
         {
             console.Clear();
-            console!.Print(0, 0, str);
+            var lines = str.Split('\n');
+            foreach (var (line, i) in lines.Select((line, i) => (line, i)))
+            {
+                console!.Print(0, i, line.TrimEnd('\r'));
+            }
         };
     }
 }
