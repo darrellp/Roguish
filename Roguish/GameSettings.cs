@@ -31,7 +31,7 @@ internal static class GameSettings
     // Description console info
     public const int DescWidth = IbWidth;
     public const int DescHeight = 3;
-    public static Point DescPosition { get; } = new(0, 0);
+    public static Point DescPosition { get; } = new(0, GameHeight - DescHeight - SbHeight);
 
     #endregion
 

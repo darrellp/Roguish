@@ -94,8 +94,8 @@ public class MapGenerator
         if (fovLevel == LevelOfFov.Unseen)
         {
             return """
-                   ????
-                   You peer into the inky abyss!
+                   [c:r f:Yellow]????
+                   [c:r f:Orange]You peer into the inky abyss!
                    """;
         }
 
@@ -109,41 +109,41 @@ public class MapGenerator
                 var healthCmp = ecsEntity.GetComponent<HealthComponent>();
                 var agentInfo = AgentInfo.InfoFromType(agentCmp.AgentType);
                 return $"""
-                       {agentInfo.Name}
-                       {agentInfo.Description}
-                       Hit Points: {healthCmp.CurrentHealth}
+                       [c:r f:Yellow]{agentInfo.Name}
+                       [c:r f:Orange]{agentInfo.Description}
+                       [c:r f:Orange]Hit Points: {healthCmp.CurrentHealth}
                        """;
             }
 
             var strPlayer = """
-                            Player
-                            It's you silly!
+                            [c:r f:Yellow]Player
+                            [c:r f:Orange]It's you silly!
                             """;
             var strUnknown = """
-                             Unknown Agent
-                             How did they sneak in here?
+                             [c:r f:Yellow]Unknown Agent
+                             [c:r f:Orange]How did they sneak in here?
                              """;
             return ecsEntity.HasComponent<IsPlayerControlledComponent>() ? strPlayer : strUnknown;
         }
         else if (IsWalkable(pt))
         {
             return """
-                   floor
-                   Just a boring old floor.
+                   [c:r f:Yellow]floor
+                   [c:r f:Orange]Just a boring old floor.
                    """;
         }
         else if (Wall(pt.X, pt.Y))
         {
             return """
-                   wall
-                   To keep bad stuff out and good stuff in
+                   [c:r f:Yellow]wall
+                   [c:r f:Orange]To keep bad stuff out and good stuff in
                    """;
         }
         else
         {
             return """
-                   offscreen
-                   Nothing to see here - move along!
+                   [c:r f:Yellow]offscreen
+                   [c:r f:Orange]Nothing to see here - move along!
                    """;
         }
     }

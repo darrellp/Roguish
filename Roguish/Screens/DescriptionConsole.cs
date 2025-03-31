@@ -1,11 +1,17 @@
-﻿using SystemsRx.ReactiveData;
+﻿using System.Data.SqlTypes;
+using SystemsRx.ReactiveData;
+using SadConsole.StringParser;
 
 namespace Roguish.Screens;
 
-internal class DescriptionConsole()
-    : Console(GameSettings.DescWidth, GameSettings.DescHeight)
+internal class DescriptionConsole : Console
 {
-    public static ReactiveProperty<string> Description = new("Testing!");
+    public DescriptionConsole() : base(GameSettings.DescWidth, GameSettings.DescHeight)
+    {
+        this.Surface.UsePrintProcessor = true;
+    }
+
+    public static ReactiveProperty<string> Description = new("");
 
     #region Handlers
     public void SetDescription(string description)
