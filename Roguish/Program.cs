@@ -45,7 +45,7 @@ internal static class Program
         Kernel.Bind<TopContainer>().ToSelf().InSingletonScope();
         Kernel.Bind<MapGenerator>().ToSelf().InSingletonScope();
         Kernel.Bind<InfoBar>().ToSelf().InSingletonScope();
-        Kernel.Bind<DescriptionConsole>().ToSelf().InSingletonScope();
+        Kernel.Bind<DescriptionSurface>().ToSelf().InSingletonScope();
     }
 
     public static Builder SetupGame()
@@ -79,7 +79,7 @@ internal static class Program
         var ib = Kernel.Get<InfoBar>();
         ib.Position = Point.Zero;
         container.Children.Add(ib);
-        var dc = Kernel.Get<DescriptionConsole>();
+        var dc = Kernel.Get<DescriptionSurface>();
         ib.Children.Add(dc);
         dc.Position = GameSettings.DescPosition;
 

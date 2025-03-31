@@ -4,9 +4,9 @@ using SadConsole.StringParser;
 
 namespace Roguish.Screens;
 
-internal class DescriptionConsole : Console
+internal class DescriptionSurface : ScreenSurface
 {
-    public DescriptionConsole() : base(GameSettings.DescWidth, GameSettings.DescHeight)
+    public DescriptionSurface() : base(GameSettings.DescWidth, GameSettings.DescHeight)
     {
         this.Surface.UsePrintProcessor = true;
     }

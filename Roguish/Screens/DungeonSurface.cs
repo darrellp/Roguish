@@ -54,7 +54,7 @@ internal class DungeonSurface : ScreenSurface
 
     private readonly EntityManager _entityManager;
     private StatusBar? _statusBar;
-    private DescriptionConsole? _descriptionConsole;
+    private DescriptionSurface? _descriptionConsole;
     private static IEventSystem _eventSystem = null!;
     private static bool[,] _revealed = new bool[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
     private static bool _drawFov = true;
@@ -244,7 +244,7 @@ internal class DungeonSurface : ScreenSurface
         if (_statusBar == null)
         {
             _statusBar = Kernel.Get<StatusBar>();
-            _descriptionConsole = Kernel.Get<DescriptionConsole>();
+            _descriptionConsole = Kernel.Get<DescriptionSurface>();
         }
         base.Update(delta);
     }

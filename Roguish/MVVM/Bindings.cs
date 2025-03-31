@@ -42,11 +42,11 @@ internal static class Bindings
         },
         new Binding<string>
         {
-            Screen = typeof(DescriptionConsole),
+            Screen = typeof(DescriptionSurface),
             Position = new Point(0, 0),
             Control = null,
-            BindValue = DescriptionConsole.Description,
-            Observer = MoveStringToConsole,
+            BindValue = DescriptionSurface.Description,
+            Observer = MoveStringToSurface,
         },
     ];
 
@@ -116,9 +116,9 @@ internal static class Bindings
         return (string str) => label!.DisplayText = str;
     }
 
-    public static Action<string> MoveStringToConsole(object c)
+    public static Action<string> MoveStringToSurface(object c)
     {
-        var console = c as Console;
+        var console = c as ScreenSurface;
         Debug.Assert(console != null, nameof(console) + " != null");
         return (string str) =>
         {
