@@ -13,12 +13,13 @@ namespace Roguish.Map_Generation;
 public class MapGenerator
 {
     private static readonly int[,] AgentMap = new int[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
+    private static readonly List<int>?[,] EntityMap = new List<int>?[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
 
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
 
     static MapGenerator()
     {
-        ClearEntityMap();
+        ClearEntityMaps();
     }
 
     public static ISettableGridView<bool> WallFloorValues { get; private set; } = null!;
@@ -55,18 +56,26 @@ public class MapGenerator
         WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
         Walls = generator.Context.GetFirst<ISettableGridView<bool>>("Walls");
         //Areas = generator.Context.GetFirst<Area[]>("Areas");
-        ClearEntityMap();
+        ClearEntityMaps();
     }
 
-    internal static void SetAgentPosition(int id, Point posOld, Point posNew)
+    internal static void SetAgentPosition(int id, Point posOld, EcsType type, Point posNew)
     {
-        AgentMap[posOld.X, posOld.Y] = -1;
-        AgentMap[posNew.X, posNew.Y] = id;
+        if (type == EcsType.Agent || type == EcsType.Player)
+        {
+            AgentMap[posOld.X, posOld.Y] = -1;
+            AgentMap[posNew.X, posNew.Y] = id;
+        }
+        else
+        {
+            EntityMap[posNew.X, posNew.Y] ??= [];
+            EntityMap[posNew.X, posNew.Y]!.Add(id);
+        }
     }
 
-    private bool IsEntityAt(int x, int y)
+    private static bool IsEntityAt(int x, int y)
     {
-        return AgentMap[x, y] >= 0;
+        return AgentMap[x, y] >= 0 || EntityMap[x, y] != null;
     }
 
     private bool IsEntityAt(Point pt)
@@ -74,11 +83,51 @@ public class MapGenerator
         return IsEntityAt(pt.X, pt.Y);
     }
 
-    private static void ClearEntityMap()
+    private (EcsEntity?, bool) GetEntityAt(int x, int y)
+    {
+        int id;
+        bool fMore = false;
+
+        if (IsAgentAt(x, y))
+        {
+            id = AgentMap[x, y];
+        }
+        else if (EntityMap[x, y] != null)
+        {
+            id = EntityMap[x, y]![0];
+            fMore = EntityMap[x, y]!.Count > 1;
+        }
+        else
+        {
+            return (null, false);
+        }
+        return (EcsApp.EntityDatabase.GetEntity(id), fMore);
+    }
+
+    private (EcsEntity?, bool) GetEntityAt(Point pt)
+    {
+        return GetEntityAt(pt.X, pt.Y);
+    }
+
+
+    private static bool IsAgentAt(int x, int y)
+    {
+        return AgentMap[x, y] >= 0;
+    }
+
+    private bool IsAgentAt(Point pt)
+    {
+        return IsEntityAt(pt.X, pt.Y);
+    }
+
+    private static void ClearEntityMaps()
     {
         for (var iX = 0; iX < GameSettings.DungeonWidth; iX++)
         for (var iY = 0; iY < GameSettings.DungeonHeight; iY++)
+        {
             AgentMap[iX, iY] = -1;
+            EntityMap[iX, iY] = null;
+        }
     }
 
     internal static int BaseGlyphAt(int iX, int iY)
@@ -109,15 +158,16 @@ public class MapGenerator
 
         if (fovLevel == LevelOfFov.Lit && IsEntityAt(pt))
         {
-            var ecsEntity = EcsApp.EntityDatabase.GetEntity(AgentMap[pt.X, pt.Y]);
+            var (ecsEntity, isMore) = GetEntityAt(pt);
             var type = ecsEntity.GetComponent<EntityTypeComponent>().EcsType;
             var ret = new StringBuilder();
 
             if (ecsEntity.HasComponent<DescriptionComponent>())
             {
                 var descCmp = ecsEntity.GetComponent<DescriptionComponent>();
+                var plural = isMore ? " and others" : "";
                 ret = new StringBuilder( $"""
-                        [c:r f:Yellow]{descCmp.Name}
+                        [c:r f:Yellow]{descCmp.Name} {plural}
                         [c:r f:Orange]{descCmp.Description}
                         """);
             }

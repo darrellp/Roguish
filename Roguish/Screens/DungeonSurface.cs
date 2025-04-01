@@ -94,17 +94,6 @@ internal class DungeonSurface : ScreenSurface
     #endregion
 
     #region SadConsole Entities
-
-    public ScEntity CreateScEntity(ColoredGlyph glyph, Point pt, int chGlyph, int zOrder)
-    {
-        var scEntity = new ScEntity(new ScEntity.SingleCell(glyph.Foreground, glyph.Background, chGlyph), zOrder)
-        {
-            Position = pt
-        };
-        _entityManager.Add(scEntity);
-        return scEntity;
-    }
-
     public IEnumerable<ScEntity> GetEntities()
     {
         return _entityManager.Entities;

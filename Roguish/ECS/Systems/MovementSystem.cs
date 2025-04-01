@@ -26,6 +26,7 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
             return;
         }
         var scEntity = entity.GetComponent<DisplayComponent>().ScEntity;
+        var type = entity.GetComponent<EntityTypeComponent>().EcsType;
         var posOld = scEntity.Position;
         var posCmp = entity.GetComponent<PositionComponent>();
         var posNew = posCmp.Position.Value;
@@ -35,7 +36,7 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
             return;
         }
         scEntity.Position = posNew;
-        MapGenerator.SetAgentPosition(entity.Id, posOld, posNew);
+        MapGenerator.SetAgentPosition(entity.Id, posOld, type, posNew);
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (Fov == null)
         {

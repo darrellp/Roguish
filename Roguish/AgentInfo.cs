@@ -136,11 +136,13 @@ internal class AgentInfo
     {
         public new void Apply(EcsEntity entity)
         {
-            base.Apply(entity);
             entity.AddComponent(new AgentComponent(AgentType, Move));
             // Start with a random fireon time to stagger agent moves randomly
             entity.AddComponent(new TaskComponent(Move * Rng.NextULong(100) / 100ul, NewTurnEventSystem.DefaultAgentMove));
             entity.AddComponent(new EntityTypeComponent(EcsType.Agent));
+            // base Apply does position which calls movement system which requires EntityType
+            // so it has to come after the EntityTypeComponent add in this routine
+            base.Apply(entity);
         }
     }
 
@@ -148,9 +150,11 @@ internal class AgentInfo
     {
         public new void Apply(EcsEntity entity)
         {
-            base.Apply(entity);
             entity.AddComponent(new EntityTypeComponent(EcsType.Player));
             entity.AddComponent<IsPlayerControlledComponent>();
+            // base Apply does position which calls movement system which requires EntityType
+            // so it has to come after the EntityTypeComponent add in this routine
+            base.Apply(entity);
         }
     }
     #endregion

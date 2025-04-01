@@ -99,9 +99,10 @@ internal class WeaponInfo
             entity.AddComponent(new DescriptionComponent(Name, Description));
             entity.AddComponent(new DisplayComponent(ScEntity));
             entity.AddComponent(new LevelItemComponent());
-            entity.AddComponent(new PositionComponent(ScEntity.Position));
             entity.AddComponent(new EquipableComponent(Slot));
             entity.AddComponent(new EntityTypeComponent(EcsType.Weapon));
+            // Ensure that position is added AFTER EntityType because the move system requires EntityType
+            entity.AddComponent(new PositionComponent(ScEntity.Position));
         }
     }
     #endregion
