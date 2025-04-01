@@ -29,6 +29,9 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         }
         var taskCmp = player.GetComponent<TaskComponent>();
         Debug.Assert(taskCmp != null);
+        // TODO: Figure out why this assertion fires very occasionally.
+        // I suspect some sort of race condition in the keyboard tasks so probably
+        // won't see unless going "double" or "triple" speed
         Debug.Assert(Ticks < taskCmp.FireOn);
         Ticks = taskCmp.FireOn;
         Debug.Assert(taskCmp.Action != null, "taskCmp.Action != null");
