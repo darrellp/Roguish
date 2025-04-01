@@ -1,4 +1,5 @@
-﻿using EcsRx.Extensions;
+﻿using System.Text;
+using EcsRx.Extensions;
 using GoRogue.MapGeneration;
 using GoRogue.Random;
 using Roguish.ECS.Components;
@@ -63,14 +64,14 @@ public class MapGenerator
         AgentMap[posNew.X, posNew.Y] = id;
     }
 
-    private bool IsAgentAt(int x, int y)
+    private bool IsEntityAt(int x, int y)
     {
         return AgentMap[x, y] >= 0;
     }
 
-    private bool IsAgentAt(Point pt)
+    private bool IsEntityAt(Point pt)
     {
-        return IsAgentAt(pt.X, pt.Y);
+        return IsEntityAt(pt.X, pt.Y);
     }
 
     private static void ClearEntityMap()
@@ -91,7 +92,7 @@ public class MapGenerator
         {
             var x = _rng.NextInt(GameSettings.DungeonWidth);
             var y = _rng.NextInt(GameSettings.DungeonHeight);
-            if (!IsAgentAt(x, y) && IsWalkable(x, y)) return new Point(x, y);
+            if (!IsEntityAt(x, y) && IsWalkable(x, y)) return new Point(x, y);
         }
     }
 
@@ -99,36 +100,38 @@ public class MapGenerator
     {
         var fovLevel = DungeonSurface.GetFov(pt);
         if (fovLevel == LevelOfFov.Unseen)
+        {
             return """
-                   [c:r f:Yellow]????
-                   [c:r f:Orange]You peer into the inky abyss!
-                   """;
+                [c:r f:Yellow]????
+                [c:r f:Orange]You peer into the inky abyss!
+                """;
+        }
 
-        if (fovLevel == LevelOfFov.Lit && IsAgentAt(pt))
+        if (fovLevel == LevelOfFov.Lit && IsEntityAt(pt))
         {
             var ecsEntity = EcsApp.EntityDatabase.GetEntity(AgentMap[pt.X, pt.Y]);
-            // ReSharper disable once InvertIf
-            if (ecsEntity.HasComponent<AgentComponent>())
+            var type = ecsEntity.GetComponent<EntityTypeComponent>().EcsType;
+            var ret = new StringBuilder();
+
+            if (ecsEntity.HasComponent<DescriptionComponent>())
             {
-                var agentCmp = ecsEntity.GetComponent<AgentComponent>();
-                var healthCmp = ecsEntity.GetComponent<HealthComponent>();
-                var agentInfo = AgentInfo.InfoFromType(agentCmp.AgentType);
-                return $"""
-                        [c:r f:Yellow]{agentInfo.Name}
-                        [c:r f:Orange]{agentInfo.Description}
-                        [c:r f:Orange]Hit Points: [c:r f:Cyan]{healthCmp.CurrentHealth}
-                        """;
+                var descCmp = ecsEntity.GetComponent<DescriptionComponent>();
+                ret = new StringBuilder( $"""
+                        [c:r f:Yellow]{descCmp.Name}
+                        [c:r f:Orange]{descCmp.Description}
+                        """);
             }
 
-            const string strPlayer = """
-                                     [c:r f:Yellow]Player
-                                     [c:r f:Orange]It's you silly!
-                                     """;
-            const string strUnknown = """
-                                      [c:r f:Yellow]Unknown Agent
-                                      [c:r f:Orange]How did they sneak in here?
-                                      """;
-            return ecsEntity.HasComponent<IsPlayerControlledComponent>() ? strPlayer : strUnknown;
+            switch (type)
+            {
+                case EcsType.Agent:
+                case EcsType.Player:
+                    var healthCmp = ecsEntity.GetComponent<HealthComponent>();
+                    ret.Append($"\n[c:r f:Orange]Hit Points: [c:r f:Cyan]{healthCmp.CurrentHealth}");
+                    break;
+            }
+
+            return ret.ToString();
         }
 
         if (IsWalkable(pt))

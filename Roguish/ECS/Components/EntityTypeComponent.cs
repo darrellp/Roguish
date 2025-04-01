@@ -25,4 +25,5 @@ internal enum EcsType
 
 internal class EntityTypeComponent(EcsType type) : EcsComponent
 {
+    internal EcsType EcsType { get; init; } = type;
 }
