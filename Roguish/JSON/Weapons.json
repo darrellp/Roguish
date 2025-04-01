@@ -8,7 +8,7 @@
     "EndLevl": 10,
     "Glyph": 120,
     "Color": {
-      "_packedValue": 0xffff8080
+      "_packedValue": 0xffffff80
     }
   },
   {
@@ -20,7 +20,7 @@
     "EndLevel": 10,
     "Glyph": 115,
     "Color": {
-      "_packedValue": 0xffff8080
+      "_packedValue": 0xffffff80
     }
   }
 ]

@@ -19,6 +19,7 @@ internal class EcsRxApp : EcsRxApplication
     public IObservableGroup LevelItems = null!;
     public IObservableGroup PlayerGroup = null!;
     public IObservableGroup TaskedGroup = null!;
+    public IObservableGroup DisplayGroup = null!;
 
     public Point PlayerPos
     {
@@ -39,6 +40,7 @@ internal class EcsRxApp : EcsRxApplication
         LevelItems = GetGroup(typeof(LevelItemComponent));
         GetGroup(typeof(AgentComponent));
         TaskedGroup = GetGroup(typeof(TaskComponent));
+        DisplayGroup = GetGroup(typeof(DisplayComponent), typeof(PositionComponent));
 
         var collection = EntityDatabase.GetCollection();
         var dungeon = Kernel.Get<DungeonSurface>();

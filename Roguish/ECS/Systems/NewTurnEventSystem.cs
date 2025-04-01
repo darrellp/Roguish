@@ -11,7 +11,7 @@ using Roguish.Screens;
 namespace Roguish.ECS.Systems;
 internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
 {
-    private DungeonSurface _dungeon;
+    private static DungeonSurface _dungeon;
     internal static ulong Ticks { get; set; }
 
     public NewTurnEventSystem(DungeonSurface dungeon)
@@ -46,6 +46,9 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
                 task.Action(tasked);
             }
         }
+        // Everybody should have moved if they wanted by this time so time to check visibility
+        CheckScEntityVisibility();
+
     }
 
     internal static void DefaultAgentMove(EcsEntity enemy)
@@ -63,4 +66,29 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         // Don't need this right now since it's not changing
         // taskCmp.Action = DefaultMonsterMove;
     }
+
+    internal static void CheckScEntityVisibility()
+    {
+        foreach (var ecsEntity in EcsApp.DisplayGroup)
+        {
+            var scEntity = ecsEntity.GetComponent<DisplayComponent>().ScEntity;
+            if (!_dungeon.DrawFov)
+            {
+                scEntity.IsVisible = true;
+                continue;
+            }
+            var playerDelta = scEntity.Position - EcsApp.PlayerPos;
+            var deltaModulus = playerDelta.X * playerDelta.X + playerDelta.Y * playerDelta.Y;
+            // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
+            if (deltaModulus > GameSettings.FovRadius * GameSettings.FovRadius)
+            {
+                scEntity.IsVisible = false;
+            }
+            else
+            {
+                scEntity.IsVisible = Fov.CurrentFOV.Contains(scEntity.Position);
+            }
+        }
+    }
+
 }

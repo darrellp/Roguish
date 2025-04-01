@@ -176,6 +176,8 @@ internal class DungeonSurface : ScreenSurface
             var weaponBlueprint = WeaponInfo.GetBlueprint(iLevel, this);
             EcsApp.EntityDatabase.GetCollection().CreateEntity(weaponBlueprint);
         }
+
+        NewTurnEventSystem.CheckScEntityVisibility();
     }
     #endregion
 
