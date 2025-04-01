@@ -112,7 +112,7 @@ internal class DungeonSurface : ScreenSurface
 
     public ScEntity CreateScEntity(Color foreground, Point pt, int chGlyph, int zOrder)
     {
-        var scEntity = new ScEntity(new ScEntity.SingleCell(foreground, Color.Transparent, chGlyph), zOrder)
+        var scEntity = new ScEntity(new ScEntity.SingleCell(foreground, GameSettings.ClearColor, chGlyph), zOrder)
         {
             Position = pt
         };
@@ -176,10 +176,16 @@ internal class DungeonSurface : ScreenSurface
     // Player has been placed, FOV calculated
     public void Populate(int iLevel)
     {
-        for (var iAgent = 0; iAgent < GameSettings.MonstersPerLevel; iAgent++)
+        for (var iAgent = 0; iAgent < GameSettings.AgentsPerLevel; iAgent++)
         {
             var bp = AgentInfo.GetBlueprint(iLevel, this);
             var agent = EcsApp.EntityDatabase.GetCollection().CreateEntity(bp);
+        }
+
+        for (var iWeapon = 0; iWeapon < GameSettings.WeaponsPerLevel; iWeapon++)
+        {
+            var weaponBlueprint = WeaponInfo.GetBlueprint(iLevel, this);
+            EcsApp.EntityDatabase.GetCollection().CreateEntity(weaponBlueprint);
         }
     }
     #endregion

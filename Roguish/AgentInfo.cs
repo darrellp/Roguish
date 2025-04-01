@@ -112,7 +112,7 @@ internal class AgentInfo
         };
     }
 
-    internal class PlayerBlueprint : IBlueprint
+    internal class BaseBlueprint : IBlueprint
     {
         public required string Name { get; set; }
         public required string Description { get; set; }
@@ -132,7 +132,7 @@ internal class AgentInfo
         }
     }
 
-    internal class AgentBlueprint : PlayerBlueprint, IBlueprint
+    internal class AgentBlueprint : BaseBlueprint, IBlueprint
     {
         public new void Apply(EcsEntity entity)
         {
@@ -140,6 +140,17 @@ internal class AgentInfo
             entity.AddComponent(new AgentComponent(AgentType, Move));
             // Start with a random fireon time to stagger agent moves randomly
             entity.AddComponent(new TaskComponent(Move * Rng.NextULong(100) / 100ul, NewTurnEventSystem.DefaultAgentMove));
+            entity.AddComponent(new EntityTypeComponent(EcsType.Agent));
+        }
+    }
+
+    internal class PlayerBlueprint : BaseBlueprint, IBlueprint
+    {
+        public new void Apply(EcsEntity entity)
+        {
+            base.Apply(entity);
+            entity.AddComponent(new EntityTypeComponent(EcsType.Player));
+            entity.AddComponent<IsPlayerControlledComponent>();
         }
     }
     #endregion

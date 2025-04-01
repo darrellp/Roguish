@@ -11,7 +11,7 @@ internal enum EquipSlots
     Pants,
     Torso,
 }
-internal class EquipableComponent : EcsComponent
+internal class EquipableComponent(EquipSlots equipSlot) : EcsComponent
 {
-    internal EquipSlots EquipSlot;
+    internal EquipSlots EquipSlot = equipSlot;
 }

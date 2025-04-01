@@ -140,7 +140,7 @@ public class MapGenerator
         if (Wall(pt.X, pt.Y))
             return """
                    [c:r f:Yellow]Wall
-                   [c:r f:Orange]To keep bad stuff out and good stuff in
+                   [c:r f:Orange]Keeps bad stuff out and good stuff in
                    """;
 
         return """

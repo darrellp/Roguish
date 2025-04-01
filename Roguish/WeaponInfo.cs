@@ -1,12 +1,14 @@
 ﻿using System.Diagnostics;
-using EcsR3.Blueprints;
-using EcsR3.Entities;
+using EcsRx.Blueprints;
+using EcsRx.Extensions;
 using GoRogue.Random;
 using Newtonsoft.Json;
 using ShaiRandom.Generators;
 
 namespace Roguish;
 using ECS.Components;
+using Roguish.Screens;
+using static Roguish.AgentInfo;
 
 internal enum WeaponType
 {
@@ -25,7 +27,7 @@ internal class WeaponInfo
     public int StartLevel { get; set; }
     public int EndLevel { get; set; }
     public int Glyph { get; set; }
-    public Color Color { get; set; } = Color.White;
+    public Color Color { get; set; }
     #endregion
     
     #region Private fields
@@ -67,12 +69,39 @@ internal class WeaponInfo
     #endregion
 
     #region Blueprints
+    internal static IBlueprint GetBlueprint(int iLevel, DungeonSurface dungeon)
+    {
+        var info = PickWeaponForLevel(iLevel);
+        var pos = dungeon.Mapgen.FindRandomEmptyPoint();
+        var scEntity = dungeon.CreateScEntity(info.Color, pos, info.Glyph, 0);
+
+        return new WeaponBlueprint
+        {
+            Name = info.Name,
+            Description = info.Description,
+            ScEntity = scEntity,
+            WeaponType = info.WeaponType,
+            Slot = info.Slot,
+        };
+    }
+
 
     internal class WeaponBlueprint : IBlueprint
     {
-        public void Apply(IEntity entity)
+        public required string Name { get; set; }
+        public required string Description { get; set; }
+        public required ScEntity ScEntity { get; set; }
+        public required WeaponType WeaponType { get; set; }
+        public required EquipSlots Slot { get; set; }
+
+        public void Apply(EcsEntity entity)
         {
-            throw new NotImplementedException();
+            entity.AddComponent(new DescriptionComponent(Name, Description));
+            entity.AddComponent(new DisplayComponent(ScEntity));
+            entity.AddComponent(new LevelItemComponent());
+            entity.AddComponent(new PositionComponent(ScEntity.Position));
+            entity.AddComponent(new EquipableComponent(Slot));
+            entity.AddComponent(new EntityTypeComponent(EcsType.Weapon));
         }
     }
     #endregion

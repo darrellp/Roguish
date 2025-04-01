@@ -1,4 +1,6 @@
-﻿namespace Roguish;
+﻿using GoRogue.Random;
+
+namespace Roguish;
 
 internal static class GameSettings
 {
@@ -37,7 +39,13 @@ internal static class GameSettings
     #region Misc Settings
     public const Settings.WindowResizeOptions ResizeMode = Settings.WindowResizeOptions.None;
     public const int FovRadius = 10;
-    public const int MonstersPerLevel = 20;
+
+    public static int AgentsPerLevel => GlobalRandom.DefaultRNG.NextInt(AgentsPerLevelMin, AgentsPerLevelMax + 1);
+    public const int AgentsPerLevelMin = 15;
+    public const int AgentsPerLevelMax = 20;
+    public static int WeaponsPerLevel => GlobalRandom.DefaultRNG.NextInt(WeaponsPerLevelMin, WeaponsPerLevelMax + 1);
+    public const int WeaponsPerLevelMin = 5;
+    public const int WeaponsPerLevelMax = 10;
     public static bool FAllowResize => false;
     public static Color ClearColor = Color.Black;
     public static Color FloorColor = Color.Orange;
