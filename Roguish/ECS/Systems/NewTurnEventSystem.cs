@@ -11,7 +11,7 @@ using Roguish.Screens;
 namespace Roguish.ECS.Systems;
 internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
 {
-    private DungeonSurface _dungeon = null!;
+    private DungeonSurface _dungeon;
     internal static ulong Ticks { get; set; }
 
     public NewTurnEventSystem(DungeonSurface dungeon)

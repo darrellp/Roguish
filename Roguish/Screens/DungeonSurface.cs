@@ -17,7 +17,7 @@ public enum LevelOfFov
 {
     Unseen,
     Seen,
-    Lit,
+    Lit
 }
 
 internal class DungeonSurface : ScreenSurface
@@ -452,7 +452,7 @@ internal class DungeonSurface : ScreenSurface
             glyph.Foreground = glyph.Glyph switch
             {
                 '.' => clrFloor,
-                _ => glyph.Foreground,          // Leave things alone if not specifically handled above
+                _ => glyph.Foreground // Leave things alone if not specifically handled above
             };
         }
         DrawGlyph(glyph, pt);

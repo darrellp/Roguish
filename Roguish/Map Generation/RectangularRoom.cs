@@ -1,4 +1,5 @@
 ﻿using GoRogue.Random;
+
 // ReSharper disable IdentifierTypo
 
 namespace Roguish.Map_Generation;
@@ -11,7 +12,6 @@ internal enum Wall
     Bottom
 }
 
-
 internal class RectangularRoom
 {
     public Rectangle Rect;
@@ -19,28 +19,24 @@ internal class RectangularRoom
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Gets the top row. </summary>
-    ///
     /// <value>	The top row. </value>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     internal int Top => Rect.Y;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Gets the left column. </summary>
-    ///
     /// <value>	The left column. </value>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     internal int Left => Rect.X;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Gets the bottom row. </summary>
-    ///
     /// <value>	The bottom row. </value>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     internal int Bottom => Rect.Y + Rect.Height - 1;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Gets the right column. </summary>
-    ///
     /// <value>	The right column. </value>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     internal int Right => Rect.X + Rect.Width - 1;
@@ -52,7 +48,8 @@ internal class RectangularRoom
         return dir == Dir.Horiz ? Rect.Width : Rect.Height;
     }
 
-    internal static RectangularRoom CreateUndirectional(Point location, int sizeInDir, int sizeInOtherDir, int superGridCoordInDir, int superGridCoordInOtherDir, Dir dir)
+    internal static RectangularRoom CreateUndirectional(Point location, int sizeInDir, int sizeInOtherDir,
+        int superGridCoordInDir, int superGridCoordInOtherDir, Dir dir)
     {
         Point superGridCell;
         Rectangle rc;
@@ -67,7 +64,8 @@ internal class RectangularRoom
             rc = new Rectangle(location.X, location.Y, sizeInDir, sizeInOtherDir);
             superGridCell = new Point(superGridCoordInDir, superGridCoordInOtherDir);
         }
-        return new RectangularRoom() { Rect = rc, SuperGridCell = superGridCell };
+
+        return new RectangularRoom { Rect = rc, SuperGridCell = superGridCell };
     }
 
     public Area ToArea()
@@ -87,15 +85,12 @@ internal class RectangularRoom
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Pick a spot on one of the walls of the room. </summary>
-    ///
-    /// <remarks>	
-    /// This is a spot ON the wall - not outside it.  It thus lies within the confines of the room.
-    /// Darrellp, 9/20/2011. 
+    /// <remarks>
+    ///     This is a spot ON the wall - not outside it.  It thus lies within the confines of the room.
+    ///     Darrellp, 9/20/2011.
     /// </remarks>
-    ///
     /// <param name="wall">				The wall. </param>
     /// <param name="fIncludeCorners">	true to include corners in our consideration for a spot. </param>
-    ///
     /// <returns>	Coordinates of the spot chosen. </returns>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     internal Point PickSpotOnWall(Wall wall, bool fIncludeCorners = false)
@@ -106,14 +101,14 @@ internal class RectangularRoom
         int column, row;
 
         // Our values get bumped to avoid corners if need be
-        int cornerBump = fIncludeCorners ? 0 : 1;
+        var cornerBump = fIncludeCorners ? 0 : 1;
 
         // If we're at the top or bottom
         if (wall == Wall.Top || wall == Wall.Bottom)
         {
             // Pick a random column
-            int left = Left + cornerBump;
-            int right = Right - cornerBump;
+            var left = Left + cornerBump;
+            var right = Right - cornerBump;
             column = rng.NextInt(left, right + 1);
 
             // Set row to top or bottom
@@ -122,8 +117,8 @@ internal class RectangularRoom
         else
         {
             // Pick a random row
-            int top = Top + cornerBump;
-            int bottom = Bottom - cornerBump;
+            var top = Top + cornerBump;
+            var bottom = Bottom - cornerBump;
             row = rng.NextInt(top, bottom + 1);
 
             // Set column to left or right

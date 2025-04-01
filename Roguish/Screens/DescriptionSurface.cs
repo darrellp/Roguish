@@ -1,6 +1,4 @@
-﻿using System.Data.SqlTypes;
-using SystemsRx.ReactiveData;
-using SadConsole.StringParser;
+﻿using SystemsRx.ReactiveData;
 
 namespace Roguish.Screens;
 
@@ -8,7 +6,7 @@ internal class DescriptionSurface : ScreenSurface
 {
     public DescriptionSurface() : base(GameSettings.DescWidth, GameSettings.DescHeight)
     {
-        this.Surface.UsePrintProcessor = true;
+        Surface.UsePrintProcessor = true;
     }
 
     public static ReactiveProperty<string> Description = new("");

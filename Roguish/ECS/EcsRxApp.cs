@@ -1,37 +1,24 @@
 ﻿using System.Diagnostics;
+using EcsRx.Extensions;
 using EcsRx.Groups.Observable;
 using EcsRx.Infrastructure;
 using EcsRx.Plugins.Views;
 using Ninject;
 using Roguish.ECS.Components;
+using Roguish.Screens;
 using SystemsRx.Infrastructure.Dependencies;
 using SystemsRx.Infrastructure.Ninject;
 using SystemsRx.Infrastructure.Ninject.Extensions;
-using EcsRx.Extensions;
-using Roguish.Screens;
+
 // ReSharper disable IdentifierTypo
 
 namespace Roguish.ECS;
 
 internal class EcsRxApp : EcsRxApplication
 {
-    public IObservableGroup PlayerGroup = null!;
     public IObservableGroup LevelItems = null!;
-    public IObservableGroup EnemiesGroup = null!;
+    public IObservableGroup PlayerGroup = null!;
     public IObservableGroup TaskedGroup = null!;
-
-    protected override void ApplicationStarted()
-    {
-        PlayerGroup = GetGroup(typeof(IsPlayerControlledComponent));
-        LevelItems = GetGroup(typeof(LevelItemComponent));
-        EnemiesGroup = GetGroup(typeof(AgentComponent));
-        TaskedGroup = GetGroup(typeof(TaskComponent));
-
-        var collection = EntityDatabase.GetCollection();
-        var dungeon = Program.Kernel.Get<DungeonSurface>();
-        var entity = collection.CreateEntity(AgentInfo.GetPlayerBlueprint(20, dungeon));
-        entity.AddComponent(new IsPlayerControlledComponent());
-    }
 
     public Point PlayerPos
     {
@@ -44,12 +31,25 @@ internal class EcsRxApp : EcsRxApplication
         }
     }
 
+    public override IDependencyRegistry DependencyRegistry { get; } = new NinjectDependencyRegistry();
+
+    protected override void ApplicationStarted()
+    {
+        PlayerGroup = GetGroup(typeof(IsPlayerControlledComponent));
+        LevelItems = GetGroup(typeof(LevelItemComponent));
+        GetGroup(typeof(AgentComponent));
+        TaskedGroup = GetGroup(typeof(TaskComponent));
+
+        var collection = EntityDatabase.GetCollection();
+        var dungeon = Kernel.Get<DungeonSurface>();
+        var entity = collection.CreateEntity(AgentInfo.GetPlayerBlueprint(20, dungeon));
+        entity.AddComponent(new IsPlayerControlledComponent());
+    }
+
     protected override void LoadPlugins()
     {
         RegisterPlugin(new ViewsPlugin());
     }
-
-    public override IDependencyRegistry DependencyRegistry { get; } = new NinjectDependencyRegistry();
 
     // ReSharper disable once UnusedMember.Global
     public T Get<T>()

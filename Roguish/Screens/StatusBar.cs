@@ -53,7 +53,7 @@ internal class StatusBar : ScreenSurface
     public static Action<Point> GetMousePosObserver(object c)
     {
         var label = c as Label;
-        return (ptMouse) =>
+        return ptMouse =>
         {
             var text = string.Format(PositionFormat, ptMouse.X, ptMouse.Y);
             label!.DisplayText = text;

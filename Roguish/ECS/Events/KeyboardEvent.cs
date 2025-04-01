@@ -2,10 +2,9 @@
 using SadConsole.Input;
 
 namespace Roguish.ECS.Events;
-internal class KeyboardEvent(ReadOnlyCollection<AsciiKey>? keys, bool retrieveFromQueue = false, bool shutdownQueue = false)
+internal class KeyboardEvent(ReadOnlyCollection<AsciiKey>? keys, bool retrieveFromQueue = false)
 {
-    public bool ShutdownQueue { get; set; } = shutdownQueue;
-    public bool RetrieveFromQueue { get; set; } = retrieveFromQueue;
-    public ReadOnlyCollection<AsciiKey>? Keys { get; set; } = keys;
+    public bool RetrieveFromQueue { get; init; } = retrieveFromQueue;
+    public ReadOnlyCollection<AsciiKey>? Keys { get; } = keys;
 }
 

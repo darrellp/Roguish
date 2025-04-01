@@ -1,33 +1,33 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using EcsRx.Extensions;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using Roguish.Map_Generation;
+using Roguish.Screens;
 using SadConsole.Input;
 using SystemsRx.Systems.Conventional;
-using EcsRx.Extensions;
-using Roguish.Screens;
 
 namespace Roguish.ECS.Systems;
+
+// ReSharper disable once ClassNeverInstantiated.Global
 internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem<KeyboardEvent>
 {
-    public static ConcurrentQueue<Keys> KeysQueue { get; set; } = new();
-    
+    public static ConcurrentQueue<Keys> KeysQueue { get; } = new();
+
     public void Process(KeyboardEvent keyData)
     {
         if (keyData.RetrieveFromQueue)
         {
-            var task = Task.Factory.StartNew(ReadFromQueue);
+            Task.Factory.StartNew(ReadFromQueue);
             return;
         }
-        
+
         KeysQueue.Clear();
 
         if (keyData.Keys is not { Count: 1 })
-        {
             // We currently only handle single key presses
             return;
-        }
         var key = keyData.Keys[0].Key;
         ProcessKey(key);
     }
@@ -88,16 +88,13 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         var newTicks = NewTurnEventSystem.Ticks + 100ul;
         var action = MovePlayerClosure(ptMove);
         var newTask = new TaskComponent(newTicks, action);
-        player.AddComponent<TaskComponent>(newTask);
+        player.AddComponent(newTask);
         EcsApp.EventSystem.Publish(new NewTurnEvent());
     }
 
-    Action<EcsEntity>? MovePlayerClosure(Point ptMove)
+    private Action<EcsEntity> MovePlayerClosure(Point ptMove)
     {
-        return _ =>
-        {
-            MovePlayer(ptMove);
-        };
+        return _ => { MovePlayer(ptMove); };
     }
 
     private void MovePlayer(Point ptMove)
@@ -106,10 +103,7 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         var positionCmp = (PositionComponent)player.GetComponent(typeof(PositionComponent));
         var position = positionCmp.Position.Value;
         var newPosition = position + ptMove;
-        if (MapGenerator.IsWalkable(newPosition))
-        {
-            positionCmp.Position.SetValueAndForceNotify(newPosition);
-        }
+        if (MapGenerator.IsWalkable(newPosition)) positionCmp.Position.SetValueAndForceNotify(newPosition);
         dungeon.KeepPlayerInView();
     }
 }

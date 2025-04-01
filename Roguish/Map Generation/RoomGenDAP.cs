@@ -8,17 +8,19 @@ namespace Roguish.Map_Generation;
 // ReSharper disable once InconsistentNaming
 internal class RoomGenDAP : GenerationStep
 {
-    public int SuperCellWidth = 15;
-    public int SuperCellHeight = 15;
-    public int MinRoomWidth = 5;
-    public int MinRoomHeight = 5;
-    public string? WallFloorComponentTag;
-    public string? RectRoomsComponentTag;
-
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
+    public int MinRoomHeight = 5;
+    public int MinRoomWidth = 5;
+    private string? RectRoomsComponentTag;
+    public int SuperCellHeight = 15;
+    public int SuperCellWidth = 15;
+    private string? WallFloorComponentTag;
 
     // ReSharper disable once ConvertToPrimaryConstructor
-    public RoomGenDAP(string? name = null, string? wallFloorComponentTag = "WallFloor", string? rectRoomsComponentTag = "RectRooms")
+    public RoomGenDAP(
+        string? name = null, 
+        string? wallFloorComponentTag = "WallFloor",
+        string? rectRoomsComponentTag = "RectRooms")
         : base(name)
     {
         WallFloorComponentTag = wallFloorComponentTag;
@@ -61,7 +63,6 @@ internal class RoomGenDAP : GenerationStep
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Locates the rooms on the map. </summary>
-    /// 
     /// <remarks>	Darrellp, 9/19/2011. </remarks>
     /// <param name="context">Map info</param>
     /// <param name="wallFloor">GridView to draw floor on</param>
@@ -115,7 +116,7 @@ internal class RoomGenDAP : GenerationStep
             for (var superGridRow = 0; superGridRow < gridHeight; superGridRow++)
             {
                 // Determine the current map row
-                int currentHeight = baseRoomHeight;
+                var currentHeight = baseRoomHeight;
                 heightTally += heightRemainder;
 
                 // Do we need to bump height ala Bresenham?
@@ -137,10 +138,7 @@ internal class RoomGenDAP : GenerationStep
                 var rect = room.Rect;
                 rect = rect.WithSize(rect.Width - 2, rect.Height - 2)
                     .WithPosition(rect.Position + new Point(1, 1));
-                foreach (var tileGridPos in rect.Positions())
-                {
-                    wallFloor[tileGridPos] = true;
-                }
+                foreach (var tileGridPos in rect.Positions()) wallFloor[tileGridPos] = true;
 
                 // Place it in the grid
                 rooms[superGridColumn][superGridRow] = room;
@@ -158,14 +156,11 @@ internal class RoomGenDAP : GenerationStep
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Creates a room in a grid cell. </summary>
-    ///
     /// <remarks>	Darrellp, 9/20/2011. </remarks>
-    ///
     /// <param name="superGridLocation">	The grid location of the cell. </param>
     /// <param name="gridLocation">	The cell location in the map. </param>
     /// <param name="cellWidth">	Width of the current cell. </param>
     /// <param name="cellHeight">	Height of the current cell. </param>
-    ///
     /// <returns>	The newly created room. </returns>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     private RectangularRoom CreateRoomInCell(Point superGridLocation, Point gridLocation, int cellWidth, int cellHeight)
@@ -173,17 +168,19 @@ internal class RoomGenDAP : GenerationStep
         // Locals
 
         // Determine start and end columns
-        RandomSpan(gridLocation.X + 1, gridLocation.X + cellWidth - 2, MinRoomWidth, out var startColumn, out var endColumn);
+        RandomSpan(gridLocation.X + 1, gridLocation.X + cellWidth - 2, MinRoomWidth, out var startColumn,
+            out var endColumn);
 
         // Determine start and end rows
-        RandomSpan(gridLocation.Y + 1, gridLocation.Y + cellHeight - 2, MinRoomHeight, out var startRow, out var endRow);
+        RandomSpan(gridLocation.Y + 1, gridLocation.Y + cellHeight - 2, MinRoomHeight, out var startRow,
+            out var endRow);
         var rc = new Rectangle(startColumn, startRow, endColumn - startColumn + 1, endRow - startRow + 1);
 
         // Return newly created room
-        RectangularRoom room = new RectangularRoom()
+        var room = new RectangularRoom
         {
             Rect = rc,
-            SuperGridCell = superGridLocation,
+            SuperGridCell = superGridLocation
         };
 
         return room;
@@ -192,25 +189,21 @@ internal class RoomGenDAP : GenerationStep
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     /// <summary>	Create a random interval of length at least minWidth between start and end. </summary>
-    ///
-    /// <remarks>	
-    /// The range for the interval is start through end inclusive.  The difference between the return
-    /// values will be at least minWidth, again inclusive. Darrellp, 9/18/2011. 
+    /// <remarks>
+    ///     The range for the interval is start through end inclusive.  The difference between the return
+    ///     values will be at least minWidth, again inclusive. Darrellp, 9/18/2011.
     /// </remarks>
-    ///
     /// <param name="start">		The start value of the range. </param>
     /// <param name="end">			The end value of the range. </param>
     /// <param name="minWidth">		Minimum width of the returned interval. </param>
     /// <param name="spanStart">	[out] The span start. </param>
     /// <param name="spanEnd">		[out] The span end. </param>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    internal void RandomSpan(int start, int end, int minWidth, out int spanStart, out int spanEnd)
+    private void RandomSpan(int start, int end, int minWidth, out int spanStart, out int spanEnd)
     {
         if (minWidth > end - start)
-        {
             throw new InvalidConfigurationException(this, nameof(SuperCellWidth),
                 "Width isn't wide enough to make span in RandomSpan");
-        }
         var val1 = _rng.NextInt(start, end + 1);
         var val2 = _rng.NextInt(start, end + 1);
 
@@ -219,6 +212,7 @@ internal class RoomGenDAP : GenerationStep
             val1 = _rng.NextInt(start, end + 1);
             val2 = _rng.NextInt(start, end + 1);
         }
+
         if (val1 < val2)
         {
             spanStart = val1;

@@ -1,29 +1,30 @@
 ﻿using System.Diagnostics;
-using GoRogue.MapGeneration.TunnelCreators;
 using Roguish.Screens;
 using SadConsole.UI;
 using SadConsole.UI.Controls;
 using Label = SadConsole.UI.Controls.Label;
 
 namespace Roguish.MVVM;
+
 internal static class Bindings
 {
     public static Dictionary<string, ControlBase?> Controls { get; } = [];
 
-    public static List<Binding> BindingList { get; } = [
+    public static List<Binding> BindingList { get; } =
+    [
         new()
         {
-            Screen = typeof(StatusBar), 
-            Position = new Point(13, 0), 
-            Control = new Button(10) {Text = "Redraw", FocusOnMouseClick = false}, 
-            Command = StatusBar.RedrawClick,
+            Screen = typeof(StatusBar),
+            Position = new Point(13, 0),
+            Control = new Button(10) { Text = "Redraw", FocusOnMouseClick = false },
+            Command = StatusBar.RedrawClick
         },
         new()
         {
             Screen = typeof(StatusBar),
             Position = new Point(30, 0),
             Control = new CheckBox("Draw Path"),
-            Command = StatusBar.DrawPathClick,
+            Command = StatusBar.DrawPathClick
         },
         new Binding<Point>
         {
@@ -31,14 +32,14 @@ internal static class Bindings
             Position = new Point(0, 0),
             Control = new Label(12),
             BindValue = StatusBar.MousePosition,
-            Observer = StatusBar.GetMousePosObserver,
+            Observer = StatusBar.GetMousePosObserver
         },
         new()
         {
             Screen = typeof(StatusBar),
             Position = new Point(45, 0),
-            Control = new Button(10) {Text = "FOV", FocusOnMouseClick = false},
-            Command = StatusBar.FovClick,
+            Control = new Button(10) { Text = "FOV", FocusOnMouseClick = false },
+            Command = StatusBar.FovClick
         },
         new Binding<string>
         {
@@ -46,8 +47,8 @@ internal static class Bindings
             Position = new Point(0, 0),
             Control = null,
             BindValue = DescriptionSurface.Description,
-            Observer = MoveStringToSurface,
-        },
+            Observer = MoveStringToSurface
+        }
     ];
 
     public static void Bind()
@@ -64,20 +65,11 @@ internal static class Bindings
             }
 
             binding.Control.Position = binding.Position;
-            if (binding.Name != null)
-            {
-                Controls[binding.Name] = binding.Control;
-            }
+            if (binding.Name != null) Controls[binding.Name] = binding.Control;
 
-            if (!controlHosts.ContainsKey(surface))
-            {
-                controlHosts[surface] = [];
-            }
+            if (!controlHosts.ContainsKey(surface)) controlHosts[surface] = [];
 
-            if (binding.GetType().IsGenericType)
-            {
-                binding.SetBinding();
-            }
+            if (binding.GetType().IsGenericType) binding.SetBinding();
 
             switch (binding.Control)
             {
@@ -103,31 +95,25 @@ internal static class Bindings
             }
         }
 
-        foreach (var keyValue in controlHosts)
-        {
-            keyValue.Key.SadComponents.Add(keyValue.Value);
-        }
+        foreach (var keyValue in controlHosts) keyValue.Key.SadComponents.Add(keyValue.Value);
     }
 
     // Common handlers
     public static Action<string> MoveStringToLabel(object c)
     {
         var label = c as Label;
-        return (string str) => label!.DisplayText = str;
+        return str => label!.DisplayText = str;
     }
 
     public static Action<string> MoveStringToSurface(object c)
     {
         var console = c as ScreenSurface;
         Debug.Assert(console != null, nameof(console) + " != null");
-        return (string str) =>
+        return str =>
         {
             console.Clear();
             var lines = str.Split('\n');
-            foreach (var (line, i) in lines.Select((line, i) => (line, i)))
-            {
-                console!.Print(0, i, line.TrimEnd('\r'));
-            }
+            foreach (var (line, i) in lines.Select((line, i) => (line, i))) console!.Print(0, i, line.TrimEnd('\r'));
         };
     }
 }

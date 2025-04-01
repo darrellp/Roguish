@@ -21,6 +21,10 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
 
     public void Process(EcsEntity entity)
     {
+        if (entity.HasComponent<IsDestroyedComponent>())
+        {
+            return;
+        }
         var scEntity = entity.GetComponent<DisplayComponent>().ScEntity;
         var posOld = scEntity.Position;
         var posCmp = entity.GetComponent<PositionComponent>();
@@ -53,6 +57,7 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
     {
         var playerDelta = entity.Position - EcsApp.PlayerPos;
         var deltaModulus = playerDelta.X * playerDelta.X + playerDelta.Y * playerDelta.Y;
+        // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
         if (deltaModulus > GameSettings.FovRadius * GameSettings.FovRadius)
         {
             entity.IsVisible = false;

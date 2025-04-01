@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using GoRogue.DiceNotation.Terms;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using Roguish.Map_Generation;
@@ -9,7 +8,7 @@ using Roguish.Screens;
 
 namespace Roguish.ECS.Systems;
 
-// ReSharper disable once UnusedMember.Global
+// ReSharper disable once UnusedType.Global
 internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
 {
     private readonly MapGenerator _mapgen;
@@ -48,7 +47,7 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
         Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
         posCmp.FDrawFullFov = true;
         Debug.Assert(_dungeon != null, nameof(_dungeon) + " != null");
-        posCmp!.Position.SetValueAndForceNotify(_mapgen.FindRandomEmptyPoint());
+        posCmp.Position.SetValueAndForceNotify(_mapgen.FindRandomEmptyPoint());
 
         // Repopulate the new dungeon
         _dungeon.Populate(eventData.NewLevel);

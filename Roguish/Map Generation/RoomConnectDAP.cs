@@ -420,7 +420,7 @@ public class RoomConnectDAP : GenerationStep
 
         // Add some random connections
         // TODO: Make 170/100 a const somewhere
-        _connections!.AddRandomConnections(Math.Min(_rooms.Length, _rooms[0].Length) * 170 / 100, _connections);
+        GridConnections.AddRandomConnections(Math.Min(_rooms.Length, _rooms[0].Length) * 170 / 100, _connections);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////

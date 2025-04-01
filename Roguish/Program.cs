@@ -15,10 +15,11 @@ using Roguish.Screens;
 namespace Roguish;
 internal static class Program
 {
-    public static IKernel Kernel { get; set; } = null!;
-    public static EcsRxApp EcsApp = new();
+    public static IKernel Kernel { get; private set; } = null!;
+    public static readonly EcsRxApp EcsApp = new();
     public static FOV Fov = null!;
 
+    // ReSharper disable once UnusedParameter.Global
     public static void Main(string[] args)
     {
         Kernel = EcsApp.DependencyRegistry.GetKernel();
@@ -48,7 +49,7 @@ internal static class Program
         Kernel.Bind<DescriptionSurface>().ToSelf().InSingletonScope();
     }
 
-    public static Builder SetupGame()
+    private static Builder SetupGame()
     {
         Settings.AllowWindowResize = GameSettings.FAllowResize;
         Settings.ResizeMode = GameSettings.ResizeMode;
@@ -82,8 +83,19 @@ internal static class Program
         var dc = Kernel.Get<DescriptionSurface>();
         ib.Children.Add(dc);
         dc.Position = GameSettings.DescPosition;
+        DrawDescBorder(ib);
 
         ds.FillSurface(ds);
         MVVM.Bindings.Bind();
+    }
+
+    private static void DrawDescBorder(InfoBar ib)
+    {
+        var rdescLeft = GameSettings.DescPosition.X - 1;
+        var rdescTop = GameSettings.DescPosition.Y - 1;
+        const int rdescWidth = GameSettings.DescWidth + 2;
+        const int rdescHeight = GameSettings.DescHeight + 2;
+        ib.DrawBox(new Rectangle(rdescLeft, rdescTop, rdescWidth, rdescHeight), ShapeParameters.CreateStyledBox(ICellSurface.ConnectedLineThin,
+            new ColoredGlyph(Color.Orange, Color.Black)));
     }
 }

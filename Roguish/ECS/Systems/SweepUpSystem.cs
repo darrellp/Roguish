@@ -13,13 +13,14 @@ namespace Roguish.ECS.Systems;
 // That's not exactly what I want but it may not cause any problems.  Until it does I guess I'll leave
 // it like this.  Perhaps, ultimately, I want this on a timed update loop.
 [Priority(-100)]
+// ReSharper disable once UnusedType.Global
 internal class SweepUpSystem(DungeonSurface dungeon) : IReactToGroupSystem
 {
     public IGroup Group => new Group(typeof(IsDestroyedComponent));
 
     public IObservable<IObservableGroup> ReactToGroup(IObservableGroup observableGroup)
     {
-        var group = Program.GetGroup(typeof(IsDestroyedComponent));
+        var group = GetGroup(typeof(IsDestroyedComponent));
         return group.OnEntityAdded.Select(_ => group);
     }
 
@@ -27,9 +28,10 @@ internal class SweepUpSystem(DungeonSurface dungeon) : IReactToGroupSystem
     {
         if (entity.HasComponent(typeof(DisplayComponent)))
         {
-            var scEntity = ((entity.GetComponent(typeof(DisplayComponent)) as DisplayComponent)!).ScEntity;
+            var scEntity = (entity.GetComponent(typeof(DisplayComponent)) as DisplayComponent)!.ScEntity;
             dungeon.RemoveScEntity(scEntity);
         }
-        Program.EcsApp.EntityDatabase.RemoveEntity(entity);
+
+        EcsApp.EntityDatabase.RemoveEntity(entity);
     }
 }
