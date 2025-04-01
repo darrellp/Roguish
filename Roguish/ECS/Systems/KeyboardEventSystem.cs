@@ -26,8 +26,10 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         KeysQueue.Clear();
 
         if (keyData.Keys is not { Count: 1 })
+        {
             // We currently only handle single key presses
             return;
+        }
         var key = keyData.Keys[0].Key;
         ProcessKey(key);
     }
@@ -86,24 +88,35 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         var player = EcsApp.PlayerGroup.First();
         Debug.Assert(player != null);
         var newTicks = NewTurnEventSystem.Ticks + 100ul;
-        var action = MovePlayerClosure(ptMove);
+        var newPosition = NextPos(player, ptMove);
+        if (!MapGenerator.IsWalkable(newPosition))
+        {
+            return;
+        }
+        var action = MovePlayerClosure(newPosition);
         var newTask = new TaskComponent(newTicks, action);
         player.AddComponent(newTask);
         EcsApp.EventSystem.Publish(new NewTurnEvent());
     }
 
-    private Action<EcsEntity> MovePlayerClosure(Point ptMove)
+    private Action<EcsEntity> MovePlayerClosure(Point newPosition)
     {
-        return _ => { MovePlayer(ptMove); };
+        return _ => { MovePlayer(newPosition); };
     }
 
-    private void MovePlayer(Point ptMove)
+    private void MovePlayer(Point newPosition)
     {
         var player = EcsApp.PlayerGroup.First();
         var positionCmp = (PositionComponent)player.GetComponent(typeof(PositionComponent));
-        var position = positionCmp.Position.Value;
-        var newPosition = position + ptMove;
-        if (MapGenerator.IsWalkable(newPosition)) positionCmp.Position.SetValueAndForceNotify(newPosition);
+        Debug.Assert(MapGenerator.IsWalkable(newPosition));
+        positionCmp.Position.SetValueAndForceNotify(newPosition);
         dungeon.KeepPlayerInView();
+    }
+
+    private Point NextPos(EcsEntity player, Point ptMoveDelta)
+    {
+        var positionCmp = (PositionComponent)player.GetComponent(typeof(PositionComponent));
+        var position = positionCmp.Position.Value;
+        return position + ptMoveDelta;
     }
 }

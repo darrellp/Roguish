@@ -33,6 +33,8 @@ internal class AgentInfo
     public Color Color { get; set; } = Color.White;
     public int HealthMin { get; set; } = 1;
     public int HealthMax { get; set; } = 1;
+    public ulong Move { get; set; } = 100;
+
     public AgentType AgentType { get; set; } = AgentType.Player;
     #endregion
 
@@ -86,7 +88,8 @@ internal class AgentInfo
             Description = "It's you silly!",
             MaxHealth = maxHealth,
             ScEntity = scEntity,
-            Task = null
+            Task = null,
+            Move = 100
         };
     }
 
@@ -104,7 +107,8 @@ internal class AgentInfo
             MaxHealth = maxHealth,
             ScEntity = scEntity,
             AgentType = info.AgentType,
-            Task = task
+            Task = task,
+            Move = info.Move
         };
     }
 
@@ -116,6 +120,7 @@ internal class AgentInfo
         public required ScEntity ScEntity { get; set; }
         public required AgentType AgentType { get; set; }
         public required TaskComponent? Task { get; set; }
+        public required ulong Move { get; set; }
 
         public void Apply(EcsEntity entity)
         {
@@ -131,10 +136,10 @@ internal class AgentInfo
     {
         public new void Apply(EcsEntity entity)
         {
-            const int agentMoveTime = 100;
             base.Apply(entity);
-            entity.AddComponent(new AgentComponent(AgentType, agentMoveTime));
-            entity.AddComponent(new TaskComponent(agentMoveTime, NewTurnEventSystem.DefaultAgentMove));
+            entity.AddComponent(new AgentComponent(AgentType, Move));
+            // Start with a random fireon time to stagger agent moves randomly
+            entity.AddComponent(new TaskComponent(Move * Rng.NextULong(100) / 100ul, NewTurnEventSystem.DefaultAgentMove));
         }
     }
     #endregion

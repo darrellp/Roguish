@@ -10,7 +10,8 @@
     "Glyph": 114,
     "Color": {
       "_packedValue": 0xff00ffff
-    }
+    },
+    "Move": 120
   },
   {
     "AgentType": "Goblin",

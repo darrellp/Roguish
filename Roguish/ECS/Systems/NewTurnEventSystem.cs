@@ -59,7 +59,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
             Where(MapGenerator.IsWalkable).
             ToArray();
         posCmp.Position.Value = moves[GlobalRandom.DefaultRNG.NextInt(moves.Length)];
-        taskCmp.FireOn = Ticks + agentCmp.MoveTime;
+        taskCmp.FireOn += agentCmp.MoveTime;
         // Don't need this right now since it's not changing
         // taskCmp.Action = DefaultMonsterMove;
     }

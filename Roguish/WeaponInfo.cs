@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using EcsR3.Blueprints;
+using EcsR3.Entities;
 using GoRogue.Random;
 using Newtonsoft.Json;
 using ShaiRandom.Generators;
@@ -64,4 +66,14 @@ internal class WeaponInfo
     internal static WeaponInfo InfoFromType(WeaponType type) => MpTypeToInfo[type];
     #endregion
 
+    #region Blueprints
+
+    internal class WeaponBlueprint : IBlueprint
+    {
+        public void Apply(IEntity entity)
+        {
+            throw new NotImplementedException();
+        }
+    }
+    #endregion
 }

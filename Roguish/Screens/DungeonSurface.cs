@@ -179,7 +179,7 @@ internal class DungeonSurface : ScreenSurface
         for (var iAgent = 0; iAgent < GameSettings.MonstersPerLevel; iAgent++)
         {
             var bp = AgentInfo.GetBlueprint(iLevel, this);
-            EcsApp.EntityDatabase.GetCollection().CreateEntity(bp);
+            var agent = EcsApp.EntityDatabase.GetCollection().CreateEntity(bp);
         }
     }
     #endregion
