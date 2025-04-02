@@ -33,7 +33,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         // I suspect some sort of race condition in the keyboard tasks so probably
         // won't see unless going "double" or "triple" speed.  I think on slower
         // machines there's the possibility that publishes can get mixed up and come
-        // in in the wrong order.  I can't get this to happen on my big fast desktop
+        // in the wrong order.  I can't get this to happen on my big fast desktop
         // but I can on my laptop.
         Debug.Assert(Tasks.Ticks < taskCmp.FireOn);
 

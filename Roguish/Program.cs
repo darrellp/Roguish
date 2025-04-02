@@ -11,6 +11,7 @@ using Roguish.Map_Generation;
 using SadConsole.Configuration;
 using SystemsRx.Infrastructure.Ninject.Extensions;
 using Roguish.Screens;
+// ReSharper disable StringLiteralTypo
 
 namespace Roguish;
 internal static class Program
@@ -47,6 +48,7 @@ internal static class Program
         Kernel.Bind<MapGenerator>().ToSelf().InSingletonScope();
         Kernel.Bind<InfoBar>().ToSelf().InSingletonScope();
         Kernel.Bind<DescriptionSurface>().ToSelf().InSingletonScope();
+        Kernel.Bind<LogScreen>().ToSelf().InSingletonScope();
     }
 
     private static Builder SetupGame()
@@ -61,6 +63,7 @@ internal static class Program
             .OnStart(Start)
             .OnEnd(End);
     }
+
     private static void End(object? sender, GameHost e)
     {
         EcsApp.StopApplication();
@@ -72,30 +75,44 @@ internal static class Program
 
         var container = Kernel.Get<TopContainer>();
         Game.Instance.Screen = container;
+
         var ds = Kernel.Get<DungeonSurface>();
         ds.Position = new Point(GameSettings.IbWidth, 0);
         container.Children.Add(ds);
+
         var sb = Kernel.Get<StatusBar>();
         container.Children.Add(sb);
+
         var ib = Kernel.Get<InfoBar>();
         ib.Position = Point.Zero;
         container.Children.Add(ib);
+
         var dc = Kernel.Get<DescriptionSurface>();
         ib.Children.Add(dc);
         dc.Position = GameSettings.DescPosition;
-        DrawDescBorder(ib);
+        DrawInfoBarBorder(ib);
+
+        var log = Kernel.Get<LogScreen>();
+        ib.Children.Add(log);
+        log.Position = GameSettings.LogPosition;
 
         ds.FillSurface(ds);
         MVVM.Bindings.Bind();
     }
 
-    private static void DrawDescBorder(InfoBar ib)
+    private static void DrawInfoBarBorder(InfoBar ib)
     {
-        var rdescLeft = GameSettings.DescPosition.X - 1;
-        var rdescTop = GameSettings.DescPosition.Y - 1;
-        const int rdescWidth = GameSettings.DescWidth + 2;
-        const int rdescHeight = GameSettings.DescHeight + 2;
-        ib.DrawBox(new Rectangle(rdescLeft, rdescTop, rdescWidth, rdescHeight), ShapeParameters.CreateStyledBox(ICellSurface.ConnectedLineThin,
-            new ColoredGlyph(Color.Orange, Color.Black)));
+        ib.DrawLine(new Point(0, 0), new Point(0, GameSettings.IbHeight - 1), DungeonSurface.pathVert.Glyph);
+        ib.DrawLine(new Point(GameSettings.IbWidth - 1, 0), new Point(GameSettings.IbWidth - 1, GameSettings.IbHeight - 1), DungeonSurface.pathVert.Glyph);
+        foreach (var yBar in GameSettings.IbCrossBars)
+        {
+            ib.DrawLine(new Point(0, yBar), new Point(GameSettings.IbWidth, yBar), DungeonSurface.pathHoriz.Glyph);
+            ib.SetGlyph(0, yBar, DungeonSurface.pathTLeft.Glyph);
+            ib.SetGlyph(GameSettings.IbWidth - 1, yBar, DungeonSurface.pathTRight.Glyph);
+        }
+        ib.SetGlyph(0, 0, DungeonSurface.pathUL.Glyph);
+        ib.SetGlyph(GameSettings.IbWidth - 1, 0, DungeonSurface.pathUR.Glyph);
+        ib.SetGlyph(0, GameSettings.IbHeight - 1, DungeonSurface.pathLL.Glyph);
+        ib.SetGlyph(GameSettings.IbWidth - 1, GameSettings.IbHeight - 1, DungeonSurface.pathLR.Glyph);
     }
 }

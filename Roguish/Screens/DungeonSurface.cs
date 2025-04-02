@@ -29,12 +29,14 @@ internal class DungeonSurface : ScreenSurface
     public bool DrawPath { get; set; }
 
     // ReSharper disable InconsistentNaming
-    private static ColoredGlyph pathVert = new(Color.Yellow, Color.Black, 0xBA);
-    private static ColoredGlyph pathHoriz = new(Color.Yellow, Color.Black, 0xCD);
-    private static ColoredGlyph pathUR = new(Color.Yellow, Color.Black, 0xBB);
-    private static ColoredGlyph pathUL = new(Color.Yellow, Color.Black, 0xC9);
-    private static ColoredGlyph pathLR = new(Color.Yellow, Color.Black, 0xBC);
-    private static ColoredGlyph pathLL = new(Color.Yellow, Color.Black, 0xC8);
+    internal static ColoredGlyph pathTRight = new(Color.Green, Color.Green, 0xB9);
+    internal static ColoredGlyph pathTLeft = new(Color.Green, Color.Green, 0xCC);
+    internal static ColoredGlyph pathVert = new(Color.Yellow, Color.Black, 0xBA);
+    internal static ColoredGlyph pathHoriz = new(Color.Yellow, Color.Black, 0xCD);
+    internal static ColoredGlyph pathUR = new(Color.Yellow, Color.Black, 0xBB);
+    internal static ColoredGlyph pathUL = new(Color.Yellow, Color.Black, 0xC9);
+    internal static ColoredGlyph pathLR = new(Color.Yellow, Color.Black, 0xBC);
+    internal static ColoredGlyph pathLL = new(Color.Yellow, Color.Black, 0xC8);
     // ReSharper restore InconsistentNaming
 
     private static readonly Color WallColor = GameSettings.WallColor;

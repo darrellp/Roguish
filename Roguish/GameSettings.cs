@@ -30,10 +30,36 @@ internal static class GameSettings
     public const int SbHeight = 1;
     public static Point SbPosition { get; } = new(0, GameHeight - 1);
 
+    public static int[] IbCrossBars =
+    [
+        (int)(IbHeight * 0.0),      // Top of Message Log Area
+        (int)(IbHeight * 0.1),      // Top of the Equip Area
+        (int)(IbHeight * 0.3),      // Top of the Inventory Area
+        85,                         // Top of the Description Area
+        IbHeight - 1,               // End of the Information Bar
+    ];
+
+    
     // Description console info
     public const int DescWidth = IbWidth - 2;
-    public const int DescHeight = 3;
-    public static Point DescPosition { get; } = new(1, GameHeight - DescHeight - SbHeight - 1);
+    public static int DescHeight = IbCrossBars[4] - IbCrossBars[3] - 1;
+    public static Point DescPosition { get; } = new(1,IbCrossBars[3] + 1);
+
+    // Log screen info
+    public const int LogWidth = IbWidth - 2;
+    public static int LogHeight = IbCrossBars[1] - IbCrossBars[0] - 1;
+    public static Point LogPosition { get; } = new(1, IbCrossBars[0] + 1);
+
+    // Equipped screen info
+    public const int EquipWidth = IbWidth - 2;
+    public static int EquipHeight = IbCrossBars[2] - IbCrossBars[1] - 1;
+    public static Point EquipPosition { get; } = new(1, IbCrossBars[1] + 1);
+
+    // Inventory screen info
+    public const int InvWidth = IbWidth - 2;
+    public static int InvHeight = IbCrossBars[3] - IbCrossBars[2] - 1;
+    public static Point InvPosition { get; } = new(1, IbCrossBars[2] + 1);
+
     #endregion
 
     #region Misc Settings
