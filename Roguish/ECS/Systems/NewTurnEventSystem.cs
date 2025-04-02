@@ -12,7 +12,6 @@ namespace Roguish.ECS.Systems;
 internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
 {
     private static DungeonSurface _dungeon;
-    internal static ulong Ticks { get; set; }
 
     public NewTurnEventSystem(DungeonSurface dungeon)
     {
@@ -29,11 +28,16 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         }
         var taskCmp = player.GetComponent<TaskComponent>();
         Debug.Assert(taskCmp != null);
-        // TODO: Figure out why this assertion fires very occasionally.
+
+        // TODO: Figure out why the assertion below fires very occasionally.
         // I suspect some sort of race condition in the keyboard tasks so probably
-        // won't see unless going "double" or "triple" speed
-        Debug.Assert(Ticks < taskCmp.FireOn);
-        Ticks = taskCmp.FireOn;
+        // won't see unless going "double" or "triple" speed.  I think on slower
+        // machines there's the possibility that publishes can get mixed up and come
+        // in in the wrong order.  I can't get this to happen on my big fast desktop
+        // but I can on my laptop.
+        Debug.Assert(Tasks.Ticks < taskCmp.FireOn);
+
+        Tasks.Ticks = taskCmp.FireOn;
         Debug.Assert(taskCmp.Action != null, "taskCmp.Action != null");
         taskCmp.Action(player);
         // Player is special - it will get a new task when the UI demands it
@@ -43,7 +47,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         foreach (var tasked in EcsApp.TaskedGroup.ToArray())
         {
             var task = tasked.GetComponent<TaskComponent>();
-            while (task.FireOn <= Ticks)
+            while (task.FireOn <= Tasks.Ticks)
             {
                 Debug.Assert(task.Action != null, "task.Action != null");
                 task.Action(tasked);
@@ -52,22 +56,6 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         // Everybody should have moved if they wanted by this time so time to check visibility
         CheckScEntityVisibility();
 
-    }
-
-    internal static void DefaultAgentMove(EcsEntity enemy)
-    {
-        var posCmp = enemy.GetComponent<PositionComponent>();
-        var agentCmp = enemy.GetComponent<AgentComponent>();
-        var taskCmp = enemy.GetComponent<TaskComponent>();
-        var pos = posCmp.Position.Value;
-        var moves = pos.
-            Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false).
-            Where(MapGenerator.IsWalkable).
-            ToArray();
-        posCmp.Position.Value = moves[GlobalRandom.DefaultRNG.NextInt(moves.Length)];
-        taskCmp.FireOn += agentCmp.MoveTime;
-        // Don't need this right now since it's not changing
-        // taskCmp.Action = DefaultMonsterMove;
     }
 
     internal static void CheckScEntityVisibility()

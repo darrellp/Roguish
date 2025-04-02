@@ -2,14 +2,8 @@
 
 // Used to flag enemies
 
-internal class AgentComponent : EcsComponent
+internal class AgentComponent(AgentType agentType, ulong moveTime) : EcsComponent
 {
-    public AgentType AgentType { get; set; }
-    public ulong MoveTime { get; set; }
-
-    public AgentComponent(AgentType agentType, ulong moveTime)
-    {
-        AgentType = agentType;
-        MoveTime=moveTime;
-    }
+    public AgentType AgentType { get; set; } = agentType;
+    public ulong MoveTime { get; set; } = moveTime;
 }

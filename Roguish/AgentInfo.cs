@@ -5,6 +5,7 @@ using Roguish.ECS.Components;
 using ShaiRandom.Generators;
 using EcsRx.Extensions;
 using Newtonsoft.Json;
+using Roguish.ECS;
 using Roguish.ECS.Systems;
 using Roguish.Screens;
 
@@ -89,7 +90,7 @@ internal class AgentInfo
             MaxHealth = maxHealth,
             ScEntity = scEntity,
             Task = null,
-            Move = 100
+            Move = Tasks.StdMovementTime,
         };
     }
 
@@ -138,7 +139,7 @@ internal class AgentInfo
         {
             entity.AddComponent(new AgentComponent(AgentType, Move));
             // Start with a random fireon time to stagger agent moves randomly
-            entity.AddComponent(new TaskComponent(Move * Rng.NextULong(100) / 100ul, NewTurnEventSystem.DefaultAgentMove));
+            entity.AddComponent(new TaskComponent(Move * Rng.NextULong(100) / 100ul, Tasks.DefaultAgentMove));
             entity.AddComponent(new EntityTypeComponent(EcsType.Agent));
             // base Apply does position which calls movement system which requires EntityType
             // so it has to come after the EntityTypeComponent add in this routine

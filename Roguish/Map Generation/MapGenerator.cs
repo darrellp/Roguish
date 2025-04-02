@@ -83,12 +83,12 @@ public class MapGenerator
         return IsEntityAt(pt.X, pt.Y);
     }
 
-    private (EcsEntity?, bool) GetEntityAt(int x, int y)
+    internal (EcsEntity?, bool) GetEntityAt(int x, int y, bool fItem = false)
     {
         int id;
         bool fMore = false;
 
-        if (IsAgentAt(x, y))
+        if (!fItem && IsAgentAt(x, y))
         {
             id = AgentMap[x, y];
         }
@@ -104,9 +104,21 @@ public class MapGenerator
         return (EcsApp.EntityDatabase.GetEntity(id), fMore);
     }
 
-    private (EcsEntity?, bool) GetEntityAt(Point pt)
+    internal (EcsEntity?, bool) GetEntityAt(Point pt, bool fItem = false)
     {
-        return GetEntityAt(pt.X, pt.Y);
+        return GetEntityAt(pt.X, pt.Y, fItem);
+    }
+
+    internal bool RemoveItemAt(Point pt, int it)
+    {
+        var items = EntityMap[pt.X, pt.Y];
+        if (items == null || !items.Contains(it))
+        {
+            return false;
+        }
+
+        items.Remove(it);
+        return true;
     }
 
 

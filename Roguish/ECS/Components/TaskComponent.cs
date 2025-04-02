@@ -1,4 +1,8 @@
-﻿namespace Roguish.ECS.Components;
+﻿using System.Diagnostics;
+using Roguish.ECS.Events;
+using Roguish.Map_Generation;
+
+namespace Roguish.ECS.Components;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>   A task component. </summary>

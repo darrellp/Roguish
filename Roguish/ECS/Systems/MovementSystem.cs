@@ -48,10 +48,6 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
             DungeonSurface.SignalNewFov(posCmp.FDrawFullFov);
             posCmp.FDrawFullFov = false;
         }
-        //else if (dungeon.DrawFov && entity.HasComponent(typeof(DisplayComponent)))
-        //{
-        //    CheckScEntityVisibility(scEntity);
-        //}
     }
 
     internal static void DetermineVisibility(ScEntity entity)

@@ -45,10 +45,17 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
 
     private void ProcessKey(Keys key)
     {
-        var ptMove = Point.Zero;
+        Point? ptMove = null;
+        TaskComponent? task = null;
+        var player = EcsApp.PlayerGroup.First();
+        Debug.Assert(player != null);
 
         switch (key)
         {
+            case Keys.G:
+                task = Tasks.CreatePickupTask();
+                break;
+
             case Keys.D5:
                 break;
 
@@ -85,32 +92,19 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
                 break;
         }
 
-        var player = EcsApp.PlayerGroup.First();
-        Debug.Assert(player != null);
-        var newTicks = NewTurnEventSystem.Ticks + 100ul;
-        var newPosition = NextPos(player, ptMove);
-        if (!MapGenerator.IsWalkable(newPosition))
+        if (ptMove != null)
         {
-            return;
+            var newPosition = NextPos(player, ptMove.Value);
+            if (!MapGenerator.IsWalkable(newPosition))
+            {
+                return;
+            }
+
+            task = Tasks.CreatePlayerMoveTask(newPosition);
+
         }
-        var action = MovePlayerClosure(newPosition);
-        var newTask = new TaskComponent(newTicks, action);
-        player.AddComponent(newTask);
+        player.AddComponent(task);
         EcsApp.EventSystem.Publish(new NewTurnEvent());
-    }
-
-    private Action<EcsEntity> MovePlayerClosure(Point newPosition)
-    {
-        return _ => { MovePlayer(newPosition); };
-    }
-
-    private void MovePlayer(Point newPosition)
-    {
-        var player = EcsApp.PlayerGroup.First();
-        var positionCmp = (PositionComponent)player.GetComponent(typeof(PositionComponent));
-        Debug.Assert(MapGenerator.IsWalkable(newPosition));
-        positionCmp.Position.SetValueAndForceNotify(newPosition);
-        dungeon.KeepPlayerInView();
     }
 
     private Point NextPos(EcsEntity player, Point ptMoveDelta)
