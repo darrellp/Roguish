@@ -19,13 +19,6 @@ internal static class Bindings
             Control = new Button(10) { Text = "Redraw", FocusOnMouseClick = false },
             Command = StatusBar.RedrawClick
         },
-        new()
-        {
-            Screen = typeof(StatusBar),
-            Position = new Point(30, 0),
-            Control = new CheckBox("Draw Path"),
-            Command = StatusBar.DrawPathClick
-        },
         new Binding<Point>
         {
             Screen = typeof(StatusBar),
@@ -37,7 +30,7 @@ internal static class Bindings
         new()
         {
             Screen = typeof(StatusBar),
-            Position = new Point(45, 0),
+            Position = new Point(25, 0),
             Control = new Button(10) { Text = "FOV", FocusOnMouseClick = false },
             Command = StatusBar.FovClick
         },

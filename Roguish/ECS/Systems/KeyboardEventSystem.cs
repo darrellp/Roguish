@@ -103,7 +103,11 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
             task = Tasks.CreatePlayerMoveTask(newPosition);
 
         }
-        player.AddComponent(task);
+
+        if (task != null)
+        {
+            player.AddComponent(task);
+        }
         EcsApp.EventSystem.Publish(new NewTurnEvent());
     }
 

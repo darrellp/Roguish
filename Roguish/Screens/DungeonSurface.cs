@@ -26,8 +26,6 @@ internal class DungeonSurface : ScreenSurface
 
     private static DungeonSurface? Dungeon { get; set; }
     public MapGenerator Mapgen;
-    public bool DrawPath { get; set; }
-
     // ReSharper disable InconsistentNaming
     internal static ColoredGlyph pathTRight = new(Color.Green, Color.Green, 0xB9);
     internal static ColoredGlyph pathTLeft = new(Color.Green, Color.Green, 0xCC);
@@ -333,56 +331,6 @@ internal class DungeonSurface : ScreenSurface
         if (fCenter)
         {
             CenterView(EcsApp.PlayerPos);
-        }
-
-        if (!DrawPath)
-        {
-            return;
-        }
-
-        var pathStart = new ColoredGlyph(Color.Green, Color.Green, '\u2591');
-        var pathEnd = new ColoredGlyph(Color.Red, Color.Red, '\u2591');
-
-        var fFoundStart = false;
-        var fFoundEnd = false;
-        var ptStart = new Point();
-        var ptEnd = new Point();
-        for (var iX = 0; iX < Width; iX++)
-        {
-            for (var iY = 0; iY < Height; iY++)
-            {
-                if (!fFoundStart && MapGenerator.IsWalkable(iX, iY))
-                {
-                    ptStart = new Point(iX, iY);
-                    fFoundStart = true;
-                }
-                if (!fFoundEnd && MapGenerator.IsWalkable(Width - 1 - iX, Height - 1 - iY))
-                {
-                    ptEnd = new Point(Width - 1 - iX, Height - 1 - iY);
-                    fFoundEnd = true;
-                }
-                if (fFoundStart && fFoundEnd)
-                {
-                    break;
-                }
-            }
-            if (fFoundStart && fFoundEnd)
-            {
-                break;
-            }
-        }
-        var aStar = new AStar(MapGenerator.WallFloorValues, Distance.Manhattan);
-        var path = aStar.ShortestPath(ptStart, ptEnd);
-        if (path != null)
-        {
-            var pathSteps = path.Steps.ToArray();
-            DrawGlyph(pathStart, ptStart);
-            DrawGlyph(pathEnd, ptEnd);
-            InscribePath(ptStart, pathSteps[0], pathSteps[1]);
-            for (var i = 1; i <  pathSteps.Length - 1; i++)
-            {
-                InscribePath(pathSteps[i - 1], pathSteps[i], pathSteps[i + 1]);
-            }
         }
     }
 

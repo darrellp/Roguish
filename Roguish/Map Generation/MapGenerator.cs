@@ -118,6 +118,10 @@ public class MapGenerator
         }
 
         items.Remove(it);
+        if (items.Count == 0)
+        {
+            EntityMap[pt.X, pt.Y] = null;
+        }
         return true;
     }
 

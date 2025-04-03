@@ -14,6 +14,7 @@ internal static class Tasks
     internal static ulong Ticks { get; set; } = 0;
     private static DungeonSurface _dungeon;
     private static MapGenerator _mapgen;
+    private static LogScreen _log;
     #endregion
 
     #region Task Times
@@ -27,6 +28,7 @@ internal static class Tasks
     {
         _dungeon = Kernel.Get<DungeonSurface>();
         _mapgen = Kernel.Get<MapGenerator>();
+        _log = Kernel.Get<LogScreen>();
     }
     #endregion
 
@@ -97,13 +99,23 @@ internal static class Tasks
                 var displayCmp = entity.GetComponent<DisplayComponent>();
                 displayCmp.ScEntity.IsVisible = false;
                 _dungeon.RemoveScEntity(displayCmp.ScEntity);
+                _mapgen.RemoveItemAt(pos, entity.Id);
             }
+
+            var name = "an [c:r f:Yellow]unknown object[c:undo]";
+            if (entity.HasComponent<DescriptionComponent>())
+            {
+                name = entity.GetComponent<DescriptionComponent>().Name;
+                name = Utility.PrefixWithAorAnColored(name.ToLower(), "Yellow");
+            }
+
+            _log.PrintProcessedString($"Picked up {name}");
             entity.RemoveComponent<PositionComponent>();
             entity.AddComponent<InBackpackComponent>();
         }
         else
         {
-            // TODO: give a message to the use saying this get was unsuccessful
+            _log.Cursor.Print("There's nothing to be picked up here").NewLine();
         }
         //agent.RemoveComponent<TaskComponent>();
 

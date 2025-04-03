@@ -42,14 +42,6 @@ internal class StatusBar : ScreenSurface
         Dungeon.IsFocused = true;
     };
 
-    public static EventHandler DrawPathClick = (c, _) =>
-    {
-        Dungeon.DrawPath = !(c as CheckBox)!.IsSelected;
-        Dungeon.DrawMap();
-        Dungeon.IsFocused = true;
-        DungeonSurface.SignalNewFov(true);
-    };
-
     public static Action<Point> GetMousePosObserver(object c)
     {
         var label = c as Label;
