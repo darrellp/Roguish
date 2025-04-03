@@ -94,13 +94,15 @@ internal static class Program
 
         var log = Kernel.Get<LogScreen>();
         ib.Children.Add(log);
-        log.Position = GameSettings.LogPosition;
         log.PrintProcessedString("""
                          ***************************
                          [c:r f:Orange]Welcome to Roguish!
                          Hope you enjoy the game![c:undo]
                          ***************************
                          """);
+
+        var inv = Kernel.Get<InventorySurface>();
+        ib.Children.Add(inv);
 
         ds.FillSurface(ds);
         MVVM.Bindings.Bind();
