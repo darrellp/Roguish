@@ -10,6 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ECS\Blueprints\**" />
+    <EmbeddedResource Remove="ECS\Blueprints\**" />
+    <None Remove="ECS\Blueprints\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="SadConsole" />
     <Using Include="SadRogue.Primitives" />
     <Using Include="SadConsole.Console" Alias="Console" />
@@ -31,10 +37,6 @@
     <PackageReference Include="System.Reactive" Version="6.0.1" />
     <PackageReference Include="SystemsRx.Infrastructure.Ninject" Version="8.0.65" />
     <PackageReference Include="SystemsRx.ReactiveData" Version="8.0.65" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ECS\Blueprints\" />
   </ItemGroup>
 
   <ItemGroup>
