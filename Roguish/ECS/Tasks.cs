@@ -15,13 +15,14 @@ internal static class Tasks
     private static DungeonSurface _dungeon;
     private static MapGenerator _mapgen;
     private static LogScreen _log;
+    private static InventorySurface _inv;
     #endregion
 
     #region Task Times
     internal const int StdMovementTime = 100;
     internal const int PickUpTime = 10;
+    internal const int EquipTime = 10;
     #endregion
-
 
     #region (static) Constructor
     static Tasks()
@@ -29,6 +30,7 @@ internal static class Tasks
         _dungeon = Kernel.Get<DungeonSurface>();
         _mapgen = Kernel.Get<MapGenerator>();
         _log = Kernel.Get<LogScreen>();
+        _inv = Kernel.Get<InventorySurface>();
     }
     #endregion
 
@@ -102,12 +104,14 @@ internal static class Tasks
                 _mapgen.RemoveItemAt(pos, entity.Id);
             }
 
-            var name = "an [c:r f:Yellow]unknown object[c:undo]";
-            if (entity.HasComponent<DescriptionComponent>())
-            {
-                name = entity.GetComponent<DescriptionComponent>().Name;
-                name = Utility.PrefixWithAorAnColored(name.ToLower(), "Yellow");
-            }
+            var name = Utility.GetName(entity);
+            
+            //"an [c:r f:Yellow]unknown object[c:undo]");
+            //if (entity.HasComponent<DescriptionComponent>())
+            //{
+            //    name = entity.GetComponent<DescriptionComponent>().Name;
+            //    name = Utility.PrefixWithAorAnColored(name.ToLower(), "Yellow");
+            //}
 
             _log.PrintProcessedString($"Picked up {name}");
             entity.RemoveComponent<PositionComponent>();
@@ -117,7 +121,6 @@ internal static class Tasks
         {
             _log.Cursor.Print("There's nothing to be picked up here").NewLine();
         }
-        //agent.RemoveComponent<TaskComponent>();
 
         if (!agent.HasComponent<IsPlayerControlledComponent>())
         {
@@ -135,4 +138,22 @@ internal static class Tasks
         return new(currentTicks + PickUpTime, UserPickup);
     }
     #endregion
+
+    #region Equipping
+    internal static TaskComponent CreateEquipTask(ulong currentTicks = ulong.MaxValue)
+    {
+        if (currentTicks == ulong.MaxValue)
+        {
+            currentTicks = Ticks;
+        }
+        return new(currentTicks + EquipTime, UserEquip);
+    }
+
+    public static void UserEquip(EcsEntity agent)
+    {
+        _inv.Equip();
+    }
+
+    #endregion
+
 }

@@ -4,7 +4,7 @@ using Ninject;
 using Roguish.ECS;
 using Roguish.ECS.Components;
 using SadConsole.Input;
-using IObservableGroup = EcsRx.Groups.Observable.IObservableGroup;
+// ReSharper disable IdentifierTypo
 
 namespace Roguish.Screens;
 internal class InventorySurface : ScreenSurface
@@ -12,6 +12,8 @@ internal class InventorySurface : ScreenSurface
     private static List<InventoryItem> _inventorySlots = new List<InventoryItem>(GameSettings.InvHeight);
     private static int _selectedIndex = -1;
     private static LogScreen _log;
+    private static object _lock = new object();
+    private static string _clearLine = "".PadRight(GameSettings.InvWidth);
 
     static InventorySurface()
     {
@@ -28,8 +30,36 @@ internal class InventorySurface : ScreenSurface
         var name = entity.HasComponent<DescriptionComponent>()
             ? entity.GetComponent<DescriptionComponent>().Name
             : "Unnamed Object";
-        Surface.Print(0, _inventorySlots.Count, name);
+        Monitor.Enter(_lock);
+        Surface.Print(0, _inventorySlots.Count, name, Color.White);
         _inventorySlots.Add(new InventoryItem(id, name));
+        Monitor.Exit(_lock);
+    }
+    
+    internal void RemoveItem(int id)
+    {
+        var index = _inventorySlots.FindIndex(item => item.id == id);
+        if (index < 0)
+            return;
+        Monitor.Enter(_lock);
+        _inventorySlots.RemoveAt(index);
+        for (var i = index; i < _inventorySlots.Count; i++)
+        {
+            var name = _inventorySlots[i].name.PadRight(GameSettings.InvWidth);
+            Surface.Print(0, i, name, Color.White);
+        }
+
+        Surface.Print(0, _inventorySlots.Count, _clearLine);
+        if (_selectedIndex > index)
+        {
+
+            MoveHighlightTo(--_selectedIndex);
+        }
+        else if (_selectedIndex == index)
+        {
+            _selectedIndex = -1;
+        }
+        Monitor.Exit(_lock);
     }
 
     protected override void OnMouseLeftClicked(MouseScreenObjectState state)
@@ -59,24 +89,28 @@ internal class InventorySurface : ScreenSurface
 
     internal void Equip()
     {
+        if (_selectedIndex < 0)
+        {
+            _log.PrintProcessedString("No inventory items selected to equip");
+            return;
+        }
+
         var item = EcsApp.EntityDatabase.GetEntity(_inventorySlots[_selectedIndex].id);
         Debug.Assert(item != null);
-        EquipableComponent? equipableCmp;
         if (!item.HasComponent<EquipableComponent>())
         {
-            var name = item.HasComponent<DescriptionComponent>()
-                ? Utility.PrefixWithAorAnColored(item.GetComponent<DescriptionComponent>().Name, "Yellow")
-                : "an [c:r f:Yellow]unnamed object";
+            var name = Utility.GetName(item);
             _log.PrintProcessedString($"We can't equip {name}");
             return;
         }
 
-        equipableCmp = item.GetComponent<EquipableComponent>();
-        item.RemoveComponent<InBackpackComponent>();
+        var equipableCmp = item.GetComponent<EquipableComponent>();
         var equippedCmp = EcsRxApp.Player.GetComponent<EquippedComponent>();
         var id = item.Id;
         var oldId = -1;
         var oldIdAlt = -1;
+
+        item.RemoveComponent<InBackpackComponent>();
 
         switch (equipableCmp.EquipSlot)
         {
@@ -107,10 +141,20 @@ internal class InventorySurface : ScreenSurface
 
             case EquipSlots.OneHand:
                 oldId = equippedCmp.WeaponLeft;
-                if (oldId == -1)
+                if (oldId >= 0)
                 {
-                    oldIdAlt = equippedCmp.WeaponRight;
-                    equippedCmp.WeaponRight = id;
+                    if (equippedCmp.WeaponRight == equippedCmp.WeaponLeft)
+                    {
+                        // Two handed weapon - remove it and place new in left
+                        equippedCmp.WeaponLeft = id;
+                        equippedCmp.WeaponRight = -1;
+                    }
+                    else
+                    {
+                        // Something in the left so let's put in the right
+                        oldId = equippedCmp.WeaponRight;
+                        equippedCmp.WeaponRight = id;
+                    }
                 }
                 else
                 {
@@ -120,9 +164,10 @@ internal class InventorySurface : ScreenSurface
 
             case EquipSlots.Ring:
                 oldId = equippedCmp.LRing;
-                if (oldId == -1)
+                if (oldId >= 0)
                 {
-                    oldIdAlt = equippedCmp.RRing;
+                    // Ring already on the left so use the right
+                    oldId = equippedCmp.RRing;
                     equippedCmp.RRing = id;
                 }
                 else
@@ -146,16 +191,13 @@ internal class InventorySurface : ScreenSurface
             var replaced = EcsApp.EntityDatabase.GetEntity(oldId);
             Debug.Assert(replaced != null);
             replaced.AddComponent<InBackpackComponent>();
-            AddItem(replaced.Id);
         }
         if (oldIdAlt >= 0)
         {
             var replaced = EcsApp.EntityDatabase.GetEntity(oldIdAlt);
             Debug.Assert(replaced != null);
             replaced.AddComponent<InBackpackComponent>();
-            AddItem(replaced.Id);
         }
-        // TODO: keyboard hotkey, Equipped screen, locking _inventorySlots because we want to both add and remove
     }
 
     private record InventoryItem(int id, string name);

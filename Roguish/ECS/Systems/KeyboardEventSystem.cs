@@ -56,7 +56,12 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
                 task = Tasks.CreatePickupTask();
                 break;
 
+            case Keys.E:
+                task = Tasks.CreateEquipTask();
+                break;
+
             case Keys.D5:
+                ptMove = new Point(0, 0);
                 break;
 
             case Keys.Up:

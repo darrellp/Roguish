@@ -16,7 +16,7 @@ internal class InventorySystem : ISetupSystem, ITeardownSystem
     public IGroup Group => new Group(typeof(InBackpackComponent));
     public void Teardown(EcsEntity entity)
     {
-        throw new NotImplementedException();
+        _inv.RemoveItem(entity.Id);
     }
 
     public void Setup(EcsEntity entity)
