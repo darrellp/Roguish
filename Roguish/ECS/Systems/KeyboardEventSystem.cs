@@ -47,7 +47,7 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
     {
         Point? ptMove = null;
         TaskComponent? task = null;
-        var player = EcsApp.PlayerGroup.First();
+        var player = EcsRxApp.Player;
         Debug.Assert(player != null);
 
         switch (key)

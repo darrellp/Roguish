@@ -40,7 +40,7 @@ internal static class Tasks
 
     private static void MovePlayer(Point newPosition)
     {
-        var player = EcsApp.PlayerGroup.First();
+        var player = EcsRxApp.Player;
         var positionCmp = (PositionComponent)player.GetComponent(typeof(PositionComponent));
         Debug.Assert(MapGenerator.IsWalkable(newPosition));
         positionCmp.Position.SetValueAndForceNotify(newPosition);

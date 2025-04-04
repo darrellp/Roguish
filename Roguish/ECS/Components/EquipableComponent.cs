@@ -8,8 +8,8 @@ internal enum EquipSlots
     Amulet,
     Headgear,
     Footwear,
-    Pants,
-    Torso,
+    Legs,
+    Chest,
 }
 internal class EquipableComponent(EquipSlots equipSlot) : EcsComponent
 {

@@ -16,17 +16,17 @@ namespace Roguish.ECS;
 
 internal class EcsRxApp : EcsRxApplication
 {
-    public IObservableGroup LevelItems = null!;
-    public IObservableGroup PlayerGroup = null!;
-    public IObservableGroup TaskedGroup = null!;
-    public IObservableGroup DisplayGroup = null!;
+    public static IObservableGroup LevelItems = null!;
+    public static IObservableGroup PlayerGroup = null!;
+    public static IObservableGroup TaskedGroup = null!;
+    public static IObservableGroup DisplayGroup = null!;
+    internal static EcsEntity Player;
 
     public Point PlayerPos
     {
         get
         {
-            var player = PlayerGroup[0];
-            var poscmp = player.GetComponent(typeof(PositionComponent)) as PositionComponent;
+            var poscmp = Player.GetComponent(typeof(PositionComponent)) as PositionComponent;
             Debug.Assert(poscmp != null);
             return poscmp.Position.Value;
         }
@@ -41,10 +41,9 @@ internal class EcsRxApp : EcsRxApplication
         GetGroup(typeof(AgentComponent));
         TaskedGroup = GetGroup(typeof(TaskComponent));
         DisplayGroup = GetGroup(typeof(DisplayComponent), typeof(PositionComponent));
-
         var collection = EntityDatabase.GetCollection();
         var dungeon = Kernel.Get<DungeonSurface>();
-        var entity = collection.CreateEntity(AgentInfo.GetPlayerBlueprint(20, dungeon));
+        Player = collection.CreateEntity(AgentInfo.GetPlayerBlueprint(20, dungeon));
     }
 
     protected override void LoadPlugins()

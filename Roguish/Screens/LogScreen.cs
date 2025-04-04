@@ -59,7 +59,7 @@ internal class LogScreen : ControlsConsole
         MessageBuffer.Surface.UsePrintProcessor = true;
     }
 
-    public void PrintProcessedString(string str, bool fNewLine = true)
+    internal void PrintProcessedString(string str, bool fNewLine = true)
     {
         var coloredString = ColoredString.Parser.Parse(str);
         if (fNewLine)
@@ -72,7 +72,7 @@ internal class LogScreen : ControlsConsole
         }
     }
 
-    public void Clear()
+    internal void Clear()
     {
         MessageBuffer.Clear();
         _scrollOffset = 0;

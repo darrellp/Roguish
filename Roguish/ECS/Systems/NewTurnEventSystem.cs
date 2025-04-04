@@ -21,7 +21,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
     public void Process(NewTurnEvent eventData)
     {
         // Get the player's task and achieve it
-        var player = EcsApp.PlayerGroup[0];
+        var player = EcsRxApp.Player;
         if (!player.HasComponent<TaskComponent>())
         {
             return;
@@ -44,7 +44,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         // so no replacing here
         player.RemoveComponent<TaskComponent>();
 
-        foreach (var tasked in EcsApp.TaskedGroup.ToArray())
+        foreach (var tasked in EcsRxApp.TaskedGroup.ToArray())
         {
             var task = tasked.GetComponent<TaskComponent>();
             while (task.FireOn <= Tasks.Ticks)
@@ -60,7 +60,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
 
     internal static void CheckScEntityVisibility()
     {
-        foreach (var ecsEntity in EcsApp.DisplayGroup)
+        foreach (var ecsEntity in EcsRxApp.DisplayGroup)
         {
             var scEntity = ecsEntity.GetComponent<DisplayComponent>().ScEntity;
             if (!_dungeon.DrawFov)

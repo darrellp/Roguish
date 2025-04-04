@@ -26,7 +26,7 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
         Fov = new FOV(MapGenerator.WallFloorValues);
 
         // Delete the old stuff in the old dungeon floor
-        foreach (var item in EcsApp.LevelItems.ToArray())
+        foreach (var item in EcsRxApp.LevelItems.ToArray())
         {
             if (item.HasComponent<IsPlayerControlledComponent>())
             {
@@ -45,7 +45,7 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
         }
 
         // Set up the player in their new position
-        var player = EcsApp.PlayerGroup[0];
+        var player = EcsRxApp.Player;
         var posCmp = player.GetComponent<PositionComponent>();
         Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
         posCmp.FDrawFullFov = true;
