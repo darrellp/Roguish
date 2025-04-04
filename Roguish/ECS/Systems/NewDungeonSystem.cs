@@ -38,7 +38,10 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
                 _dungeon.RemoveScEntity(displayCmp!.ScEntity);
             }
 
-            EcsApp.EntityDatabase.GetCollection().RemoveEntity(item.Id);
+            if (!item.HasComponent<InBackpackComponent>())
+            {
+                EcsApp.EntityDatabase.GetCollection().RemoveEntity(item.Id);
+            }
         }
 
         // Set up the player in their new position

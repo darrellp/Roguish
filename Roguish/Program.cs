@@ -49,6 +49,7 @@ internal static class Program
         Kernel.Bind<InfoBar>().ToSelf().InSingletonScope();
         Kernel.Bind<DescriptionSurface>().ToSelf().InSingletonScope();
         Kernel.Bind<LogScreen>().ToSelf().InSingletonScope();
+        Kernel.Bind<InventorySurface>().ToSelf().InSingletonScope();
     }
 
     private static Builder SetupGame()
