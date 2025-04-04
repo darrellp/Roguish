@@ -12,6 +12,7 @@ internal class InventorySurface : ScreenSurface
     private static List<InventoryItem> _inventorySlots = new List<InventoryItem>(GameSettings.InvHeight);
     private static int _selectedIndex = -1;
     private static LogScreen _log;
+    private static EquipSurface _equip;
     private static object _lock = new object();
     private static string _clearLine = "".PadRight(GameSettings.InvWidth);
 
@@ -19,9 +20,11 @@ internal class InventorySurface : ScreenSurface
     {
         _log = Kernel.Get<LogScreen>();
     }
-    public InventorySurface() : base(GameSettings.InvWidth, GameSettings.InvHeight)
+    public InventorySurface(EquipSurface equip, LogScreen log) : base(GameSettings.InvWidth, GameSettings.InvHeight)
     {
         Position = GameSettings.InvPosition;
+        _log = log;
+        _equip = equip;
     }
 
     internal void AddItem(int id)
@@ -65,10 +68,9 @@ internal class InventorySurface : ScreenSurface
     protected override void OnMouseLeftClicked(MouseScreenObjectState state)
     {
         var (x, y) = state.CellPosition;
-        var index = y;
-        if (index >= _inventorySlots.Count)
+        if (y >= _inventorySlots.Count)
             return;
-        MoveHighlightTo(index);
+        MoveHighlightTo(y);
     }
 
     private void MoveHighlightTo(int index)
@@ -111,9 +113,25 @@ internal class InventorySurface : ScreenSurface
         var oldIdAlt = -1;
 
         item.RemoveComponent<InBackpackComponent>();
+        item.AddComponent<IsEquippedComponent>();
 
         switch (equipableCmp.EquipSlot)
         {
+            case EquipSlots.Gloves:
+                oldId = equippedCmp.Gloves;
+                equippedCmp.Gloves = id;
+                break;
+
+            case EquipSlots.Belt:
+                oldId = equippedCmp.Belt;
+                equippedCmp.Belt = id;
+                break;
+
+            case EquipSlots.Arms:
+                oldId = equippedCmp.Arms;
+                equippedCmp.Arms = id;
+                break;
+
             case EquipSlots.Amulet:
                 oldId = equippedCmp.Amulet;
                 equippedCmp.Amulet = id;
@@ -191,13 +209,17 @@ internal class InventorySurface : ScreenSurface
             var replaced = EcsApp.EntityDatabase.GetEntity(oldId);
             Debug.Assert(replaced != null);
             replaced.AddComponent<InBackpackComponent>();
+            replaced.RemoveComponent<IsEquippedComponent>();
         }
         if (oldIdAlt >= 0)
         {
             var replaced = EcsApp.EntityDatabase.GetEntity(oldIdAlt);
             Debug.Assert(replaced != null);
             replaced.AddComponent<InBackpackComponent>();
+            replaced.RemoveComponent<IsEquippedComponent>();
         }
+        _log.PrintProcessedString($"Equipped {Utility.GetName(item)}");
+        _equip.Update(equippedCmp);
     }
 
     private record InventoryItem(int id, string name);

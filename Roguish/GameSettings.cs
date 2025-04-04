@@ -34,7 +34,7 @@ internal static class GameSettings
     [
         (int)(IbHeight * 0.0),      // Top of Message Log Area
         (int)(IbHeight * 0.1),      // Top of the Equip Area
-        (int)(IbHeight * 0.3),      // Top of the Inventory Area
+        (int)(IbHeight * 0.1) + 13, // Top of the Inventory Area
         85,                         // Top of the Description Area
         IbHeight - 1,               // End of the Information Bar
     ];

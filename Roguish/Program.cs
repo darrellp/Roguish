@@ -50,6 +50,7 @@ internal static class Program
         Kernel.Bind<DescriptionSurface>().ToSelf().InSingletonScope();
         Kernel.Bind<LogScreen>().ToSelf().InSingletonScope();
         Kernel.Bind<InventorySurface>().ToSelf().InSingletonScope();
+        Kernel.Bind<EquipSurface>().ToSelf().InSingletonScope();
     }
 
     private static Builder SetupGame()
@@ -104,6 +105,9 @@ internal static class Program
 
         var inv = Kernel.Get<InventorySurface>();
         ib.Children.Add(inv);
+
+        var equip = Kernel.Get<EquipSurface>();
+        ib.Children.Add(equip);
 
         ds.FillSurface(ds);
         MVVM.Bindings.Bind();

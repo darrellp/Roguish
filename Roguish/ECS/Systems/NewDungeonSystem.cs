@@ -38,7 +38,7 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
                 _dungeon.RemoveScEntity(displayCmp!.ScEntity);
             }
 
-            if (!item.HasComponent<InBackpackComponent>())
+            if (!item.HasComponent<InBackpackComponent>() && !item.HasComponent<IsEquippedComponent>())
             {
                 EcsApp.EntityDatabase.GetCollection().RemoveEntity(item.Id);
             }

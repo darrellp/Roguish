@@ -9,7 +9,6 @@ internal class EquippedComponent : EcsComponent
 {
     internal int Headgear { get; set; } = -1;
     internal int Footwear { get; set; } = -1;
-    internal int Hands { get; set; } = -1;
     internal int Chest { get; set; } = -1;
     internal int LRing { get; set; } = -1;
     internal int RRing { get; set; } = -1;
@@ -18,4 +17,6 @@ internal class EquippedComponent : EcsComponent
     internal int Arms { get; set; } = -1;
     internal int Legs { get; set; } = -1;
     internal int Amulet { get; set; } = -1;
+    internal int Gloves { get; set; } = -1;
+    internal int Belt { get; set; } = -1;
 }

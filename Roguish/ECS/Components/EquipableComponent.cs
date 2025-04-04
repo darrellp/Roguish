@@ -10,6 +10,9 @@ internal enum EquipSlots
     Footwear,
     Legs,
     Chest,
+    Gloves,
+    Arms,
+    Belt
 }
 internal class EquipableComponent(EquipSlots equipSlot) : EcsComponent
 {
