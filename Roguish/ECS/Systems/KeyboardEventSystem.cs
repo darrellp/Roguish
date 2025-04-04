@@ -3,6 +3,7 @@ using System.Diagnostics;
 using EcsRx.Extensions;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
+using Roguish.ECS.Tasks;
 using Roguish.Map_Generation;
 using Roguish.Screens;
 using SadConsole.Input;
@@ -53,11 +54,11 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         switch (key)
         {
             case Keys.G:
-                task = Tasks.CreatePickupTask();
+                task = TaskGetter.CreatePickupTask();
                 break;
 
             case Keys.E:
-                task = Tasks.CreateEquipTask();
+                task = TaskGetter.CreateEquipTask();
                 break;
 
             case Keys.D5:
@@ -105,7 +106,7 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
                 return;
             }
 
-            task = Tasks.CreatePlayerMoveTask(newPosition);
+            task = TaskGetter.CreatePlayerMoveTask(newPosition);
 
         }
 

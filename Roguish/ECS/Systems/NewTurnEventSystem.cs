@@ -6,6 +6,7 @@ using EcsRx.Extensions;
 using GoRogue.Random;
 using Roguish.Map_Generation;
 using Roguish.Screens;
+using Roguish.ECS.Tasks;
 
 
 namespace Roguish.ECS.Systems;
@@ -35,9 +36,9 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         // machines there's the possibility that publishes can get mixed up and come
         // in the wrong order.  I can't get this to happen on my big fast desktop
         // but I can on my laptop.
-        Debug.Assert(Tasks.Ticks < taskCmp.FireOn);
+        Debug.Assert(TaskGetter.Ticks < taskCmp.FireOn);
 
-        Tasks.Ticks = taskCmp.FireOn;
+        TaskGetter.Ticks = taskCmp.FireOn;
         Debug.Assert(taskCmp.Action != null, "taskCmp.Action != null");
         taskCmp.Action(player);
         // Player is special - it will get a new task when the UI demands it
@@ -47,7 +48,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         foreach (var tasked in EcsRxApp.TaskedGroup.ToArray())
         {
             var task = tasked.GetComponent<TaskComponent>();
-            while (task.FireOn <= Tasks.Ticks)
+            while (task.FireOn <= TaskGetter.Ticks)
             {
                 Debug.Assert(task.Action != null, "task.Action != null");
                 task.Action(tasked);

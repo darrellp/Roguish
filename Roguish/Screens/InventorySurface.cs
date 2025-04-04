@@ -16,10 +16,6 @@ internal class InventorySurface : ScreenSurface
     private static object _lock = new object();
     private static string _clearLine = "".PadRight(GameSettings.InvWidth);
 
-    static InventorySurface()
-    {
-        _log = Kernel.Get<LogScreen>();
-    }
     public InventorySurface(EquipSurface equip, LogScreen log) : base(GameSettings.InvWidth, GameSettings.InvHeight)
     {
         Position = GameSettings.InvPosition;

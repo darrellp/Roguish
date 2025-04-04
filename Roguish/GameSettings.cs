@@ -59,7 +59,6 @@ internal static class GameSettings
     public const int InvWidth = IbWidth - 2;
     public static int InvHeight = IbCrossBars[3] - IbCrossBars[2] - 1;
     public static Point InvPosition { get; } = new(1, IbCrossBars[2] + 1);
-
     #endregion
 
     #region Misc Settings
@@ -76,5 +75,8 @@ internal static class GameSettings
     public static Color ClearColor = Color.Black;
     public static Color FloorColor = Color.Orange;
     public static Color WallColor = Color.Blue;
+
+    public static int PursueRadius = 7;
+
     #endregion
 }

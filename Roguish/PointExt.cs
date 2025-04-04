@@ -1,6 +1,9 @@
 ﻿// ReSharper disable IdentifierTypo
 
 // ReSharper disable InvalidXmlDocComment
+
+using System.Security.Cryptography.X509Certificates;
+
 namespace Roguish;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -170,6 +173,10 @@ public static class PointExt
         {
             yield return new Point(@this.X - 1, @this.Y + 1);
         }
+    }
 
+    internal static int Manhattan(this Point @this, Point pt)
+    {
+        return Math.Abs(@this.X - pt.X) + Math.Abs(@this.Y - pt.Y);
     }
 }
