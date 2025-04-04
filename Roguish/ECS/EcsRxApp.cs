@@ -9,6 +9,7 @@ using Roguish.Screens;
 using SystemsRx.Infrastructure.Dependencies;
 using SystemsRx.Infrastructure.Ninject;
 using SystemsRx.Infrastructure.Ninject.Extensions;
+using EcsRx.Extensions;
 
 // ReSharper disable IdentifierTypo
 
@@ -26,7 +27,7 @@ internal class EcsRxApp : EcsRxApplication
     {
         get
         {
-            var poscmp = Player.GetComponent(typeof(PositionComponent)) as PositionComponent;
+            var poscmp = Player.GetComponent<PositionComponent>();
             Debug.Assert(poscmp != null);
             return poscmp.Position.Value;
         }

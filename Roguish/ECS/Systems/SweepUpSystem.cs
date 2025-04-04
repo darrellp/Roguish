@@ -4,6 +4,7 @@ using EcsRx.Groups;
 using EcsRx.Groups.Observable;
 using EcsRx.Systems;
 using Roguish.ECS.Components;
+using Roguish.Map_Generation;
 using Roguish.Screens;
 using SystemsRx.Attributes;
 
@@ -14,22 +15,14 @@ namespace Roguish.ECS.Systems;
 // it like this.  Perhaps, ultimately, I want this on a timed update loop.
 [Priority(-100)]
 // ReSharper disable once UnusedType.Global
-internal class SweepUpSystem(DungeonSurface dungeon) : IReactToGroupSystem
+internal class SweepUpSystem(DungeonSurface dungeon, MapGenerator mapgen) : ISetupSystem
 {
     public IGroup Group => new Group(typeof(IsDestroyedComponent));
-
-    public IObservable<IObservableGroup> ReactToGroup(IObservableGroup observableGroup)
-    {
-        var group = GetGroup(typeof(IsDestroyedComponent));
-        return group.OnEntityAdded.Select(_ => group);
-    }
-
-    public void Process(EcsEntity entity)
+    public void Setup(EcsEntity entity)
     {
         if (entity.HasComponent(typeof(DisplayComponent)))
         {
-            var scEntity = (entity.GetComponent(typeof(DisplayComponent)) as DisplayComponent)!.ScEntity;
-            dungeon.RemoveScEntity(scEntity);
+            dungeon.RemoveScEntity(entity.GetComponent<DisplayComponent>()!.ScEntity);
         }
 
         EcsApp.EntityDatabase.RemoveEntity(entity);

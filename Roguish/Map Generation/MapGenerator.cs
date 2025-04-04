@@ -83,6 +83,21 @@ public class MapGenerator
         return IsEntityAt(pt.X, pt.Y);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary>   Gets entity and plurality at a position. </summary>
+    ///
+    /// <remarks>   If agent and items are located at the position then the agent will
+    ///             be returned.  If more than one item exists then the boolean returned will
+    ///             be true, otherwise false.  Null entity if there is nothing there.
+    ///             Darrell Plank, 4/4/2025. </remarks>
+    ///
+    /// <param name="x">        The x coordinate. </param>
+    /// <param name="y">        The y coordinate. </param>
+    /// <param name="fItem">    (Optional) True to only return an item. </param>
+    ///
+    /// <returns>   The entity at the position and a bool indicating whether there is more than one entity there. </returns>
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     internal (EcsEntity?, bool) GetEntityAt(int x, int y, bool fItem = false)
     {
         int id;
@@ -104,10 +119,41 @@ public class MapGenerator
         return (EcsApp.EntityDatabase.GetEntity(id), fMore);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary>   Gets entity and plurality at a position. </summary>
+    ///
+    /// <remarks>
+    ///     If agent and items are located at the position then the agent will be returned.  If more
+    ///     than one item exists then the boolean returned will be true, otherwise false.  Null
+    ///     entity if there is nothing there. Darrell Plank, 4/4/2025.
+    /// </remarks>
+    ///
+    /// <param name="pt">       The point. </param>
+    /// <param name="fItem">    (Optional) True to only return an item. </param>
+    ///
+    /// <returns>
+    ///     The entity at the position and a bool indicating whether there is more than one entity
+    ///     there.
+    /// </returns>
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     internal (EcsEntity?, bool) GetEntityAt(Point pt, bool fItem = false)
     {
         return GetEntityAt(pt.X, pt.Y, fItem);
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary>   Removes the item at location from map. </summary>
+    ///
+    /// <remarks>   This only removes it from the MAP - it is still an entity in ECS and retains
+    ///             whatever components it has including it's position/Display components.
+    ///             Darrell Plank, 4/4/2025. </remarks>
+    ///
+    /// <param name="pt">   The point. </param>
+    /// <param name="it">   The iterator. </param>
+    ///
+    /// <returns>   True if it succeeds, false if it fails. </returns>
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     internal bool RemoveItemAt(Point pt, int it)
     {
@@ -125,15 +171,20 @@ public class MapGenerator
         return true;
     }
 
+    internal void RemoveAgentAt(Point pt)
+    {
+        AgentMap[pt.X, pt.Y] = -1;
+    }
 
-    private static bool IsAgentAt(int x, int y)
+
+    internal static bool IsAgentAt(int x, int y)
     {
         return AgentMap[x, y] >= 0;
     }
 
-    private bool IsAgentAt(Point pt)
+    internal bool IsAgentAt(Point pt)
     {
-        return IsEntityAt(pt.X, pt.Y);
+        return IsAgentAt(pt.X, pt.Y);
     }
 
     private static void ClearEntityMaps()

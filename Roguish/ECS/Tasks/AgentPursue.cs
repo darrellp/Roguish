@@ -15,6 +15,11 @@ internal partial class TaskGetter
         var ptMove = pos.Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false)
             .Where(MapGenerator.IsWalkable)
             .MinBy(p => p.Manhattan(EcsApp.PlayerPos));
+        taskCmp.FireOn += agentCmp.MoveTime;
+        if (AgentBattleCheck(ptMove))
+        {
+            return;
+        }
         if (ptMove.Manhattan(EcsApp.PlayerPos) < pos.Manhattan(playerPos))
         {
             posCmp.Position.Value = ptMove;
@@ -23,12 +28,25 @@ internal partial class TaskGetter
         {
             ptMove = pos;
         }
-        taskCmp.FireOn += agentCmp.MoveTime;
         if (ptMove.Manhattan(playerPos) >= GameSettings.PursueRadius)
         {
             taskCmp.Action = DefaultAgentMove;
         }
     }
+    private static bool AgentBattleCheck(Point ptDest)
+    {
+        if (EcsApp.PlayerPos != ptDest)
+        {
+            // Takes two to tango...
+            return false;
+        }
+        // TODO: MUCH more complicated battle algorithm here!
+        var enemyHealthCmp = EcsRxApp.Player.GetComponent<HealthComponent>();
+        var newHealth = Math.Max(0, enemyHealthCmp.CurrentHealth.Value - 3);
+        enemyHealthCmp.CurrentHealth.SetValueAndForceNotify(newHealth);
+        return true;
+    }
+
 
     internal static TaskComponent CreateAgentPursueTask(ulong currentTicks = ulong.MaxValue)
     {
