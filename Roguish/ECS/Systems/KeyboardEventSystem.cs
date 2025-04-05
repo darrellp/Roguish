@@ -35,6 +35,11 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         ProcessKey(key);
     }
 
+    internal static bool HasQueue()
+    {
+        return KeysQueue.Count > 0;
+    }
+
     internal static void StopQueue()
     {
         KeysQueue.Clear();

@@ -85,7 +85,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
             else
             {
                 scEntity.IsVisible = Fov.CurrentFOV.Contains(scEntity.Position);
-                if (scEntity.IsVisible && ecsEntity.HasComponent<AgentComponent>() && ecsEntity.Id != EcsRxApp.Player.Id)
+                if (scEntity.IsVisible && ecsEntity.HasComponent<AgentComponent>() && ecsEntity.Id != EcsRxApp.Player.Id && KeyboardEventSystem.HasQueue())
                 {
                     var name = Utility.GetName(ecsEntity);
                     _log.PrintProcessedString($"Stopping since [c:r f:Yellow]{name}[c:undo] came into view");

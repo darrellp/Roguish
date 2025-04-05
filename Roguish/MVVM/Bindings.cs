@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics;
+using Roguish.ECS;
+using Roguish.ECS.Components;
 using Roguish.Screens;
 using SadConsole.UI;
 using SadConsole.UI.Controls;
+using EcsRx.Extensions;
 using Label = SadConsole.UI.Controls.Label;
 
 namespace Roguish.MVVM;
@@ -18,6 +21,14 @@ internal static class Bindings
             Position = new Point(13, 0),
             Control = new Button(10) { Text = "Redraw", FocusOnMouseClick = false },
             Command = StatusBar.RedrawClick
+        },
+        new Binding<int>
+        {
+            Screen = typeof(StatusBar),
+            Position = new Point(40, 0),
+            Control = new Label(12),
+            BindValue = EcsRxApp.Player.GetComponent<HealthComponent>().CurrentHealth,
+            Observer = MoveIntToLabelClosure("HP: {0,2:D}"),
         },
         new Binding<Point>
         {
@@ -108,5 +119,14 @@ internal static class Bindings
             var lines = str.Split('\n');
             foreach (var (line, i) in lines.Select((line, i) => (line, i))) console!.Print(0, i, line.TrimEnd('\r'));
         };
+    }
+
+    public static Func<object, Action<int>> MoveIntToLabelClosure(string format)
+    {
+        return c =>
+            {
+                var label = c as Label;
+                return i => label!.DisplayText = String.Format(format, i);
+            };
     }
 }
