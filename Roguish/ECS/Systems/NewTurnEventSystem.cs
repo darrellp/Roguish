@@ -47,6 +47,10 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
 
         foreach (var tasked in EcsRxApp.TaskedGroup.ToArray())
         {
+            if (tasked.HasComponent<IsDestroyedComponent>())
+            {
+                continue;
+            }
             var task = tasked.GetComponent<TaskComponent>();
             while (task.FireOn <= TaskGetter.Ticks)
             {

@@ -26,7 +26,7 @@ internal partial class TaskGetter
 
     private static bool BattleCheck(Point ptDest)
     {
-        if (!Mapgen.IsAgentAt(ptDest))
+        if (!Mapgen.IsAgentAt(ptDest) || ptDest == EcsApp.PlayerPos)
         {
             // Takes two to tango...
             return false;
@@ -35,7 +35,13 @@ internal partial class TaskGetter
         // TODO: MUCH more complicated battle algorithm here!
         var enemyHealthCmp = enemy.GetComponent<HealthComponent>();
         var newHealth = Math.Max(0, enemyHealthCmp.CurrentHealth.Value - 5);
+        var name = enemy.GetComponent<DescriptionComponent>().Name;
+        Log.PrintProcessedString($"You hit the [c:r f:Yellow]{name}[c:undo] for 5 points of damage!");
         enemyHealthCmp.CurrentHealth.SetValueAndForceNotify(newHealth);
+        if (newHealth == 0)
+        {
+            Log.PrintProcessedString($"You killed the [c:r f:Yellow]{name}[c:undo]!");
+        }
         return true;
     }
 
