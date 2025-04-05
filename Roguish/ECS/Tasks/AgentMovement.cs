@@ -7,19 +7,19 @@ namespace Roguish.ECS.Tasks;
 
 internal partial class TaskGetter
 {
-    internal static void DefaultAgentMove(EcsEntity agent)
+    internal static void DefaultAgentMove(EcsEntity agent, RogueTask task)
     {
         var posCmp = agent.GetComponent<PositionComponent>();
         var agentCmp = agent.GetComponent<AgentComponent>();
-        var taskCmp = agent.GetComponent<TaskComponent>();
+        agent.GetComponent<TaskComponent>();
         var pos = posCmp.Position.Value;
         var moves = pos.Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false)
             .Where(MapGenerator.IsWalkable).ToArray();
         posCmp.Position.Value = moves[GlobalRandom.DefaultRNG.NextInt(moves.Length)];
-        taskCmp.FireOn += agentCmp.MoveTime;
+        task.FireOn += agentCmp.MoveTime;
         if (posCmp.Position.Value.Manhattan(EcsApp.PlayerPos) < GameSettings.PursueRadius)
         {
-            taskCmp.Action = AgentPursue;
+            task.Action = AgentPursue;
         }
     }
 

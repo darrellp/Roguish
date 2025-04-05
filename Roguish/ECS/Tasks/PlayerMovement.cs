@@ -6,9 +6,9 @@ using EcsRx.Extensions;
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter
 {
-    private static Action<EcsEntity> MovePlayerClosure(Point newPosition)
+    private static Action<EcsEntity, RogueTask> MovePlayerClosure(Point newPosition)
     {
-        return _ => { MovePlayer(newPosition); };
+        return (_,_) => { MovePlayer(newPosition); };
     }
 
     private static void MovePlayer(Point newPosition)

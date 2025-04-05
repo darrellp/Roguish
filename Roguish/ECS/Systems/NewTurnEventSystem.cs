@@ -3,8 +3,6 @@ using Roguish.ECS.Events;
 using Roguish.ECS.Components;
 using SystemsRx.Systems.Conventional;
 using EcsRx.Extensions;
-using GoRogue.Random;
-using Roguish.Map_Generation;
 using Roguish.Screens;
 using Roguish.ECS.Tasks;
 
@@ -29,20 +27,15 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         {
             return;
         }
-        var taskCmp = player.GetComponent<TaskComponent>();
-        Debug.Assert(taskCmp != null);
+        var playerTaskCmp = player.GetComponent<TaskComponent>();
+        Debug.Assert(playerTaskCmp != null);
 
-        // TODO: Figure out why the assertion below fires very occasionally.
-        // I suspect some sort of race condition in the keyboard tasks so probably
-        // won't see unless going "double" or "triple" speed.  I think on slower
-        // machines there's the possibility that publishes can get mixed up and come
-        // in the wrong order.  I can't get this to happen on my big fast desktop
-        // but I can on my laptop.
-        Debug.Assert(TaskGetter.Ticks < taskCmp.FireOn);
+        TaskGetter.Ticks = playerTaskCmp.FireOn;
 
-        TaskGetter.Ticks = taskCmp.FireOn;
-        Debug.Assert(taskCmp.Action != null, "taskCmp.Action != null");
-        taskCmp.Action(player);
+        foreach (var nextTask in playerTaskCmp.NextTasks())
+        {
+            nextTask.Action(player, nextTask);
+        }
         // Player is special - it will get a new task when the UI demands it
         // so no replacing here
         player.RemoveComponent<TaskComponent>();
@@ -53,11 +46,13 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
             {
                 continue;
             }
-            var task = tasked.GetComponent<TaskComponent>();
-            while (task.FireOn <= TaskGetter.Ticks)
+            var taskCmp = tasked.GetComponent<TaskComponent>();
+            while (taskCmp.FireOn <= TaskGetter.Ticks)
             {
-                Debug.Assert(task.Action != null, "task.Action != null");
-                task.Action(tasked);
+                foreach (var task in taskCmp.NextTasks())
+                {
+                    task.Action(tasked, task);
+                }
             }
         }
         // Everybody should have moved if they wanted by this time so time to check visibility

@@ -4,7 +4,7 @@ using Roguish.ECS.Components;
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter
 {
-    internal static void UserPickup(EcsEntity agent)
+    internal static void UserPickup(EcsEntity agent, RogueTask t)
     {
         var posCmp = agent.GetComponent<PositionComponent>();
         var taskCmp = agent.GetComponent<TaskComponent>();

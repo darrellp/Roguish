@@ -5,7 +5,7 @@ using Roguish.Map_Generation;
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter
 {
-    internal static void AgentPursue(EcsEntity agent)
+    internal static void AgentPursue(EcsEntity agent, RogueTask task)
     {
         var playerPos = EcsApp.PlayerPos;
         var posCmp = agent.GetComponent<PositionComponent>();
@@ -15,7 +15,7 @@ internal partial class TaskGetter
         var ptMove = pos.Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false)
             .Where(Movable)
             .MinBy(p => p.Manhattan(EcsApp.PlayerPos));
-        taskCmp.FireOn += agentCmp.MoveTime;
+        task.FireOn += agentCmp.MoveTime;
         if (AgentBattleCheck(agent, ptMove))
         {
             return;
@@ -30,7 +30,7 @@ internal partial class TaskGetter
         }
         if (ptMove.Manhattan(playerPos) >= GameSettings.PursueRadius)
         {
-            taskCmp.Action = DefaultAgentMove;
+            task.Action = DefaultAgentMove;
         }
     }
 

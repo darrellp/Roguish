@@ -17,7 +17,7 @@ internal partial class TaskGetter
         return new(currentTicks + EquipTime, UserEquip);
     }
 
-    public static void UserEquip(EcsEntity agent)
+    public static void UserEquip(EcsEntity agent, RogueTask t)
     {
         Inv.Equip();
     }

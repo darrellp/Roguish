@@ -20,7 +20,7 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
     {
         if (keyData.RetrieveFromQueue)
         {
-            Task.Factory.StartNew(ReadFromQueue);
+            System.Threading.Tasks.Task.Factory.StartNew(ReadFromQueue);
             return;
         }
 
