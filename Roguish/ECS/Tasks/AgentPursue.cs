@@ -13,7 +13,7 @@ internal partial class TaskGetter
         var taskCmp = agent.GetComponent<TaskComponent>();
         var pos = posCmp.Position.Value;
         var ptMove = pos.Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false)
-            .Where(MapGenerator.IsWalkable)
+            .Where(Movable)
             .MinBy(p => p.Manhattan(EcsApp.PlayerPos));
         taskCmp.FireOn += agentCmp.MoveTime;
         if (AgentBattleCheck(agent, ptMove))
@@ -33,6 +33,12 @@ internal partial class TaskGetter
             taskCmp.Action = DefaultAgentMove;
         }
     }
+
+    private static bool Movable(Point pt)
+    {
+        return MapGenerator.IsWalkable(pt) && (!Mapgen.IsAgentAt(pt) || pt == EcsApp.PlayerPos);
+    }
+
     private static bool AgentBattleCheck(EcsEntity enemy, Point ptDest)
     {
         if (EcsApp.PlayerPos != ptDest)
@@ -48,7 +54,7 @@ internal partial class TaskGetter
         if (newHealth == 0)
         {
             Log.PrintProcessedString("[c:r f:Red]*** Y O U   D I E D ! ! ! ***");
-            Log.PrintProcessedString("[c:r f:Yellow]***   Resetting because we love you! ***");
+            Log.PrintProcessedString("[c:r f:Red]But you rise to life like a phoenix!");
             newHealth = 20;
         }
         enemyHealthCmp.CurrentHealth.SetValueAndForceNotify(newHealth);

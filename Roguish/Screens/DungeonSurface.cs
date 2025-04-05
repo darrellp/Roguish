@@ -219,7 +219,7 @@ internal class DungeonSurface : ScreenSurface
             {
                 Debug.Assert(false, "Path skipped a step");
             }
-            KeyboardEventSystem.KeysQueue.Enqueue(key);
+            KeyboardEventSystem.EnqueueKey(key);
             ptPrev = pt;
         }
         _eventSystem.Publish(new KeyboardEvent(null) { RetrieveFromQueue = true });

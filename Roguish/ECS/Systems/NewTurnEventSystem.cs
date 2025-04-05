@@ -12,11 +12,13 @@ using Roguish.ECS.Tasks;
 namespace Roguish.ECS.Systems;
 internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
 {
-    private static DungeonSurface _dungeon;
+    private static DungeonSurface _dungeon = null!;
+    private static LogScreen _log = null!;
 
-    public NewTurnEventSystem(DungeonSurface dungeon)
+    public NewTurnEventSystem(DungeonSurface dungeon, LogScreen log)
     {
         _dungeon = dungeon;
+        _log = log;
     }
 
     public void Process(NewTurnEvent eventData)
@@ -83,6 +85,14 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
             else
             {
                 scEntity.IsVisible = Fov.CurrentFOV.Contains(scEntity.Position);
+                if (scEntity.IsVisible && ecsEntity.HasComponent<AgentComponent>() && ecsEntity.Id != EcsRxApp.Player.Id)
+                {
+                    var name = Utility.GetName(ecsEntity);
+                    _log.PrintProcessedString($"Stopping since [c:r f:Yellow]{name}[c:undo] came into view");
+                    // Stopping the player because another agent is in view
+                    KeyboardEventSystem.StopQueue();
+                    
+                }
             }
         }
     }

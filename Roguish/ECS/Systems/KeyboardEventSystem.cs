@@ -14,7 +14,7 @@ namespace Roguish.ECS.Systems;
 // ReSharper disable once ClassNeverInstantiated.Global
 internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem<KeyboardEvent>
 {
-    public static ConcurrentQueue<Keys> KeysQueue { get; } = new();
+    private static ConcurrentQueue<Keys> KeysQueue { get; } = new();
 
     public void Process(KeyboardEvent keyData)
     {
@@ -24,7 +24,7 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
             return;
         }
 
-        KeysQueue.Clear();
+        StopQueue();
 
         if (keyData.Keys is not { Count: 1 })
         {
@@ -33,6 +33,16 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
         }
         var key = keyData.Keys[0].Key;
         ProcessKey(key);
+    }
+
+    internal static void StopQueue()
+    {
+        KeysQueue.Clear();
+    }
+
+    internal static void EnqueueKey(Keys key)
+    {
+        KeysQueue.Enqueue(key);
     }
 
     private void ReadFromQueue()

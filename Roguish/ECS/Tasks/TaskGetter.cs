@@ -1,10 +1,7 @@
-﻿using Roguish.ECS.Components;
-using Roguish.Map_Generation;
-using System.Diagnostics;
-using EcsRx.Extensions;
+﻿using Roguish.Map_Generation;
 using Ninject;
 using Roguish.Screens;
-using GoRogue.Random;
+
 // ReSharper disable IdentifierTypo
 
 namespace Roguish.ECS.Tasks;
