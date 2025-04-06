@@ -11,8 +11,8 @@ internal class InventorySurface : ScreenSurface
 {
     private static List<InventoryItem> _inventorySlots = new List<InventoryItem>(GameSettings.InvHeight);
     private static int _selectedIndex = -1;
-    private static LogScreen _log;
-    private static EquipSurface _equip;
+    private static LogScreen _log = null!;
+    private static EquipSurface _equip = null!;
     private static object _lock = new object();
     private static string _clearLine = "".PadRight(GameSettings.InvWidth);
 

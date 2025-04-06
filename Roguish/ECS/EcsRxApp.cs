@@ -9,7 +9,6 @@ using Roguish.Screens;
 using SystemsRx.Infrastructure.Dependencies;
 using SystemsRx.Infrastructure.Ninject;
 using SystemsRx.Infrastructure.Ninject.Extensions;
-using EcsRx.Extensions;
 
 // ReSharper disable IdentifierTypo
 
@@ -21,7 +20,7 @@ internal class EcsRxApp : EcsRxApplication
     public static IObservableGroup PlayerGroup = null!;
     public static IObservableGroup TaskedGroup = null!;
     public static IObservableGroup DisplayGroup = null!;
-    internal static EcsEntity Player;
+    internal static EcsEntity Player = null!;
 
     public Point PlayerPos
     {

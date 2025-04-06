@@ -4,7 +4,6 @@ using EcsRx.Groups;
 using EcsRx.Groups.Observable;
 using EcsRx.Systems;
 using Roguish.ECS.Components;
-using Roguish.Map_Generation;
 using Roguish.Screens;
 using SystemsRx.Attributes;
 
@@ -15,7 +14,7 @@ namespace Roguish.ECS.Systems;
 // it like this.  Perhaps, ultimately, I want this on a timed update loop.
 [Priority(-100)]
 // ReSharper disable once UnusedType.Global
-internal class SweepUpSystem(DungeonSurface dungeon, MapGenerator mapgen) : ISetupSystem
+internal class SweepUpSystem(DungeonSurface dungeon) : ISetupSystem
 {
     public IGroup Group => new Group(typeof(IsDestroyedComponent));
     public void Setup(EcsEntity entity)

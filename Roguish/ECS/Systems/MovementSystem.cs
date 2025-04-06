@@ -10,6 +10,7 @@ namespace Roguish.ECS.Systems;
 
 internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
 {
+    public DungeonSurface Dungeon { get; } = dungeon;
     public IGroup Group => new Group(typeof(PositionComponent), typeof(DisplayComponent));
 
     public IObservable<EcsEntity> ReactToEntity(EcsEntity entity)

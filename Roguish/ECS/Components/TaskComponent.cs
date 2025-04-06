@@ -25,7 +25,11 @@ internal class TaskComponent : EcsComponent
         Tasks = [new RogueTask(fireOn, action)];
     }
 
-    internal ulong FireOn => Tasks.Select(t => t.FireOn).Min();
+    public TaskComponent(params RogueTask[] tasks)
+    {
+        Tasks = tasks.ToList();
+    }
+
     internal IEnumerable<RogueTask> NextTasks()
     {
         if (Tasks.Count == 0)
@@ -36,7 +40,7 @@ internal class TaskComponent : EcsComponent
         {
             return Enumerable.Repeat(Tasks[0], 1);
         }
-        var ticksNext = Tasks.Select(t => FireOn).Min();
+        var ticksNext = Tasks.Select(t => t.FireOn).Min();
         return Tasks.Where(t => t.FireOn == ticksNext);
     }
 }

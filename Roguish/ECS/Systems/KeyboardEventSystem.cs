@@ -5,14 +5,13 @@ using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using Roguish.ECS.Tasks;
 using Roguish.Map_Generation;
-using Roguish.Screens;
 using SadConsole.Input;
 using SystemsRx.Systems.Conventional;
 
 namespace Roguish.ECS.Systems;
 
 // ReSharper disable once ClassNeverInstantiated.Global
-internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem<KeyboardEvent>
+internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
 {
     private static ConcurrentQueue<Keys> KeysQueue { get; } = new();
 
@@ -62,7 +61,7 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
     private void ProcessKey(Keys key)
     {
         Point? ptMove = null;
-        TaskComponent? task = null;
+        RogueTask? task = null;
         var player = EcsRxApp.Player;
         Debug.Assert(player != null);
 
@@ -121,15 +120,17 @@ internal class KeyboardEventSystem(DungeonSurface dungeon) : IReactToEventSystem
                 return;
             }
 
-            task = TaskGetter.CreatePlayerMoveTask(newPosition);
+            // TODO: create heal task and keep it on player also
+           task = TaskGetter.CreatePlayerMoveTask(newPosition);
 
         }
 
         if (task != null)
         {
-            player.AddComponent(task);
+            var taskCmp = player.GetComponent<TaskComponent>();
+            taskCmp.Tasks[0] = task;
+            EcsApp.EventSystem.Publish(new NewTurnEvent());
         }
-        EcsApp.EventSystem.Publish(new NewTurnEvent());
     }
 
     private Point NextPos(EcsEntity player, Point ptMoveDelta)

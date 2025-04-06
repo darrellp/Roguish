@@ -31,14 +31,9 @@ internal partial class TaskGetter
         {
             Log.Cursor.Print("There's nothing to be picked up here").NewLine();
         }
-
-        if (!agent.HasComponent<IsPlayerControlledComponent>())
-        {
-            agent.AddComponent(CreateAgentMoveTask(taskCmp.FireOn));
-        }
     }
 
-    internal static TaskComponent CreatePickupTask(ulong currentTicks = ulong.MaxValue)
+    internal static RogueTask CreatePickupTask(ulong currentTicks = ulong.MaxValue)
     {
         if (currentTicks == ulong.MaxValue)
         {

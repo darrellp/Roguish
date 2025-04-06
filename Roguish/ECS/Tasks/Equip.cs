@@ -1,14 +1,9 @@
 ﻿using Roguish.ECS.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter
 {
-    internal static TaskComponent CreateEquipTask(ulong currentTicks = ulong.MaxValue)
+    internal static RogueTask CreateEquipTask(ulong currentTicks = ulong.MaxValue)
     {
         if (currentTicks == ulong.MaxValue)
         {

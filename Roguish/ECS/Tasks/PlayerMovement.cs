@@ -45,7 +45,7 @@ internal partial class TaskGetter
         return true;
     }
 
-    internal static TaskComponent CreatePlayerMoveTask(Point newPt, ulong currentTicks = ulong.MaxValue)
+    internal static RogueTask CreatePlayerMoveTask(Point newPt, ulong currentTicks = ulong.MaxValue)
     {
         if (currentTicks == ulong.MaxValue)
         {

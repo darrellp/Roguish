@@ -23,36 +23,48 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
     {
         // Get the player's task and achieve it
         var player = EcsRxApp.Player;
-        if (!player.HasComponent<TaskComponent>())
-        {
-            return;
-        }
-        var playerTaskCmp = player.GetComponent<TaskComponent>();
-        Debug.Assert(playerTaskCmp != null);
 
-        TaskGetter.Ticks = playerTaskCmp.FireOn;
+        // The Player's first task is special - it is the one that drives all the
+        // other tasks in the game because it is driven itself by user input.  The
+        // algorithm is:
+        //      1. Get the player's first task
+        //      2. Achieve that and move the clock ahead according to the time it took
+        //      3. Do any other tasks (including the player's) that got triggered as a result
+        
+        // We don't need to check for null here since this system only gets called when the
+        // user has performed some action and set it up as a task.
+        var uiDrivenTaskCmp = player.GetComponent<TaskComponent>();
+        Debug.Assert(uiDrivenTaskCmp != null);
 
-        foreach (var nextTask in playerTaskCmp.NextTasks())
+        var uiDrivenTask = uiDrivenTaskCmp.Tasks[0];
+        Debug.Assert(uiDrivenTask != null);
+
+        TaskGetter.Ticks = uiDrivenTask.FireOn;
+        Debug.Assert(uiDrivenTask.Action != null, "uiDrivenTask.Action != null");
+        uiDrivenTask.Action(player, uiDrivenTask);
+
+        // Player gets priority in ALL their tasks
+        foreach (var nextTask in uiDrivenTaskCmp.Tasks.Skip(1).Where(t => t.FireOn <= TaskGetter.Ticks))
         {
+            // This player task is already due so we can just do it
+            Debug.Assert(nextTask.Action != null, "nextTask.Action != null");
             nextTask.Action(player, nextTask);
         }
         // Player is special - it will get a new task when the UI demands it
         // so no replacing here
-        player.RemoveComponent<TaskComponent>();
+        uiDrivenTaskCmp.Tasks[0] = null!;
 
         foreach (var tasked in EcsRxApp.TaskedGroup.ToArray())
         {
-            if (tasked.HasComponent<IsDestroyedComponent>())
+            if (tasked.HasComponent<IsDestroyedComponent>() || tasked.Id == player.Id)
             {
                 continue;
             }
             var taskCmp = tasked.GetComponent<TaskComponent>();
-            while (taskCmp.FireOn <= TaskGetter.Ticks)
+            foreach (var task in taskCmp.Tasks.Where(t => t.FireOn <= TaskGetter.Ticks))
             {
-                foreach (var task in taskCmp.NextTasks())
-                {
-                    task.Action(tasked, task);
-                }
+                Debug.Assert(task.Action != null, "task.Action != null");
+                task.Action(tasked, task);
             }
         }
         // Everybody should have moved if they wanted by this time so time to check visibility

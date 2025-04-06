@@ -17,11 +17,7 @@ internal class LogScreen : ControlsConsole
     private readonly ScrollBar _scrollBar;
     private int _scrollOffset;
     private int _lastCursorY;
-    private bool _allowInput;
 
-
-    /// The child console that displays the text written by the cursor.
-    /// </summary>
     public Console MessageBuffer { get; }
 
     public LogScreen() : base(GameSettings.LogWidth, GameSettings.LogHeight)

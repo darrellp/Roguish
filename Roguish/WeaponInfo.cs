@@ -21,8 +21,8 @@ internal class WeaponInfo
 {
     #region Public properties
     public WeaponType WeaponType { get; set; }
-    public string Name {get; set;}
-    public string Description {get; set;}
+    public string Name { get; set; } = null!;
+    public string Description { get; set; } = null!;
     public EquipSlots Slot { get; set; }
     public int StartLevel { get; set; }
     public int EndLevel { get; set; }

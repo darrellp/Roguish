@@ -89,8 +89,9 @@ internal class AgentInfo
             Description = "It's you silly!",
             MaxHealth = maxHealth,
             ScEntity = scEntity,
-            Task = null,
             Move = TaskGetter.StdMovementTime,
+            // First player task is reserved for movement
+            Task = new ( null!, TaskGetter.CreateRegenerateTask(300))
         };
     }
 
@@ -130,6 +131,10 @@ internal class AgentInfo
             entity.AddComponent(new DisplayComponent(ScEntity));
             entity.AddComponent(new LevelItemComponent());
             entity.AddComponent(new PositionComponent(ScEntity.Position));
+            if (Task != null)
+            {
+                entity.AddComponent(Task);
+            }
         }
     }
 
