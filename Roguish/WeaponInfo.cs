@@ -13,9 +13,12 @@ using static Roguish.AgentInfo;
 internal enum WeaponType
 {
     Axe,
+    Axe2H,
     Sword,
+    Sword2H,
     Staff,
     Club,
+    Fists
 }
 internal class WeaponInfo
 {
@@ -28,11 +31,12 @@ internal class WeaponInfo
     public int EndLevel { get; set; }
     public int Glyph { get; set; }
     public Color Color { get; set; }
+    public string Damage { get; set; }
     #endregion
     
     #region Private fields
-    private static Dictionary<WeaponType, WeaponInfo> MpTypeToInfo = new();
-    private static Dictionary<int, List<WeaponInfo>> MpLevelToWeapons = new();
+    private static readonly Dictionary<WeaponType, WeaponInfo> MpTypeToInfo = new();
+    private static readonly Dictionary<int, List<WeaponInfo>> MpLevelToWeapons = new();
     private static readonly IEnhancedRandom Rng = GlobalRandom.DefaultRNG;
     #endregion
     
@@ -46,6 +50,11 @@ internal class WeaponInfo
         foreach (var weaponInfo in weaponsList)
         {
             MpTypeToInfo[weaponInfo.WeaponType] = weaponInfo;
+            if (weaponInfo.WeaponType == WeaponType.Fists)
+            {
+                // Don't ever place "fists" on the floor
+                continue;
+            }
             for (var i = weaponInfo.StartLevel; i <= weaponInfo.EndLevel; i++)
             {
                 if (!MpLevelToWeapons.ContainsKey(i))
@@ -103,6 +112,7 @@ internal class WeaponInfo
             entity.AddComponent(new EntityTypeComponent(EcsType.Weapon));
             // Ensure that position is added AFTER EntityType because the move system requires EntityType
             entity.AddComponent(new PositionComponent(ScEntity.Position));
+            entity.AddComponent(new WeaponInfoComponent(WeaponType));
         }
     }
     #endregion

@@ -50,7 +50,7 @@ internal partial class TaskGetter
         var enemyHealthCmp = EcsRxApp.Player.GetComponent<HealthComponent>();
         var enemyName = enemy.GetComponent<DescriptionComponent>().Name;
         var newHealth = Math.Max(0, enemyHealthCmp.CurrentHealth.Value - 3);
-        Log.PrintProcessedString($"The [c:r f:Yellow]{enemyName}[c:undo] hits you for 3 damage!");
+        Log.PrintProcessedString($"The [c:r f:Yellow]{enemyName}[c:undo] hits you for [c:r f:orange]3[c:undo] damage!");
         if (newHealth == 0)
         {
             Log.PrintProcessedString("[c:r f:Red]*** Y O U   D I E D ! ! ! ***");

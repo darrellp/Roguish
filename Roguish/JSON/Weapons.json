@@ -7,20 +7,36 @@
     "StartLevel": 0,
     "EndLevl": 10,
     "Glyph": 120,
+    "Damage": "1d4",
     "Color": {
       "_packedValue": 0xffffff80
     }
   },
   {
-    "WeaponType": "Sword",
+    "WeaponType": "Sword2H",
     "Name": "Two Handed Sword",
     "Description": "Big ole sword!",
     "Slot": "TwoHands",
     "StartLevel": 0,
     "EndLevel": 10,
     "Glyph": 115,
+    "Damage": "1d8",
+    "Color": {
+      "_packedValue": 0xffffff80
+    }
+  },
+  {
+    "WeaponType": "Fists",
+    "Name": "Fists!",
+    "Description": "Your own fists!",
+    "Slot": "TwoHands",
+    "StartLevel": 0,
+    "EndLevel": 10,
+    "Glyph": 119,
+    "Damage": "1d3",
     "Color": {
       "_packedValue": 0xffffff80
     }
   }
+
 ]
