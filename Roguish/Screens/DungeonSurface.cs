@@ -192,7 +192,7 @@ internal class DungeonSurface : ScreenSurface
         {
             return;
         }
-        var aStar = new AStar(MapGenerator.WallFloorValues, Distance.Manhattan);
+        var aStar = new AStar(MapGenerator.WallFloorValues, Distance.Chebyshev);
         var path = aStar.ShortestPath(EcsApp.PlayerPos, posDest);
         Debug.Assert(path != null, "Path finding returned null");
         EnqueuePath(path);
@@ -210,9 +210,9 @@ internal class DungeonSurface : ScreenSurface
                 (1, 0) => Keys.Right,
                 (1, 1) => Keys.PageDown,
                 (0, 1) => Keys.Down,
-                (-1, -1) => Keys.End,
+                (-1, -1) => Keys.Home,
                 (-1, 0) => Keys.Left,
-                (-1, 1) => Keys.Home,
+                (-1, 1) => Keys.End,
                 _ => Keys.None
             };
             if (key == Keys.None)
