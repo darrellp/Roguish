@@ -12,6 +12,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
 {
     private static DungeonSurface _dungeon = null!;
     private static LogScreen _log = null!;
+    private static object Lock = new();
 
     public NewTurnEventSystem(DungeonSurface dungeon, LogScreen log)
     {
@@ -21,6 +22,8 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
 
     public void Process(NewTurnEvent eventData)
     {
+        Monitor.Enter(Lock);
+
         // Get the player's task and achieve it
         var player = EcsRxApp.Player;
 
@@ -67,11 +70,16 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
             foreach (var task in taskCmp.Tasks.Where(t => t.FireOn <= TaskGetter.Ticks))
             {
                 Debug.Assert(task.Action != null, "task.Action != null");
-                task.Action(tasked, task);
+
+                while (task.FireOn <= TaskGetter.Ticks)
+                {
+                    task.Action(tasked, task);
+                }
             }
         }
         // Everybody should have moved if they wanted by this time so time to check visibility
         CheckScEntityVisibility();
+        Monitor.Exit(Lock);
 
     }
 

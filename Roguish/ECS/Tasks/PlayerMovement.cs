@@ -2,6 +2,7 @@
 using Roguish.Map_Generation;
 using System.Diagnostics;
 using EcsRx.Extensions;
+using Roguish.ECS.Systems;
 
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter
@@ -31,6 +32,9 @@ internal partial class TaskGetter
             // Takes two to tango...
             return false;
         }
+        // Stop for any battles
+        KeyboardEventSystem.StopQueue();
+
         var (enemy,_) = Mapgen.GetEntityAt(ptDest);
         // TODO: MUCH more complicated battle algorithm here!
         var player = EcsRxApp.Player;
