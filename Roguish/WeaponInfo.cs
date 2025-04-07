@@ -31,7 +31,7 @@ internal class WeaponInfo
     public int EndLevel { get; set; }
     public int Glyph { get; set; }
     public Color Color { get; set; }
-    public string Damage { get; set; }
+    public string Damage { get; set; } = null!;
     #endregion
     
     #region Private fields
@@ -107,7 +107,7 @@ internal class WeaponInfo
         {
             entity.AddComponent(new DescriptionComponent(Name, Description));
             entity.AddComponent(new DisplayComponent(ScEntity));
-            entity.AddComponent(new LevelItemComponent());
+            entity.AddComponent(new LevelItemComponent(CurrentLevel));
             entity.AddComponent(new EquipableComponent(Slot));
             entity.AddComponent(new EntityTypeComponent(EcsType.Weapon));
             // Ensure that position is added AFTER EntityType because the move system requires EntityType

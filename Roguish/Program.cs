@@ -19,6 +19,7 @@ internal static class Program
     public static IKernel Kernel { get; private set; } = null!;
     public static readonly EcsRxApp EcsApp = new();
     public static FOV Fov = null!;
+    public static int CurrentLevel = 0;
 
     // ReSharper disable once UnusedParameter.Global
     public static void Main(string[] args)

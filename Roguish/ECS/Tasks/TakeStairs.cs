@@ -16,7 +16,8 @@ internal partial class TaskGetter
 
     public static void TakeStairs(EcsEntity agent, RogueTask t)
     {
-        Dungeon.FillSurface(Kernel.Get<DungeonSurface>());
+        CurrentLevel++;
+        Dungeon.FillSurface(Dungeon);
         Dungeon.IsFocused = true;
     }
 }

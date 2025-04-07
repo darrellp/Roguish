@@ -4,4 +4,9 @@
 internal class LevelItemComponent : EcsComponent
 {
     public int Level { get; set; }
+
+    internal LevelItemComponent(int level)
+    {
+        Level = level;
+    }
 }

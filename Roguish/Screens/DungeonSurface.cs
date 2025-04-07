@@ -206,7 +206,7 @@ internal class DungeonSurface : ScreenSurface
         stairs.AddComponent(new StairsComponent());
         stairs.AddComponent(new EntityTypeComponent(EcsType.Stairs));
         stairs.AddComponent(new PositionComponent(stairsPos));
-        stairs.AddComponent(new LevelItemComponent());
+        stairs.AddComponent(new LevelItemComponent(CurrentLevel));
     }
     #endregion
 
@@ -320,7 +320,7 @@ internal class DungeonSurface : ScreenSurface
         surface?.DrawMap(false);
 
         // Position stuff in the new dungeon
-        _eventSystem.Publish(new NewDungeonEvent(0));
+        _eventSystem.Publish(new NewDungeonEvent(CurrentLevel));
 
         // Make sure our hero is front and center
         CenterView(EcsApp.PlayerPos);

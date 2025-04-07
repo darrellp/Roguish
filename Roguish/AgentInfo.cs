@@ -129,7 +129,7 @@ internal class AgentInfo
             entity.AddComponent(new DescriptionComponent(Name, Description));
             entity.AddComponent(new HealthComponent(MaxHealth));
             entity.AddComponent(new DisplayComponent(ScEntity));
-            entity.AddComponent(new LevelItemComponent());
+            entity.AddComponent(new LevelItemComponent(CurrentLevel));
             entity.AddComponent(new PositionComponent(ScEntity.Position));
             if (Task != null)
             {

@@ -16,14 +16,21 @@ namespace Roguish.ECS.Systems;
 // ReSharper disable once ClassNeverInstantiated.Global
 internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
 {
+    #region Private Variables
     private static MapGenerator Mapgen = null!;
+    private static LogScreen Log = null!;
     private static ConcurrentQueue<Keys> KeysQueue { get; } = new();
+    #endregion
 
+    #region Static Constructor
     static KeyboardEventSystem()
     {
         Mapgen = Kernel.Get<MapGenerator>();
+        Log = Kernel.Get<LogScreen>();
     }
+    #endregion
 
+    #region Processing
     public void Process(KeyboardEvent keyData)
     {
         if (keyData.RetrieveFromQueue)
@@ -42,31 +49,6 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
         var key = keyData.Keys[0].Key;
         ProcessKey(key);
     }
-
-    internal static bool HasQueue()
-    {
-        return KeysQueue.Count > 0;
-    }
-
-    internal static void StopQueue()
-    {
-        KeysQueue.Clear();
-    }
-
-    internal static void EnqueueKey(Keys key)
-    {
-        KeysQueue.Enqueue(key);
-    }
-
-    private void ReadFromQueue()
-    {
-        while (KeysQueue.TryDequeue(out var key))
-        {
-            ProcessKey(key);
-            Thread.Sleep(50);
-        }
-    }
-
     private void ProcessKey(Keys key)
     {
         Point? ptMove = null;
@@ -84,9 +66,10 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
                     // TODO: Handle fMore
                     if (entity == null || !entity.HasComponent<StairsComponent>())
                     {
+                        
                         return;
                     }
-                    task = TaskGetter.CreateTakeStairsTask(0);
+                    task = TaskGetter.CreateTakeStairsTask(TaskGetter.Ticks);
                 }
                 break;
 
@@ -162,4 +145,32 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
         var position = positionCmp.Position.Value;
         return position + ptMoveDelta;
     }
+    #endregion
+
+    #region Queueing
+    internal static bool HasQueue()
+    {
+        return KeysQueue.Count > 0;
+    }
+
+    internal static void StopQueue()
+    {
+        KeysQueue.Clear();
+    }
+
+    internal static void EnqueueKey(Keys key)
+    {
+        KeysQueue.Enqueue(key);
+    }
+
+    private void ReadFromQueue()
+    {
+        while (KeysQueue.TryDequeue(out var key))
+        {
+            ProcessKey(key);
+            Thread.Sleep(50);
+        }
+    }
+    #endregion
+
 }
