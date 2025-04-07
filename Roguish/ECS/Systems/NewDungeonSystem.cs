@@ -44,14 +44,6 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
             }
         }
 
-        // Set up the player in their new position
-        var player = EcsRxApp.Player;
-        var posCmp = player.GetComponent<PositionComponent>();
-        Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
-        posCmp.FDrawFullFov = true;
-        Debug.Assert(_dungeon != null, nameof(_dungeon) + " != null");
-        posCmp.Position.SetValueAndForceNotify(_mapgen.FindRandomEmptyPoint());
-
         // Repopulate the new dungeon
         _dungeon.Populate(eventData.NewLevel);
     }

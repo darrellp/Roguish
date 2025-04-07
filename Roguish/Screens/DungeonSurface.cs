@@ -1,12 +1,15 @@
 ﻿using System.Diagnostics;
 using GoRogue.Pathing;
 using Ninject;
+using Roguish.ECS.Components;
+using Roguish.ECS;
 using Roguish.ECS.Events;
 using Roguish.ECS.Systems;
 using Roguish.Map_Generation;
 using SadConsole.Entities;
 using SadConsole.Input;
 using SystemsRx.Events;
+using EcsRx.Extensions;
 using Path = GoRogue.Pathing.Path;
 
 // ReSharper disable IdentifierTypo
@@ -165,19 +168,45 @@ internal class DungeonSurface : ScreenSurface
     // Player has been placed, FOV calculated
     public void Populate(int iLevel)
     {
+        // Place player
+        var player = EcsRxApp.Player;
+        var posCmp = player.GetComponent<PositionComponent>();
+        Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
+        posCmp.FDrawFullFov = true;
+        posCmp.Position.SetValueAndForceNotify(Mapgen.FindRandomEmptyPoint());
+
+        // Other agents
         for (var iAgent = 0; iAgent < GameSettings.AgentsPerLevel; iAgent++)
         {
             var bp = AgentInfo.GetBlueprint(iLevel, this);
-            var agent = EcsApp.EntityDatabase.GetCollection().CreateEntity(bp);
+            EcsApp.EntityDatabase.GetCollection().CreateEntity(bp);
         }
 
+        // Weapons
         for (var iWeapon = 0; iWeapon < GameSettings.WeaponsPerLevel; iWeapon++)
         {
             var weaponBlueprint = WeaponInfo.GetBlueprint(iLevel, this);
             EcsApp.EntityDatabase.GetCollection().CreateEntity(weaponBlueprint);
         }
 
+        // Stairs
+        CreateStairs();
+
+        // Everything's in place - light up stuff in player's FOV
         NewTurnEventSystem.CheckScEntityVisibility();
+    }
+
+    private void CreateStairs()
+    {
+        var stairsPos = Mapgen.FindRandomEmptyPoint();
+        var scEntityStairs = CreateScEntity(Color.Pink, stairsPos, '>', -100);
+        var stairs = EcsApp.EntityDatabase.GetCollection().CreateEntity();
+        var displayCmp = new DisplayComponent(scEntityStairs);
+        stairs.AddComponent(displayCmp);
+        stairs.AddComponent(new StairsComponent());
+        stairs.AddComponent(new EntityTypeComponent(EcsType.Stairs));
+        stairs.AddComponent(new PositionComponent(stairsPos));
+        stairs.AddComponent(new LevelItemComponent());
     }
     #endregion
 

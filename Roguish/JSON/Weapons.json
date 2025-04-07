@@ -7,7 +7,7 @@
     "StartLevel": 0,
     "EndLevl": 10,
     "Glyph": 120,
-    "Damage": "1d4",
+    "Damage": "1d4+1",
     "Color": {
       "_packedValue": 0xffffff80
     }
@@ -20,7 +20,7 @@
     "StartLevel": 0,
     "EndLevel": 10,
     "Glyph": 115,
-    "Damage": "1d8",
+    "Damage": "1d8+1",
     "Color": {
       "_packedValue": 0xffffff80
     }

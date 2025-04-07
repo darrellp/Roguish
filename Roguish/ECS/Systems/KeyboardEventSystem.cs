@@ -1,19 +1,28 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using EcsRx.Extensions;
+using Ninject;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using Roguish.ECS.Tasks;
 using Roguish.Map_Generation;
+using Roguish.Screens;
 using SadConsole.Input;
 using SystemsRx.Systems.Conventional;
+// ReSharper disable IdentifierTypo
 
 namespace Roguish.ECS.Systems;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
 {
+    private static MapGenerator Mapgen = null!;
     private static ConcurrentQueue<Keys> KeysQueue { get; } = new();
+
+    static KeyboardEventSystem()
+    {
+        Mapgen = Kernel.Get<MapGenerator>();
+    }
 
     public void Process(KeyboardEvent keyData)
     {
@@ -67,6 +76,20 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
 
         switch (key)
         {
+            case Keys.OemPeriod:
+                var kb = SadConsole.Game.Instance.Keyboard;
+                if (kb.IsKeyDown(Keys.LeftShift) || kb.IsKeyDown(Keys.RightShift))
+                {
+                    var (entity, fMore) = Mapgen.GetEntityAt(EcsApp.PlayerPos, true);
+                    // TODO: Handle fMore
+                    if (entity == null || !entity.HasComponent<StairsComponent>())
+                    {
+                        return;
+                    }
+                    task = TaskGetter.CreateTakeStairsTask(0);
+                }
+                break;
+
             case Keys.G:
                 task = TaskGetter.CreatePickupTask();
                 break;
