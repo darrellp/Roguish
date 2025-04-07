@@ -11,6 +11,7 @@ using SadConsole.Input;
 using SystemsRx.Events;
 using EcsRx.Extensions;
 using Path = GoRogue.Pathing.Path;
+using Keys = SadConsole.Input.Keys;
 
 // ReSharper disable IdentifierTypo
 
@@ -211,7 +212,6 @@ internal class DungeonSurface : ScreenSurface
     #endregion
 
     #region Event Handlers
-
     private void MouseButtonClickedHandler(object? sender, MouseScreenObjectState state)
     {
         _eventSystem.Publish(new KeyboardEvent(null) { RetrieveFromQueue = false });
@@ -220,6 +220,10 @@ internal class DungeonSurface : ScreenSurface
         if (_drawFov && !_revealed[posDest.X, posDest.Y] || !MapGenerator.IsWalkable(posDest))
         {
             return;
+        }
+        if (posDest == EcsApp.PlayerPos)
+        {
+            KeyboardEventSystem.EnqueueKey(Keys.D5);
         }
         var aStar = new AStar(MapGenerator.WallFloorValues, Distance.Chebyshev);
         var path = aStar.ShortestPath(EcsApp.PlayerPos, posDest);

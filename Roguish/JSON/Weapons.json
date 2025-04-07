@@ -5,7 +5,7 @@
     "Description": "Modest sized axe",
     "Slot": "OneHand",
     "StartLevel": 0,
-    "EndLevl": 10,
+    "EndLevel": 10,
     "Glyph": 120,
     "Damage": "1d4+1",
     "Color": {

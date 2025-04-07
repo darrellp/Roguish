@@ -1,5 +1,4 @@
-﻿#define CheckTimings
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Roguish.ECS.Events;
 using Roguish.ECS.Components;
 using SystemsRx.Systems.Conventional;
@@ -40,18 +39,13 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         var uiDrivenTask = uiDrivenTaskCmp.Tasks[0];
         Debug.Assert(uiDrivenTask != null);
 
+        // We shouldn't be moving BACK in time!
+        Debug.Assert(TaskGetter.Ticks <= uiDrivenTask.FireOn);
+
         TaskGetter.Ticks = uiDrivenTask.FireOn;
         Debug.Assert(uiDrivenTask.Action != null, "uiDrivenTask.Action != null");
         uiDrivenTask.Action(player, uiDrivenTask);
-#if CheckTimings
-        foreach (var nextTask in uiDrivenTaskCmp.Tasks.Skip(1))
-        {
-            if (nextTask.FireOn > TaskGetter.Ticks + 300)
-            {
-                Debug.Assert(false, "nextTask.FireOn > TaskGetter.Ticks + 300");
-            }
-        }
-#endif
+
         // Player gets priority in ALL their tasks
         foreach (var nextTask in uiDrivenTaskCmp.Tasks.Skip(1).Where(t => t.FireOn <= TaskGetter.Ticks))
         {
