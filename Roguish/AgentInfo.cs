@@ -145,7 +145,7 @@ internal class AgentInfo
             entity.AddComponent(new AgentComponent(AgentType, Move));
             // Start with a random fireon time to stagger agent moves randomly
             entity.AddComponent(new TaskComponent(TaskGetter.Ticks + Move * Rng.NextULong(100) / 100ul, 
-                TaskGetter.DefaultAgentMove));
+                TaskType.AgentMove));
             entity.AddComponent(new EntityTypeComponent(EcsType.Agent));
             // base Apply does position which calls movement system which requires EntityType
             // so it has to come after the EntityTypeComponent add in this routine

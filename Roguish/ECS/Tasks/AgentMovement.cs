@@ -19,7 +19,7 @@ internal partial class TaskGetter
         task.FireOn += agentCmp.MoveTime;
         if (posCmp.Position.Value.Manhattan(EcsApp.PlayerPos) < GameSettings.PursueRadius)
         {
-            task.Action = AgentPursue;
+            task.TaskType = TaskType.AgentPursue;
         }
     }
 
@@ -30,7 +30,7 @@ internal partial class TaskGetter
             currentTicks = Ticks;
         }
 
-        return new(currentTicks + StdMovementTime, DefaultAgentMove);
+        return new(currentTicks + StdMovementTime, TaskType.AgentMove);
     }
 }
 

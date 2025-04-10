@@ -9,7 +9,7 @@ internal partial class TaskGetter
         {
             currentTicks = Ticks;
         }
-        return new(currentTicks + EquipTime, UserEquip);
+        return new(currentTicks + EquipTime, TaskType.Equip);
     }
 
     public static void UserEquip(EcsEntity agent, RogueTask t)

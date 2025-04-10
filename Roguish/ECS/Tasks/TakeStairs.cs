@@ -11,7 +11,7 @@ internal partial class TaskGetter
         {
             currentTicks = Ticks;
         }
-        return new(currentTicks, TakeStairs);
+        return new(currentTicks, TaskType.TakeStairs);
     }
 
     public static void TakeStairs(EcsEntity agent, RogueTask t)

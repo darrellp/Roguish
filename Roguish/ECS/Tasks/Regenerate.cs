@@ -11,7 +11,7 @@ internal partial class TaskGetter
             currentTicks = Ticks;
         }
 
-        return new RogueTask(currentTicks + EquipTime, Regenerate);
+        return new RogueTask(currentTicks + EquipTime, TaskType.Regenerate);
     }
 
     internal static void Regenerate(EcsEntity agent, RogueTask t)

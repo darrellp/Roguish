@@ -30,7 +30,7 @@ internal partial class TaskGetter
         }
         if (ptMove.Manhattan(playerPos) >= GameSettings.PursueRadius)
         {
-            task.Action = DefaultAgentMove;
+            task.TaskType = TaskType.AgentMove;
         }
     }
 
@@ -68,6 +68,6 @@ internal partial class TaskGetter
         {
             currentTicks = Ticks;
         }
-        return new(currentTicks + StdMovementTime, AgentPursue);
+        return new(currentTicks + StdMovementTime, TaskType.AgentPursue);
     }
 }

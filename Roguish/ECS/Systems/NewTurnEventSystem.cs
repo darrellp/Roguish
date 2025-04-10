@@ -45,27 +45,24 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
         // We shouldn't be moving BACK in time!
         Debug.Assert(TaskGetter.Ticks <= uiDrivenTask.FireOn);
 
+        Debug.Assert(uiDrivenTask.TaskType != TaskType.Unassigned);
+        uiDrivenTask.Action(player);
         TaskGetter.Ticks = uiDrivenTask.FireOn;
-        Debug.Assert(uiDrivenTask.Action != null, "uiDrivenTask.Action != null");
-        uiDrivenTask.Action(player, uiDrivenTask);
 
         // Player gets priority in ALL their tasks
         foreach (var nextTask in uiDrivenTaskCmp.Tasks.Skip(1).Where(t => t.FireOn <= TaskGetter.Ticks))
         {
             // This player task is already due so we can just do it
             Debug.Assert(nextTask.Action != null, "nextTask.Action != null");
-            nextTask.Action(player, nextTask);
+            nextTask.Action(player);
         }
         // Player is special - it will get a new task when the UI demands it
         // so no replacing here
         uiDrivenTaskCmp.Tasks[0] = null!;
 
-        foreach (var tasked in EcsRxApp.TaskedGroup.ToArray())
+        foreach (var tasked in EcsRxApp.TaskedGroup.
+                     Where(t => !t.HasComponent<IsDestroyedComponent>() && t.Id != player.Id).ToArray())
         {
-            if (tasked.HasComponent<IsDestroyedComponent>() || tasked.Id == player.Id)
-            {
-                continue;
-            }
             var taskCmp = tasked.GetComponent<TaskComponent>();
             foreach (var task in taskCmp.Tasks.Where(t => t.FireOn <= TaskGetter.Ticks))
             {
@@ -73,7 +70,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
 
                 while (task.FireOn <= TaskGetter.Ticks)
                 {
-                    task.Action(tasked, task);
+                    task.Action(tasked);
                 }
             }
         }

@@ -7,6 +7,7 @@ using Roguish.ECS.Events;
 using Roguish.ECS.Tasks;
 using Roguish.Map_Generation;
 using Roguish.Screens;
+using Roguish.Serialization;
 using SadConsole.Input;
 using SystemsRx.Systems.Conventional;
 // ReSharper disable IdentifierTypo
@@ -55,11 +56,19 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
         RogueTask? task = null;
         var player = EcsRxApp.Player;
         Debug.Assert(player != null);
+        var kb = SadConsole.Game.Instance.Keyboard;
 
         switch (key)
         {
+            case Keys.S:
+                if (kb.IsKeyDown(Keys.LeftControl) || kb.IsKeyDown(Keys.RightControl))
+                {
+                    StopQueue();
+                    Serialize.SaveGame();
+                }
+                break;
+
             case Keys.OemPeriod:
-                var kb = SadConsole.Game.Instance.Keyboard;
                 if (kb.IsKeyDown(Keys.LeftShift) || kb.IsKeyDown(Keys.RightShift))
                 {
                     var (entity, fMore) = Mapgen.GetEntityAt(EcsApp.PlayerPos, true);
@@ -126,8 +135,7 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
                 return;
             }
 
-            // TODO: create heal task and keep it on player also
-           task = TaskGetter.CreatePlayerMoveTask(newPosition);
+            task = TaskGetter.CreatePlayerMoveTask(newPosition);
 
         }
 

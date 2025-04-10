@@ -40,6 +40,6 @@ internal partial class TaskGetter
             currentTicks = Ticks;
         }
 
-        return new(currentTicks + PickUpTime, UserPickup);
+        return new(currentTicks + PickUpTime, TaskType.PickUp);
     }
 }

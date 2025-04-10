@@ -1,12 +1,47 @@
 ﻿using Roguish.Map_Generation;
 using Ninject;
+using Roguish.ECS.Components;
 using Roguish.Screens;
-
 // ReSharper disable IdentifierTypo
-
 namespace Roguish.ECS.Tasks;
+
+public enum TaskType
+{
+    Unassigned,
+    PlayerMove,
+    AgentMove,
+    AgentPursue,
+    PickUp,
+    Equip,
+    Regenerate,
+    TakeStairs,
+
+    // Not implemented yet
+    Drop,
+    Use,
+    Wait,
+    Attack,
+    CastSpell,
+    Rest,
+    WaitForTurn
+}
+
 internal static partial class TaskGetter
 {
+    #region Action Table
+    // Parallels TaskType enum above...
+    internal static readonly List<Action<EcsEntity, RogueTask>> ActionTable =[
+        null,
+        MovePlayer,
+        DefaultAgentMove,
+        AgentPursue,
+        UserPickup,
+        UserEquip,
+        Regenerate,
+        TakeStairs,
+    ];
+    #endregion
+
     #region Fields
     internal static ulong Ticks { get; set; } = 0;
     private static readonly DungeonSurface Dungeon;

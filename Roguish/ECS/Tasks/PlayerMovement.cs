@@ -7,24 +7,6 @@ using Roguish.ECS.Systems;
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter
 {
-    private static Action<EcsEntity, RogueTask> MovePlayerClosure(Point newPosition)
-    {
-        return (_,_) => { MovePlayer(newPosition); };
-    }
-
-    private static void MovePlayer(Point newPosition)
-    {
-        var player = EcsRxApp.Player;
-        var positionCmp = (PositionComponent)player.GetComponent(typeof(PositionComponent));
-        Debug.Assert(MapGenerator.IsWalkable(newPosition));
-        if (BattleCheck(newPosition))
-        {
-            return;
-        }
-        positionCmp.Position.SetValueAndForceNotify(newPosition);
-        Dungeon.KeepPlayerInView();
-    }
-
     private static bool BattleCheck(Point ptDest)
     {
         if (!Mapgen.IsAgentAt(ptDest) || ptDest == EcsApp.PlayerPos)
@@ -78,12 +60,25 @@ internal partial class TaskGetter
         return true;
     }
 
-    internal static RogueTask CreatePlayerMoveTask(Point newPt, ulong currentTicks = ulong.MaxValue)
+    internal static RogueTask CreatePlayerMoveTask(Point ptDest, ulong currentTicks = ulong.MaxValue)
     {
         if (currentTicks == ulong.MaxValue)
         {
             currentTicks = Ticks;
         }
-        return new(currentTicks + StdMovementTime, MovePlayerClosure(newPt));
+        return new(currentTicks + StdMovementTime, TaskType.PlayerMove, ptDest);
+    }
+
+    public static void MovePlayer(EcsEntity agent, RogueTask t)
+    {
+        var player = EcsRxApp.Player;
+        var positionCmp = (PositionComponent)player.GetComponent(typeof(PositionComponent));
+        Debug.Assert(MapGenerator.IsWalkable(t.PointArg));
+        if (BattleCheck(t.PointArg))
+        {
+            return;
+        }
+        positionCmp.Position.SetValueAndForceNotify(t.PointArg);
+        Dungeon.KeepPlayerInView();
     }
 }

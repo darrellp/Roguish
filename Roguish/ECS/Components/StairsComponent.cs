@@ -1,4 +1,4 @@
 ﻿namespace Roguish.ECS.Components;
-internal class StairsComponent : EcsComponent
+public class StairsComponent : EcsComponent
 {
 }
