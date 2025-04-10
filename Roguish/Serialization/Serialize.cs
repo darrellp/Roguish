@@ -8,6 +8,8 @@ using EcsRx.Infrastructure;
 using SystemsRx.Infrastructure.Dependencies;
 using Ninject;
 using Roguish.Screens;
+using System.Data;
+using System.Reflection;
 
 // ReSharper disable IdentifierTypo
 
@@ -36,7 +38,49 @@ internal static partial class Serialize
 
         using JsonWriter writer = new JsonTextWriter(sw);
         SerializeEcs(writer, settings);
-        var output = sb.ToString();
+        var jsonEcs = sb.ToString();
+        DeserializeEcs(jsonEcs);
+    }
+
+    private static void DeserializeEcs(string json)
+    {
+        var reader = new JsonTextReader(new StringReader(json));
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.StartArray);
+        while (reader.Read())       // Start of object
+        {
+
+            if (reader.TokenType == JsonToken.EndArray)
+                break;
+            ReadEntity(reader);
+        }
+    }
+
+    private static void ReadEntity(JsonReader reader)
+    {
+        int id;
+        Debug.Assert(reader.TokenType == JsonToken.StartObject);
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.PropertyName);
+        Debug.Assert((string)reader.Value! == "Id");
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.Integer);
+        id = Convert.ToInt32(reader.Value!);
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.PropertyName);
+        Debug.Assert(reader.Value == "Components");
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.StartArray);
+
+        // Components
+        while (true)
+        {
+            var cmp = DeserializeComponent(reader);
+            if (cmp == null)
+            {
+                break;
+            }
+        }
     }
 
     private static void SerializeEcs(JsonWriter writer, JsonSerializerSettings settings)
@@ -146,4 +190,28 @@ internal static partial class Serialize
         return type == null ? null : (EcsComponent?)JsonConvert.DeserializeObject(json, type);
     }
 
+    private static EcsComponent? DeserializeComponent(JsonReader reader)
+    {
+        JsonReader reader2 = reader;
+        reader2.Read();
+        //if (reader2.TokenType != JsonToken.StartObject)
+        //{
+        //    return null;
+        //}
+
+        return DeserializeComponent(reader2.Value as string);
+        reader2.Read();
+        Debug.Assert(reader2.TokenType == JsonToken.PropertyName);
+        Debug.Assert(reader2.Value == "ComponentType");
+        reader2.Read();
+        Debug.Assert(reader2.TokenType == JsonToken.String);
+        var typeName = ComponentNamespace + "." + reader2.Value;
+        var type = Type.GetType(typeName);
+
+        JsonSerializer serializer = new JsonSerializer();
+        var method = typeof(JsonSerializer).GetMethod("Deserialize", [typeof(JsonReader)]);
+        Type[] typeArgs = [type];
+        MethodInfo genericMethod = method.MakeGenericMethod(typeArgs);
+        return genericMethod.Invoke(serializer, [reader]) as EcsComponent;
+    }
 }
