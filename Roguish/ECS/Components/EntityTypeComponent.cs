@@ -2,7 +2,7 @@
 
 // Dunno how much of this I'll actually use but doesn't hurt to put it here
 // TODO: Implement another of these
-internal enum EcsType
+public enum EcsType
 {
     Player,
     Agent,
@@ -23,7 +23,7 @@ internal enum EcsType
     Projectile,
 }
 
-internal class EntityTypeComponent(EcsType type) : EcsComponent
+public class EntityTypeComponent(EcsType type) : EcsComponent
 {
-    internal EcsType EcsType { get; init; } = type;
+    public EcsType EcsType { get; set; } = type;
 }

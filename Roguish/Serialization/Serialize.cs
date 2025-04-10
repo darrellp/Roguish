@@ -1,32 +1,67 @@
 ﻿using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Text;
 using Roguish.ECS;
 using Roguish.ECS.Components;
 using EcsRx.Extensions;
-using System.Dynamic;
-using System.Runtime.Serialization;
+using EcsRx.Infrastructure;
+using SystemsRx.Infrastructure.Dependencies;
+using Ninject;
+using Roguish.Screens;
 
 // ReSharper disable IdentifierTypo
 
 namespace Roguish.Serialization;
 internal static partial class Serialize
 {
-    static string ComponentNamespace = typeof(HealthComponent).Namespace!;
+    private static readonly string ComponentNamespace = typeof(HealthComponent).Namespace!;
+
 
     internal static void SaveGame()
     {
         JsonSerializerSettings settings = new JsonSerializerSettings
         {
-            ContractResolver = new CustomResolver("MyTypeName"),
+            ContractResolver = new CustomResolver("EcsComponent"),
             Formatting = Formatting.Indented,
             Converters = new List<JsonConverter>
             {
                 new ReactiveConverter<Point>(),
-                new ReactiveConverter<Int64>(),
+                new ReactiveConverter<long>(),
             }
         };
 
-        PlayerSerialization(settings);
+        //PlayerSerialization(settings);
+        var sb = new StringBuilder();
+        var sw = new StringWriter(sb);
+
+        using JsonWriter writer = new JsonTextWriter(sw);
+        SerializeEcs(writer, settings);
+        var output = sb.ToString();
+    }
+
+    private static void SerializeEcs(JsonWriter writer, JsonSerializerSettings settings)
+    {
+        writer.WriteStartArray();
+        foreach (var entity in EcsApp.EntityDatabase.GetCollection())
+        {
+            SerializeEntity(entity, writer, settings);
+        }
+        writer.WriteEndArray();
+    }
+    private static void SerializeEntity(EcsEntity entity, JsonWriter writer, JsonSerializerSettings settings)
+    {
+        writer.WriteStartObject();
+        writer.WritePropertyName("Id");
+        writer.WriteValue(entity.Id);
+        writer.WritePropertyName("Components");
+        writer.WriteStartArray();
+        foreach (var cmp in entity.Components)
+        {
+            var json = JsonConvert.SerializeObject(cmp, settings);
+            writer.WriteValue(json);
+        }
+        writer.WriteEndArray();
+        writer.WriteEndObject();
     }
 
     private static void PlayerSerialization(JsonSerializerSettings settings)
@@ -35,7 +70,7 @@ internal static partial class Serialize
 
         var descCmp = player.GetComponent<DescriptionComponent>();
         var descJson = JsonConvert.SerializeObject(descCmp, settings);
-        var descCmpD = DeserializeComponent<DescriptionComponent>(descJson);
+        var descCmpD = DeserializeComponent(descJson);
         Debug.Assert(descCmpD != null, "Something didn't Deserialize correctly!");
 
         var lvlCmp = player.GetComponent<LevelItemComponent>();
@@ -81,15 +116,34 @@ internal static partial class Serialize
         Debug.Assert(taskCmpD != null, "Something didn't Deserialize correctly!");
     }
 
-    private static T? DeserializeComponent<T>(string json) 
+    private static T? DeserializeComponent<T>(string json)
     {
-        dynamic? expando = JsonConvert.DeserializeObject<ExpandoObject>(json);
-        if (expando == null)
-        {
-            throw new SerializationException("Invalid Json in DeserializeComponent");
-        }
-        string typeName = ComponentNamespace + "." + expando.ComponentType;
+        var reader = new JsonTextReader(new StringReader(json));
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.StartObject);
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.PropertyName);
+        Debug.Assert(reader.Value == "ComponentType");
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.String);
+        var typeName = ComponentNamespace + "." + reader.Value;
         var type = Type.GetType(typeName);
         return type == null ? default(T) : JsonConvert.DeserializeObject<T>(json);
     }
+
+    private static EcsComponent? DeserializeComponent(string json)
+    {
+        var reader = new JsonTextReader(new StringReader(json));
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.StartObject);
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.PropertyName);
+        Debug.Assert(reader.Value == "ComponentType");
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.String);
+        var typeName = ComponentNamespace + "." + reader.Value;
+        var type = Type.GetType(typeName);
+        return type == null ? null : (EcsComponent?)JsonConvert.DeserializeObject(json, type);
+    }
+
 }
