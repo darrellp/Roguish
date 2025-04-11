@@ -27,7 +27,7 @@ internal static class Bindings
             Screen = typeof(StatusBar),
             Position = new Point(40, 0),
             Control = new Label(12),
-            BindValue = EcsRxApp.Player.GetComponent<HealthComponent>().CurrentHealth,
+            BindValue = StatusBar.PlayerHealth,
             Observer = MoveIntToLabelClosure("HP: {0,2:D}"),
         },
         new Binding<Point>

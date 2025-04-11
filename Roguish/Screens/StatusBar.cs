@@ -14,6 +14,7 @@ internal class StatusBar : ScreenSurface
     public static Color ForeColor = Color.White;
     public static string PositionFormat = "({0,3:D},{1,3:D})";
     public static ReactiveProperty<Point> MousePosition = new(new Point());
+    public static ReactiveProperty<int> PlayerHealth = new(0);
     public static DungeonSurface Dungeon = null!;
     #endregion
 

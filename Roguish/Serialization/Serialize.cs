@@ -2,8 +2,11 @@
 using System.Diagnostics;
 using System.Text;
 using Ninject;
+using Roguish.ECS;
 using Roguish.ECS.Components;
+using Roguish.Map_Generation;
 using Roguish.Screens;
+using EcsRx.Extensions;
 
 // ReSharper disable IdentifierTypo
 
@@ -12,6 +15,7 @@ internal static partial class Serialize
 {
     private static readonly string ComponentNamespace = typeof(HealthComponent).Namespace!;
     private static DungeonSurface Dungeon = Kernel.Get<DungeonSurface>();
+    private static MapGenerator MapGen = Kernel.Get<MapGenerator>();
 
     internal static void SaveGame()
     {
@@ -73,11 +77,18 @@ internal static partial class Serialize
         var collection = EcsApp.EntityDatabase.GetCollection();
         var newHeroEntity = collection.CreateEntity();
         var newId = newHeroEntity.Id;
-
+        var playerPos = EcsApp.PlayerPos;
+        var oldPlayer = EcsRxApp.Player;
+        MapGen.RemoveAgentAt(playerPos);
+        Dungeon.RemoveScEntity(oldPlayer.GetComponent<DisplayComponent>().ScEntity);
+        collection.RemoveEntity(EcsRxApp.Player.Id);
+        MapGenerator.SetAgentPosition(newId, playerPos, EcsType.Player, playerPos);
         foreach (var cmp in heroInfo.Components)
         {
-            
+            newHeroEntity.AddComponent(cmp);
         }
+
+        EcsRxApp.Player = newHeroEntity;
     }
 
     private static void MassageComponents(EntityInfo entityInfo, Dictionary<int, int> mpOldIdToNewId)
