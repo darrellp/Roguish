@@ -103,6 +103,11 @@ internal class DungeonSurface : ScreenSurface
         return _entityManager.Entities;
     }
 
+    public ScEntity GetPlayerScEntity(Point pos)
+    {
+        return CreateScEntity(Color.White, pos, 2, 100);
+    }
+
     public ScEntity CreateScEntity(Color foreground, Point pt, int chGlyph, int zOrder)
     {
         var scEntity = new ScEntity(new ScEntity.SingleCell(foreground, GameSettings.ClearColor, chGlyph), zOrder)

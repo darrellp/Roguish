@@ -1,15 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Text;
-using Roguish.ECS;
-using Roguish.ECS.Components;
-using EcsRx.Extensions;
-using EcsRx.Infrastructure;
-using SystemsRx.Infrastructure.Dependencies;
 using Ninject;
+using Roguish.ECS.Components;
 using Roguish.Screens;
-using System.Data;
-using System.Reflection;
 
 // ReSharper disable IdentifierTypo
 
@@ -17,7 +11,7 @@ namespace Roguish.Serialization;
 internal static partial class Serialize
 {
     private static readonly string ComponentNamespace = typeof(HealthComponent).Namespace!;
-
+    private static DungeonSurface Dungeon = Kernel.Get<DungeonSurface>();
 
     internal static void SaveGame()
     {
@@ -39,37 +33,113 @@ internal static partial class Serialize
         using JsonWriter writer = new JsonTextWriter(sw);
         SerializeEcs(writer, settings);
         var jsonEcs = sb.ToString();
-        DeserializeEcs(jsonEcs);
+
+        // Given an ID get the index of the corresponding entity in ecsInfo
+        var ecsInfo = DeserializeEcs(jsonEcs);
+        var mpOldIdToNewId = new Dictionary<int, int>();
+        CreateEntities(ecsInfo, mpOldIdToNewId);
+
+        ReanimateHero(FindHero(ecsInfo), ecsInfo, mpOldIdToNewId);
     }
 
-    private static void DeserializeEcs(string json)
+    private static void CreateEntities(List<EntityInfo> ecsInfo, Dictionary<int, int> mpOldIdToNewId)
     {
-        var reader = new JsonTextReader(new StringReader(json));
-        reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.StartArray);
-        while (reader.Read())       // Start of object
+        // TODO: Actually create entities and map the old ids in ecsInfo to the new entity ids
+        for (var i = 0; i < ecsInfo.Count; i++)
         {
-
-            if (reader.TokenType == JsonToken.EndArray)
-                break;
-            ReadEntity(reader);
+            mpOldIdToNewId[i] = i;    
         }
     }
 
-    private static void ReadEntity(JsonReader reader)
+    private static int FindHero(List<EntityInfo> ecsInfo)
     {
-        int id;
-        Debug.Assert(reader.TokenType == JsonToken.StartObject);
+        for (int iEntity = 0; iEntity < ecsInfo.Count; iEntity++)
+        {
+            var entityInfo = ecsInfo[iEntity];
+            var info = entityInfo.Components.Where(c => c is IsPlayerControlledComponent).ToArray();
+            if (info.Length > 0)
+            {
+                return iEntity;
+            }
+        }
+        throw new Exception("No Hero found!");
+    }
+
+    private static void ReanimateHero(int iHero, List<EntityInfo> ecsInfo, Dictionary<int, int> mpOldIdToNewId)
+    {
+        var heroInfo = ecsInfo[iHero];
+        MassageComponents(heroInfo, mpOldIdToNewId);
+
+        var collection = EcsApp.EntityDatabase.GetCollection();
+        var newHeroEntity = collection.CreateEntity();
+        var newId = newHeroEntity.Id;
+
+        foreach (var cmp in heroInfo.Components)
+        {
+            
+        }
+    }
+
+    private static void MassageComponents(EntityInfo entityInfo, Dictionary<int, int> mpOldIdToNewId)
+    {
+        foreach (var cmp in entityInfo.Components) 
+        {
+            switch (cmp)
+            {
+                case DisplayComponent displayComponent:
+                    var posCmp = entityInfo.FindComponent<PositionComponent>();
+                    if (posCmp != null)
+                    {
+                        displayComponent.ScEntity = Dungeon.GetPlayerScEntity(posCmp.Position.Value);
+                    }
+                    break;
+
+                case EquippedComponent equippedComponent:
+                    equippedComponent.RemapEquipment(mpOldIdToNewId);
+                    break;
+            }
+        }
+    }
+
+    internal static int RemapId(int id, Dictionary<int, int> mpOldIdToNewId)
+    {
+        return mpOldIdToNewId.GetValueOrDefault(id, id);
+    }
+
+    private record EntityInfo(int Id, List<EcsComponent> Components)
+    {
+        public T? FindComponent<T>() where T : class
+        {
+            return Components.FirstOrDefault(c => c is T) as T;
+        }
+    }
+
+    private static List<EntityInfo> DeserializeEcs(string json)
+    {
+        var infoList = new List<EntityInfo>();
+        var reader = new JsonTextReader(new StringReader(json));
         reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.PropertyName);
-        Debug.Assert((string)reader.Value! == "Id");
-        reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.Integer);
-        id = Convert.ToInt32(reader.Value!);
-        reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.PropertyName);
-        Debug.Assert(reader.Value == "Components");
-        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.StartArray);
+        var index = 0;
+        while (reader.Read())       // Start of object
+        {
+            if (reader.TokenType == JsonToken.EndArray)
+                break;
+            var entityInfo = DeserializeEntity(reader);
+            infoList.Add(entityInfo);
+        }
+
+        return infoList;
+    }
+
+    private static EntityInfo DeserializeEntity(JsonReader reader)
+    {
+        var componentList = new List<EcsComponent>();
+        reader.Read();  // Id:
+        reader.Read();  // <Id value>
+        var id = Convert.ToInt32(reader.Value!);
+        reader.Read();  // Components:
+        reader.Read();  // StartArray
         Debug.Assert(reader.TokenType == JsonToken.StartArray);
 
         // Components
@@ -80,7 +150,42 @@ internal static partial class Serialize
             {
                 break;
             }
+            componentList.Add(cmp);
         }
+
+        return new EntityInfo(id, componentList);
+    }
+
+    private static EcsComponent? DeserializeComponent(JsonReader reader)
+    {
+        // I don't understand why this read doesn't come back with StartObject.  I'm happy it
+        // doesn't because it gives me exactly what I really want but I still don't understand.
+        reader.Read();
+        if (reader.TokenType == JsonToken.EndArray)
+        {
+            reader.Read();      // EndObject
+            return null;
+        }
+
+        return DeserializeComponent((reader.Value as string)!);
+    }
+
+    private static EcsComponent? DeserializeComponent(string json)
+    {
+        var reader = new JsonTextReader(new StringReader(json));
+        reader.Read();      // StartObject or EndArray
+        if (reader.TokenType == JsonToken.EndArray)
+        {
+            return null;
+        }
+        reader.Read();      // "ComponentType"
+        reader.Read();      // <ComponentType value (i.e., typename)>
+        var typeName = ComponentNamespace + "." + reader.Value;
+        var type = Type.GetType(typeName);
+        Debug.Assert(type != null);
+
+        // Use the type to deserialize
+        return (EcsComponent?)JsonConvert.DeserializeObject(json, type);
     }
 
     private static void SerializeEcs(JsonWriter writer, JsonSerializerSettings settings)
@@ -92,6 +197,7 @@ internal static partial class Serialize
         }
         writer.WriteEndArray();
     }
+
     private static void SerializeEntity(EcsEntity entity, JsonWriter writer, JsonSerializerSettings settings)
     {
         writer.WriteStartObject();
@@ -107,6 +213,9 @@ internal static partial class Serialize
         writer.WriteEndArray();
         writer.WriteEndObject();
     }
+
+
+#if NOTNOW
 
     private static void PlayerSerialization(JsonSerializerSettings settings)
     {
@@ -174,44 +283,5 @@ internal static partial class Serialize
         var type = Type.GetType(typeName);
         return type == null ? default(T) : JsonConvert.DeserializeObject<T>(json);
     }
-
-    private static EcsComponent? DeserializeComponent(string json)
-    {
-        var reader = new JsonTextReader(new StringReader(json));
-        reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.StartObject);
-        reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.PropertyName);
-        Debug.Assert(reader.Value == "ComponentType");
-        reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.String);
-        var typeName = ComponentNamespace + "." + reader.Value;
-        var type = Type.GetType(typeName);
-        return type == null ? null : (EcsComponent?)JsonConvert.DeserializeObject(json, type);
-    }
-
-    private static EcsComponent? DeserializeComponent(JsonReader reader)
-    {
-        JsonReader reader2 = reader;
-        reader2.Read();
-        //if (reader2.TokenType != JsonToken.StartObject)
-        //{
-        //    return null;
-        //}
-
-        return DeserializeComponent(reader2.Value as string);
-        reader2.Read();
-        Debug.Assert(reader2.TokenType == JsonToken.PropertyName);
-        Debug.Assert(reader2.Value == "ComponentType");
-        reader2.Read();
-        Debug.Assert(reader2.TokenType == JsonToken.String);
-        var typeName = ComponentNamespace + "." + reader2.Value;
-        var type = Type.GetType(typeName);
-
-        JsonSerializer serializer = new JsonSerializer();
-        var method = typeof(JsonSerializer).GetMethod("Deserialize", [typeof(JsonReader)]);
-        Type[] typeArgs = [type];
-        MethodInfo genericMethod = method.MakeGenericMethod(typeArgs);
-        return genericMethod.Invoke(serializer, [reader]) as EcsComponent;
-    }
+#endif
 }

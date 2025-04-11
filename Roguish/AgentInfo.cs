@@ -5,7 +5,6 @@ using Roguish.ECS.Components;
 using ShaiRandom.Generators;
 using EcsRx.Extensions;
 using Newtonsoft.Json;
-using Roguish.ECS.Systems;
 using Roguish.Screens;
 using Roguish.ECS.Tasks;
 
@@ -81,7 +80,7 @@ internal class AgentInfo
     internal static IBlueprint GetPlayerBlueprint(int maxHealth, DungeonSurface dungeon)
     {
         var pos = new Point(0, 0);
-        var scEntity = dungeon.CreateScEntity(Color.White, pos, 2, 100);
+        var scEntity = dungeon.GetPlayerScEntity(pos);
         return new PlayerBlueprint
         {
             AgentType = AgentType.Player,
