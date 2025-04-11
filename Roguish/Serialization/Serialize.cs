@@ -8,6 +8,7 @@ using Roguish.Map_Generation;
 using Roguish.Screens;
 using EcsRx.Extensions;
 using Roguish.ECS.Systems;
+using SadConsole.SerializedTypes;
 
 // ReSharper disable IdentifierTypo
 
@@ -28,10 +29,14 @@ internal static partial class Serialize
             {
                 new ReactiveConverter<Point>(),
                 new ReactiveConverter<long>(),
+                new ColorJsonConverter(),
+                new ColoredGlyphJsonConverter(),
+                new ScEntityConverter(),
             }
         };
 
-        //PlayerSerialization(settings);
+        TryDeserializeDisplayCmp();
+
         var sb = new StringBuilder();
         var sw = new StringWriter(sb);
 
@@ -44,6 +49,26 @@ internal static partial class Serialize
 
         //ReanimateHero(FindHero(ecsInfo), ecsInfo, mpOldIdToNewId);
         Reanimate(ecsInfo);
+    }
+
+    private static void TryDeserializeDisplayCmp(JsonSerializerSettings settings)
+    {
+        var json = """
+                   {
+                        "ComponentType": "DisplayComponent",
+                        "ScEntity\": {
+                            "Foreground": 4294967295,
+                            "Glyph": 2,
+                            "ZOrder": 100,
+                            "Position": {
+                                "X": 44,
+                                "Y": 48
+                            }
+                        }
+                   }
+                   """;
+        var test = DeserializeComponent(json);
+
     }
 
     private static List<EcsEntity> CreateEntities(List<EntityInfo> ecsInfo, Dictionary<int, int> mpOldIdToNewId)
@@ -60,42 +85,6 @@ internal static partial class Serialize
         }
 
         return newEntities;
-    }
-
-    private static int FindHero(List<EntityInfo> ecsInfo)
-    {
-        for (int iEntity = 0; iEntity < ecsInfo.Count; iEntity++)
-        {
-            var entityInfo = ecsInfo[iEntity];
-            var info = entityInfo.Components.Where(c => c is IsPlayerControlledComponent).ToArray();
-            if (info.Length > 0)
-            {
-                return iEntity;
-            }
-        }
-        throw new Exception("No Hero found!");
-    }
-
-    private static void ReanimateHero(int iHero, List<EntityInfo> ecsInfo, Dictionary<int, int> mpOldIdToNewId)
-    {
-        var heroInfo = ecsInfo[iHero];
-        MassageComponents(heroInfo, mpOldIdToNewId);
-
-        var collection = EcsApp.EntityDatabase.GetCollection();
-        var newHeroEntity = collection.CreateEntity();
-        var newId = newHeroEntity.Id;
-        var playerPos = EcsApp.PlayerPos;
-        var oldPlayer = EcsRxApp.Player;
-        MapGen.RemoveAgentAt(playerPos);
-        Dungeon.RemoveScEntity(oldPlayer.GetComponent<DisplayComponent>().ScEntity);
-        collection.RemoveEntity(EcsRxApp.Player.Id);
-        MapGenerator.SetAgentPosition(newId, playerPos, EcsType.Player, playerPos);
-        foreach (var cmp in heroInfo.Components)
-        {
-            newHeroEntity.AddComponent(cmp);
-        }
-
-        EcsRxApp.Player = newHeroEntity;
     }
 
     private static void Reanimate(List<EntityInfo> ecsInfo)
@@ -148,7 +137,6 @@ internal static partial class Serialize
         MapGen.RemoveAgentAt(playerPos);
         Dungeon.RemoveScEntity(oldPlayer.GetComponent<DisplayComponent>().ScEntity);
         collection.RemoveEntity(EcsRxApp.Player.Id);
-
     }
 
     private static void MassageComponents(EntityInfo entityInfo, Dictionary<int, int> mpOldIdToNewId)
