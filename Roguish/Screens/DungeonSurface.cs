@@ -10,6 +10,7 @@ using SadConsole.Entities;
 using SadConsole.Input;
 using SystemsRx.Events;
 using EcsRx.Extensions;
+using Roguish.Serialization;
 using Path = GoRogue.Pathing.Path;
 using Keys = SadConsole.Input.Keys;
 
@@ -106,6 +107,52 @@ internal class DungeonSurface : ScreenSurface
     public ScEntity GetPlayerScEntity(Point pos)
     {
         return CreateScEntity(Color.White, pos, 2, 100);
+    }
+
+    public ScEntity GetStairsEntity(Point pos)
+    {
+        return CreateScEntity(Color.Pink, pos, '>', -100);
+
+    }
+
+    public ScEntity GetScEntity(EntityInfo entityInfo)
+    {
+        var typeCmp = entityInfo.FindComponent<EntityTypeComponent>();
+        Debug.Assert(typeCmp != null);
+        var posCmp = entityInfo.FindComponent<PositionComponent>();
+        var pos = posCmp == null ? Point.Zero : posCmp.Position.Value;
+        ScEntity ret = null!;
+
+        switch (typeCmp.EcsType)
+        {
+            case EcsType.Agent:
+                var agentCmp = entityInfo.FindComponent<AgentTypeComponent>();
+                Debug.Assert(agentCmp != null);
+                var agentInfo = AgentInfo.InfoFromType(agentCmp.AgentType);
+                ret = CreateScEntity(agentInfo.Color, pos, agentInfo.Glyph, 0);
+                break;
+
+            case EcsType.Player:
+                ret = GetPlayerScEntity(pos);
+                break;
+
+            case EcsType.Weapon:
+                var weaponCmp = entityInfo.FindComponent<WeaponTypeComponent>();
+                Debug.Assert(weaponCmp != null);
+                var weaponInfo = WeaponInfo.InfoFromType(weaponCmp.WeaponType);
+                ret = CreateScEntity(weaponInfo.Color, pos, weaponInfo.Glyph, 0);
+                break;
+
+            case EcsType.Stairs:
+                ret = GetStairsEntity(pos);
+                break;
+        }
+
+        if (posCmp == null)
+        {
+            ret.IsVisible = false;
+        }
+        return ret!;
     }
 
     public ScEntity CreateScEntity(Color foreground, Point pt, int chGlyph, int zOrder)
@@ -205,7 +252,7 @@ internal class DungeonSurface : ScreenSurface
     private void CreateStairs()
     {
         var stairsPos = Mapgen.FindRandomEmptyPoint();
-        var scEntityStairs = CreateScEntity(Color.Pink, stairsPos, '>', -100);
+        var scEntityStairs = GetStairsEntity(stairsPos);
         var stairs = EcsApp.EntityDatabase.GetCollection().CreateEntity();
         var displayCmp = new DisplayComponent(scEntityStairs);
         stairs.AddComponent(displayCmp);

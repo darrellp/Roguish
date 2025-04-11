@@ -22,6 +22,13 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
 
     public void Process(NewDungeonEvent eventData)
     {
+        ClearLevel();
+        // Repopulate the new dungeon
+        _dungeon.Populate(eventData.NewLevel);
+    }
+
+    internal static void ClearLevel()
+    {
         // Get the FOV for the new dungeon
         Fov = new FOV(MapGenerator.WallFloorValues);
 
@@ -43,8 +50,5 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
                 EcsApp.EntityDatabase.GetCollection().RemoveEntity(item.Id);
             }
         }
-
-        // Repopulate the new dungeon
-        _dungeon.Populate(eventData.NewLevel);
     }
 }

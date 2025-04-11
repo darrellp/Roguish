@@ -112,7 +112,7 @@ internal class WeaponInfo
             entity.AddComponent(new EntityTypeComponent(EcsType.Weapon));
             // Ensure that position is added AFTER EntityType because the move system requires EntityType
             entity.AddComponent(new PositionComponent(ScEntity.Position));
-            entity.AddComponent(new WeaponInfoComponent(WeaponType));
+            entity.AddComponent(new WeaponTypeComponent(WeaponType));
         }
     }
     #endregion

@@ -7,6 +7,7 @@ using Roguish.ECS.Components;
 using Roguish.Map_Generation;
 using Roguish.Screens;
 using EcsRx.Extensions;
+using Roguish.ECS.Systems;
 
 // ReSharper disable IdentifierTypo
 
@@ -40,19 +41,25 @@ internal static partial class Serialize
 
         // Given an ID get the index of the corresponding entity in ecsInfo
         var ecsInfo = DeserializeEcs(jsonEcs);
-        var mpOldIdToNewId = new Dictionary<int, int>();
-        CreateEntities(ecsInfo, mpOldIdToNewId);
 
-        ReanimateHero(FindHero(ecsInfo), ecsInfo, mpOldIdToNewId);
+        //ReanimateHero(FindHero(ecsInfo), ecsInfo, mpOldIdToNewId);
+        Reanimate(ecsInfo);
     }
 
-    private static void CreateEntities(List<EntityInfo> ecsInfo, Dictionary<int, int> mpOldIdToNewId)
+    private static List<EcsEntity> CreateEntities(List<EntityInfo> ecsInfo, Dictionary<int, int> mpOldIdToNewId)
     {
-        // TODO: Actually create entities and map the old ids in ecsInfo to the new entity ids
-        for (var i = 0; i < ecsInfo.Count; i++)
+        var collection = EcsApp.EntityDatabase.GetCollection();
+        var newEntities = new List<EcsEntity>();
+
+        foreach (var info in ecsInfo)
         {
-            mpOldIdToNewId[i] = i;    
+            var entity = collection.CreateEntity();
+
+            mpOldIdToNewId[info.OriginalId] = entity.Id;
+            newEntities.Add(entity);
         }
+
+        return newEntities;
     }
 
     private static int FindHero(List<EntityInfo> ecsInfo)
@@ -91,6 +98,59 @@ internal static partial class Serialize
         EcsRxApp.Player = newHeroEntity;
     }
 
+    private static void Reanimate(List<EntityInfo> ecsInfo)
+    {
+        NewDungeonSystem.ClearLevel();
+        // ClearLevel clears out everything except the player but we have to
+        // remove him also
+        RemovePlayer();
+
+        var mpOldIdToNewId = new Dictionary<int, int>();
+        var newEntities = CreateEntities(ecsInfo, mpOldIdToNewId);
+
+        for (var iEntity = 0; iEntity < ecsInfo.Count; iEntity++)
+        {
+            var entityInfo = ecsInfo[iEntity];
+            var newEntity = newEntities[iEntity];
+            MassageComponents(entityInfo, mpOldIdToNewId);
+            if (entityInfo.FindComponent<IsPlayerControlledComponent>() != null)
+            {
+                EcsRxApp.Player = newEntity;
+            }
+
+            // We want to set position last since it triggers MovementSystem which 
+            // in turn relies on other components to work properly
+            EcsComponent? positionComponent = null;
+
+            foreach (var cmp in entityInfo.Components)
+            {
+                if (cmp is PositionComponent)
+                {
+                    positionComponent = cmp;
+                    continue;
+                }
+                newEntity.AddComponent(cmp);
+            }
+
+            if (positionComponent != null)
+            {
+                newEntity.AddComponent(positionComponent);
+            }
+        }
+    }
+
+    private static void RemovePlayer()
+    {
+        var playerPos = EcsApp.PlayerPos;
+        var oldPlayer = EcsRxApp.Player;
+        var collection = EcsApp.EntityDatabase.GetCollection();
+
+        MapGen.RemoveAgentAt(playerPos);
+        Dungeon.RemoveScEntity(oldPlayer.GetComponent<DisplayComponent>().ScEntity);
+        collection.RemoveEntity(EcsRxApp.Player.Id);
+
+    }
+
     private static void MassageComponents(EntityInfo entityInfo, Dictionary<int, int> mpOldIdToNewId)
     {
         foreach (var cmp in entityInfo.Components) 
@@ -98,11 +158,7 @@ internal static partial class Serialize
             switch (cmp)
             {
                 case DisplayComponent displayComponent:
-                    var posCmp = entityInfo.FindComponent<PositionComponent>();
-                    if (posCmp != null)
-                    {
-                        displayComponent.ScEntity = Dungeon.GetPlayerScEntity(posCmp.Position.Value);
-                    }
+                    displayComponent.ScEntity = Dungeon.GetScEntity(entityInfo);
                     break;
 
                 case EquippedComponent equippedComponent:
@@ -112,17 +168,9 @@ internal static partial class Serialize
         }
     }
 
-    internal static int RemapId(int id, Dictionary<int, int> mpOldIdToNewId)
+    internal static int RemapId(int originalId, Dictionary<int, int> mpOldIdToNewId)
     {
-        return mpOldIdToNewId.GetValueOrDefault(id, id);
-    }
-
-    private record EntityInfo(int Id, List<EcsComponent> Components)
-    {
-        public T? FindComponent<T>() where T : class
-        {
-            return Components.FirstOrDefault(c => c is T) as T;
-        }
+        return mpOldIdToNewId.GetValueOrDefault(originalId, originalId);
     }
 
     private static List<EntityInfo> DeserializeEcs(string json)
@@ -146,9 +194,9 @@ internal static partial class Serialize
     private static EntityInfo DeserializeEntity(JsonReader reader)
     {
         var componentList = new List<EcsComponent>();
-        reader.Read();  // Id:
+        reader.Read();  // OriginalId:
         reader.Read();  // <Id value>
-        var id = Convert.ToInt32(reader.Value!);
+        var originalId = Convert.ToInt32(reader.Value!);
         reader.Read();  // Components:
         reader.Read();  // StartArray
         Debug.Assert(reader.TokenType == JsonToken.StartArray);
@@ -164,7 +212,7 @@ internal static partial class Serialize
             componentList.Add(cmp);
         }
 
-        return new EntityInfo(id, componentList);
+        return new EntityInfo(originalId, componentList);
     }
 
     private static EcsComponent? DeserializeComponent(JsonReader reader)
@@ -199,6 +247,7 @@ internal static partial class Serialize
         return (EcsComponent?)JsonConvert.DeserializeObject(json, type);
     }
 
+    #region Serialization
     private static void SerializeEcs(JsonWriter writer, JsonSerializerSettings settings)
     {
         writer.WriteStartArray();
@@ -212,7 +261,7 @@ internal static partial class Serialize
     private static void SerializeEntity(EcsEntity entity, JsonWriter writer, JsonSerializerSettings settings)
     {
         writer.WriteStartObject();
-        writer.WritePropertyName("Id");
+        writer.WritePropertyName("OriginalId");
         writer.WriteValue(entity.Id);
         writer.WritePropertyName("Components");
         writer.WriteStartArray();
@@ -224,75 +273,5 @@ internal static partial class Serialize
         writer.WriteEndArray();
         writer.WriteEndObject();
     }
-
-
-#if NOTNOW
-
-    private static void PlayerSerialization(JsonSerializerSettings settings)
-    {
-        var player = EcsRxApp.Player;
-
-        var descCmp = player.GetComponent<DescriptionComponent>();
-        var descJson = JsonConvert.SerializeObject(descCmp, settings);
-        var descCmpD = DeserializeComponent(descJson);
-        Debug.Assert(descCmpD != null, "Something didn't Deserialize correctly!");
-
-        var lvlCmp = player.GetComponent<LevelItemComponent>();
-        var lvlJson = JsonConvert.SerializeObject(lvlCmp, settings);
-        var lvlCmpD = DeserializeComponent<LevelItemComponent>(lvlJson);
-        Debug.Assert(lvlCmpD != null, "Something didn't Deserialize correctly!");
-
-        var posCmp = player.GetComponent<PositionComponent>();
-        var posJson = JsonConvert.SerializeObject(posCmp, settings);
-        var posCmpD = DeserializeComponent<PositionComponent>(posJson);
-        Debug.Assert(posCmpD != null, "Something didn't Deserialize correctly!");
-
-        var ispcCmp = player.GetComponent<IsPlayerControlledComponent>();
-        var ispcJson = JsonConvert.SerializeObject(ispcCmp, settings);
-        var ispcCmpD = DeserializeComponent<IsPlayerControlledComponent>(ispcJson);
-        Debug.Assert(ispcCmpD != null, "Something didn't Deserialize correctly!");
-
-        var entTCmp = player.GetComponent<EntityTypeComponent>();
-        var entTJson = JsonConvert.SerializeObject(entTCmp, settings);
-        var entTCmpD = DeserializeComponent<EntityTypeComponent>(entTJson);
-        Debug.Assert(entTCmpD != null, "Something didn't Deserialize correctly!");
-
-        var hlthCmp = player.GetComponent<HealthComponent>();
-        var hlthJson = JsonConvert.SerializeObject(hlthCmp, settings);
-        var hlthCmpD = DeserializeComponent<HealthComponent>(hlthJson);
-        Debug.Assert(hlthCmpD != null, "Something didn't Deserialize correctly!");
-
-        // We can actually create the entity based on the EntityTypeComponent and PositionComponent above so no need to
-        // worry about this too much...
-        var dispCmp = player.GetComponent<DisplayComponent>();
-        var dispJson = JsonConvert.SerializeObject(dispCmp, settings);
-        var dispCmpD = DeserializeComponent<DisplayComponent>(dispJson);
-        Debug.Assert(dispCmpD != null, "Something didn't Deserialize correctly!");
-
-        var equpCmp = player.GetComponent<EquippedComponent>();
-        var equpJson = JsonConvert.SerializeObject(equpCmp, settings);
-        var equpCmpD = DeserializeComponent<EquippedComponent>(equpJson);
-        Debug.Assert(equpCmpD != null, "Something didn't Deserialize correctly!");
-
-        var taskCmp = player.GetComponent<TaskComponent>();
-        var taskJson = JsonConvert.SerializeObject(taskCmp, settings);
-        var taskCmpD = DeserializeComponent<TaskComponent>(taskJson);
-        Debug.Assert(taskCmpD != null, "Something didn't Deserialize correctly!");
-    }
-
-    private static T? DeserializeComponent<T>(string json)
-    {
-        var reader = new JsonTextReader(new StringReader(json));
-        reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.StartObject);
-        reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.PropertyName);
-        Debug.Assert(reader.Value == "ComponentType");
-        reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.String);
-        var typeName = ComponentNamespace + "." + reader.Value;
-        var type = Type.GetType(typeName);
-        return type == null ? default(T) : JsonConvert.DeserializeObject<T>(json);
-    }
-#endif
+    #endregion
 }

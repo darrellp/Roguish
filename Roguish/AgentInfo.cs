@@ -141,7 +141,7 @@ internal class AgentInfo
     {
         public new void Apply(EcsEntity entity)
         {
-            entity.AddComponent(new AgentComponent(AgentType, Move));
+            entity.AddComponent(new AgentTypeComponent(AgentType, Move));
             // Start with a random fireon time to stagger agent moves randomly
             entity.AddComponent(new TaskComponent(TaskGetter.Ticks + Move * Rng.NextULong(100) / 100ul, 
                 TaskType.AgentMove));

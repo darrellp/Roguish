@@ -10,7 +10,7 @@ internal partial class TaskGetter
     internal static void DefaultAgentMove(EcsEntity agent, RogueTask task)
     {
         var posCmp = agent.GetComponent<PositionComponent>();
-        var agentCmp = agent.GetComponent<AgentComponent>();
+        var agentCmp = agent.GetComponent<AgentTypeComponent>();
         agent.GetComponent<TaskComponent>();
         var pos = posCmp.Position.Value;
         var moves = pos.Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false)

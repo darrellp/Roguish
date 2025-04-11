@@ -38,7 +38,7 @@ internal class EcsRxApp : EcsRxApplication
     {
         PlayerGroup = GetGroup(typeof(IsPlayerControlledComponent));
         LevelItems = GetGroup(typeof(LevelItemComponent));
-        GetGroup(typeof(AgentComponent));
+        GetGroup(typeof(AgentTypeComponent));
         TaskedGroup = GetGroup(typeof(TaskComponent));
         DisplayGroup = GetGroup(typeof(DisplayComponent), typeof(PositionComponent));
         var collection = EntityDatabase.GetCollection();

@@ -9,7 +9,7 @@ internal partial class TaskGetter
     {
         var playerPos = EcsApp.PlayerPos;
         var posCmp = agent.GetComponent<PositionComponent>();
-        var agentCmp = agent.GetComponent<AgentComponent>();
+        var agentCmp = agent.GetComponent<AgentTypeComponent>();
         var taskCmp = agent.GetComponent<TaskComponent>();
         var pos = posCmp.Position.Value;
         var ptMove = pos.Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false)

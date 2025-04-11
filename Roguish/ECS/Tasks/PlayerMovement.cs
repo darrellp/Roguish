@@ -34,7 +34,7 @@ internal partial class TaskGetter
         {
             // Left Hand
             var weapon1 = EcsApp.EntityDatabase.GetEntity(equippedCmp.WeaponLeft);
-            var weaponType1 = weapon1.GetComponent<WeaponInfoComponent>().WeaponType;
+            var weaponType1 = weapon1.GetComponent<WeaponTypeComponent>().WeaponType;
             weaponInfo1 = WeaponInfo.InfoFromType(weaponType1);
             var damage1 = weaponInfo1.Damage;
             hitDamage += GoRogue.DiceNotation.Dice.Roll(damage1);
@@ -43,7 +43,7 @@ internal partial class TaskGetter
         {
             // Right Hand
             var weapon2 = EcsApp.EntityDatabase.GetEntity(equippedCmp.WeaponRight);
-            var weaponType2 = weapon2.GetComponent<WeaponInfoComponent>().WeaponType;
+            var weaponType2 = weapon2.GetComponent<WeaponTypeComponent>().WeaponType;
             var weaponInfo2 = WeaponInfo.InfoFromType(weaponType2);
             var damage2 = weaponInfo2.Damage;
             hitDamage += GoRogue.DiceNotation.Dice.Roll(damage2);

@@ -11,7 +11,7 @@ internal partial class TaskGetter
         var pos = posCmp.Position.Value;
         // TODO: Handle fMore being true here
         var (entity, fMore) = Mapgen.GetEntityAt(pos, true);
-        if (entity != null && !entity.HasComponent<AgentComponent>())
+        if (entity != null && !entity.HasComponent<AgentTypeComponent>())
         {
             if (entity.HasComponent<DisplayComponent>())
             {
