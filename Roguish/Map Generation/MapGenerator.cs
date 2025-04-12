@@ -187,7 +187,7 @@ public class MapGenerator
         return IsAgentAt(pt.X, pt.Y);
     }
 
-    private static void ClearEntityMaps()
+    internal static void ClearEntityMaps()
     {
         for (var iX = 0; iX < GameSettings.DungeonWidth; iX++)
         for (var iY = 0; iY < GameSettings.DungeonHeight; iY++)

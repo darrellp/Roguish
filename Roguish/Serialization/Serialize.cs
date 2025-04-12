@@ -18,10 +18,11 @@ internal static partial class Serialize
     private static readonly string ComponentNamespace = typeof(HealthComponent).Namespace!;
     private static DungeonSurface Dungeon = Kernel.Get<DungeonSurface>();
     private static MapGenerator MapGen = Kernel.Get<MapGenerator>();
+    private static JsonSerializerSettings settings;
 
     internal static void SaveGame()
     {
-        JsonSerializerSettings settings = new JsonSerializerSettings
+        settings = new JsonSerializerSettings
         {
             ContractResolver = new CustomResolver("EcsComponent"),
             Formatting = Formatting.Indented,
@@ -31,11 +32,11 @@ internal static partial class Serialize
                 new ReactiveConverter<long>(),
                 new ColorJsonConverter(),
                 new ColoredGlyphJsonConverter(),
-                new ScEntityConverter(),
+                new ScEntityConverter(Dungeon),
             }
         };
 
-        TryDeserializeDisplayCmp();
+        //TryDeserializeDisplayCmp(settings);
 
         var sb = new StringBuilder();
         var sw = new StringWriter(sb);
@@ -67,7 +68,7 @@ internal static partial class Serialize
                         }
                    }
                    """;
-        var test = DeserializeComponent(json);
+        var test = DeserializeComponent(json, settings);
 
     }
 
@@ -126,6 +127,8 @@ internal static partial class Serialize
                 newEntity.AddComponent(positionComponent);
             }
         }
+
+        Dungeon.SetVisibilities();
     }
 
     private static void RemovePlayer()
@@ -145,10 +148,6 @@ internal static partial class Serialize
         {
             switch (cmp)
             {
-                case DisplayComponent displayComponent:
-                    displayComponent.ScEntity = Dungeon.GetScEntity(entityInfo);
-                    break;
-
                 case EquippedComponent equippedComponent:
                     equippedComponent.RemapEquipment(mpOldIdToNewId);
                     break;
@@ -217,6 +216,24 @@ internal static partial class Serialize
         return DeserializeComponent((reader.Value as string)!);
     }
 
+    private static EcsComponent? DeserializeComponent(string json, JsonSerializerSettings settings)
+    {
+        var reader = new JsonTextReader(new StringReader(json));
+        reader.Read();      // StartObject or EndArray
+        if (reader.TokenType == JsonToken.EndArray)
+        {
+            return null;
+        }
+        reader.Read();      // "ComponentType"
+        reader.Read();      // <ComponentType value (i.e., typename)>
+        var typeName = ComponentNamespace + "." + reader.Value;
+        var type = Type.GetType(typeName);
+        Debug.Assert(type != null);
+
+        // Use the type to deserialize
+        return (EcsComponent?)JsonConvert.DeserializeObject(json, type, settings);
+    }
+
     private static EcsComponent? DeserializeComponent(string json)
     {
         var reader = new JsonTextReader(new StringReader(json));
@@ -232,7 +249,7 @@ internal static partial class Serialize
         Debug.Assert(type != null);
 
         // Use the type to deserialize
-        return (EcsComponent?)JsonConvert.DeserializeObject(json, type);
+        return (EcsComponent?)JsonConvert.DeserializeObject(json, type, settings);
     }
 
     #region Serialization

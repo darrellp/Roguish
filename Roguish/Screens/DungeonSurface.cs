@@ -512,5 +512,25 @@ internal class DungeonSurface : ScreenSurface
             Dungeon.MarkUnseen(point);
         }
     }
+
+    public void SetVisibilities()
+    {
+        if (!DrawFov)
+        {
+            foreach (var scEntity in StatusBar.Dungeon.GetEntities())
+            {
+                scEntity.IsVisible = true;
+            }
+        }
+        else
+        {
+            foreach (var scEntity in StatusBar.Dungeon.GetEntities())
+            {
+                MovementSystem.DetermineVisibility(scEntity);
+            }
+        }
+
+    }
+
     #endregion
 }

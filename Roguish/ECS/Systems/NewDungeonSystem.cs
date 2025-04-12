@@ -50,5 +50,6 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
                 EcsApp.EntityDatabase.GetCollection().RemoveEntity(item.Id);
             }
         }
+        MapGenerator.ClearEntityMaps();
     }
 }

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Roguish.Screens;
 
 namespace Roguish.Serialization;
-internal class ScEntityConverter : JsonConverter<ScEntity>
+internal class ScEntityConverter(DungeonSurface dungeon) : JsonConverter<ScEntity>
 {
     public override void WriteJson(JsonWriter writer, ScEntity? value, JsonSerializer serializer)
     {
@@ -30,6 +26,22 @@ internal class ScEntityConverter : JsonConverter<ScEntity>
     public override ScEntity? ReadJson(JsonReader reader, Type objectType, ScEntity? existingValue, bool hasExistingValue,
         JsonSerializer serializer)
     {
-        return null;
+        reader.Read();      // PropertyName "Foreground"
+        var packed = (uint)(reader.ReadAsDouble() ?? 0);
+        var fg = new Color(packed);
+        reader.Read();      // PropertyName "Glyph"
+        var glyph = reader.ReadAsInt32() ?? 219;
+        reader.Read();      // PropertyName "ZOrder"
+        var zOrder = reader.ReadAsInt32() ?? 0;
+        reader.Read();      // PropertyName "Position"
+        reader.Read();      // ObjectStart
+        reader.Read();      // PropertyName "X"
+        var x = reader.ReadAsInt32() ?? 0;
+        reader.Read();      // PropertyName "Y"
+        var y = reader.ReadAsInt32() ?? 0;
+        var position = new Point(x, y);
+        reader.Read();      // ObjectEnd
+        reader.Read();      // ObjectEnd
+        return dungeon.CreateScEntity(fg, position, glyph, zOrder);
     }
 }

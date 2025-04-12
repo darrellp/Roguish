@@ -1,6 +1,7 @@
-﻿namespace Roguish.ECS.Components;
+﻿// ReSharper disable IdentifierTypo
+namespace Roguish.ECS.Components;
 
-internal enum EquipSlots
+public enum EquipSlots
 {
     OneHand,
     TwoHands,
@@ -14,7 +15,7 @@ internal enum EquipSlots
     Arms,
     Belt
 }
-internal class EquipableComponent(EquipSlots equipSlot) : EcsComponent
+public class EquipableComponent(EquipSlots equipSlot) : EcsComponent
 {
-    internal EquipSlots EquipSlot = equipSlot;
+    public EquipSlots EquipSlot { get; set; } = equipSlot;
 }
