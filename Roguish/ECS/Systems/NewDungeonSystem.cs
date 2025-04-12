@@ -30,7 +30,7 @@ internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
     internal static void ClearLevel()
     {
         // Get the FOV for the new dungeon
-        Fov = new FOV(MapGenerator.WallFloorValues);
+        Fov = new FOV(MapGenerator.WalkableMap);
 
         // Delete the old stuff in the old dungeon floor
         foreach (var item in EcsRxApp.LevelItems.ToArray())

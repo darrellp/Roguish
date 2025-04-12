@@ -61,7 +61,6 @@ internal class DungeonSurface : ScreenSurface
     private StatusBar? _statusBar;
     private DescriptionSurface? _descriptionConsole;
     private static IEventSystem _eventSystem = null!;
-    private static bool[,] _revealed = new bool[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
     private static bool _drawFov = true;
 
     public bool DrawFov
@@ -269,7 +268,7 @@ internal class DungeonSurface : ScreenSurface
         _eventSystem.Publish(new KeyboardEvent(null) { RetrieveFromQueue = false });
 
         var posDest = state.CellPosition;
-        if (_drawFov && !_revealed[posDest.X, posDest.Y] || !MapGenerator.IsWalkable(posDest))
+        if (_drawFov && !MapGenerator.RevealMap[posDest.X, posDest.Y] || !MapGenerator.IsWalkable(posDest))
         {
             return;
         }
@@ -277,7 +276,7 @@ internal class DungeonSurface : ScreenSurface
         {
             KeyboardEventSystem.EnqueueKey(Keys.D5);
         }
-        var aStar = new AStar(MapGenerator.WallFloorValues, Distance.Chebyshev);
+        var aStar = new AStar(MapGenerator.WalkableMap, Distance.Chebyshev);
         var path = aStar.ShortestPath(EcsApp.PlayerPos, posDest);
         Debug.Assert(path != null, "Path finding returned null");
         EnqueuePath(path);
@@ -368,7 +367,7 @@ internal class DungeonSurface : ScreenSurface
         {
             for (var iY = 0; iY < GameSettings.DungeonHeight; iY++)
             {
-                _revealed[iX, iY] = false;
+                MapGenerator.RevealMap[iX, iY] = false;
             }
         }
 
@@ -391,7 +390,7 @@ internal class DungeonSurface : ScreenSurface
         {
             for (var iY = 0; iY < Height; iY++)
             {
-                if (DrawFov && !_revealed[iX, iY])
+                if (DrawFov && !MapGenerator.RevealMap[iX, iY])
                 {
                     var appearance = new ColoredGlyph(Color.Black, Color.Black, MapGenerator.BaseGlyphAt(iX, iY));
                     DrawGlyph(appearance, iX, iY);
@@ -450,7 +449,7 @@ internal class DungeonSurface : ScreenSurface
         {
             return LevelOfFov.Lit;
         }
-        return Fov.CurrentFOV.Contains(pt) ? LevelOfFov.Lit : _revealed[pt.X, pt.Y] ? LevelOfFov.Seen : LevelOfFov.Unseen;
+        return Fov.CurrentFOV.Contains(pt) ? LevelOfFov.Lit : MapGenerator.RevealMap[pt.X, pt.Y] ? LevelOfFov.Seen : LevelOfFov.Unseen;
     }
 
     public void MarkSeen(Point pt)
@@ -465,7 +464,7 @@ internal class DungeonSurface : ScreenSurface
 
     public void MarkFov(Point pt, bool fSeen)
     {
-        _revealed[pt.X, pt.Y] = true;
+        MapGenerator.RevealMap[pt.X, pt.Y] = true;
         if (!DrawFov)
         {
             return;

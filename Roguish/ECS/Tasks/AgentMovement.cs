@@ -11,7 +11,6 @@ internal partial class TaskGetter
     {
         var posCmp = agent.GetComponent<PositionComponent>();
         var agentCmp = agent.GetComponent<AgentTypeComponent>();
-        agent.GetComponent<TaskComponent>();
         var pos = posCmp.Position.Value;
         var moves = pos.Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false)
             .Where(MapGenerator.IsWalkable).ToArray();

@@ -7,22 +7,28 @@ using Roguish.ECS.Components;
 using Roguish.Map_Generation;
 using Roguish.Screens;
 using EcsRx.Extensions;
+using GoRogue.Random;
 using Roguish.ECS.Systems;
 using SadConsole.SerializedTypes;
+using SadRogue.Primitives.GridViews;
+using ShaiRandom.Generators;
 
 // ReSharper disable IdentifierTypo
 
 namespace Roguish.Serialization;
 internal static partial class Serialize
 {
+    #region private fields
     private static readonly string ComponentNamespace = typeof(HealthComponent).Namespace!;
-    private static DungeonSurface Dungeon = Kernel.Get<DungeonSurface>();
-    private static MapGenerator MapGen = Kernel.Get<MapGenerator>();
-    private static JsonSerializerSettings settings;
+    private static readonly DungeonSurface Dungeon = Kernel.Get<DungeonSurface>();
+    private static readonly MapGenerator MapGen = Kernel.Get<MapGenerator>();
+    private static readonly JsonSerializerSettings Settings;
+    #endregion
 
-    internal static void SaveGame()
+    #region Static Constructor
+    static Serialize()
     {
-        settings = new JsonSerializerSettings
+        Settings = new JsonSerializerSettings
         {
             ContractResolver = new CustomResolver("EcsComponent"),
             Formatting = Formatting.Indented,
@@ -35,60 +41,49 @@ internal static partial class Serialize
                 new ScEntityConverter(Dungeon),
             }
         };
+    }
+    #endregion
 
-        //TryDeserializeDisplayCmp(settings);
-
+    internal static void SaveGame()
+    {
         var sb = new StringBuilder();
         var sw = new StringWriter(sb);
 
         using JsonWriter writer = new JsonTextWriter(sw);
-        SerializeEcs(writer, settings);
+        SerializeEcs(writer);
         var jsonEcs = sb.ToString();
-
-        // Given an ID get the index of the corresponding entity in ecsInfo
         var ecsInfo = DeserializeEcs(jsonEcs);
-
-        //ReanimateHero(FindHero(ecsInfo), ecsInfo, mpOldIdToNewId);
-        Reanimate(ecsInfo);
+        DeserializeEcs(ecsInfo);
     }
 
-    private static void TryDeserializeDisplayCmp(JsonSerializerSettings settings)
+    internal static void TestPacking()
     {
-        var json = """
-                   {
-                        "ComponentType": "DisplayComponent",
-                        "ScEntity\": {
-                            "Foreground": 4294967295,
-                            "Glyph": 2,
-                            "ZOrder": 100,
-                            "Position": {
-                                "X": 44,
-                                "Y": 48
-                            }
-                        }
-                   }
-                   """;
-        var test = DeserializeComponent(json, settings);
-
-    }
-
-    private static List<EcsEntity> CreateEntities(List<EntityInfo> ecsInfo, Dictionary<int, int> mpOldIdToNewId)
-    {
-        var collection = EcsApp.EntityDatabase.GetCollection();
-        var newEntities = new List<EcsEntity>();
-
-        foreach (var info in ecsInfo)
+        var rng = GlobalRandom.DefaultRNG;
+        var test = new ArrayView2D<bool>(10, 10);
+        for (var iRow = 0; iRow < test.Height; iRow++)
         {
-            var entity = collection.CreateEntity();
-
-            mpOldIdToNewId[info.OriginalId] = entity.Id;
-            newEntities.Add(entity);
+            for (var iCol = 0; iCol < test.Width; iCol++)
+            {
+                test[iCol, iRow] = rng.NextInt(2) == 1;
+            }
         }
+        var packed = PackBoolArray(test);
+        var unpacked = UnpackBoolArray(packed, test.Width, test.Height);
 
-        return newEntities;
+        for (var iRow = 0; iRow < test.Height; iRow++)
+        {
+            for (var iCol = 0; iCol < test.Width; iCol++)
+            {
+                if (test[iRow, iCol] != unpacked[iRow, iCol])
+                {
+                    Debugger.Break();
+                }
+            }
+        }
     }
 
-    private static void Reanimate(List<EntityInfo> ecsInfo)
+    #region Deserialization
+    private static void DeserializeEcs(List<EntityInfo> ecsInfo)
     {
         NewDungeonSystem.ClearLevel();
         // ClearLevel clears out everything except the player but we have to
@@ -140,24 +135,6 @@ internal static partial class Serialize
         MapGen.RemoveAgentAt(playerPos);
         Dungeon.RemoveScEntity(oldPlayer.GetComponent<DisplayComponent>().ScEntity);
         collection.RemoveEntity(EcsRxApp.Player.Id);
-    }
-
-    private static void MassageComponents(EntityInfo entityInfo, Dictionary<int, int> mpOldIdToNewId)
-    {
-        foreach (var cmp in entityInfo.Components) 
-        {
-            switch (cmp)
-            {
-                case EquippedComponent equippedComponent:
-                    equippedComponent.RemapEquipment(mpOldIdToNewId);
-                    break;
-            }
-        }
-    }
-
-    internal static int RemapId(int originalId, Dictionary<int, int> mpOldIdToNewId)
-    {
-        return mpOldIdToNewId.GetValueOrDefault(originalId, originalId);
     }
 
     private static List<EntityInfo> DeserializeEcs(string json)
@@ -216,24 +193,6 @@ internal static partial class Serialize
         return DeserializeComponent((reader.Value as string)!);
     }
 
-    private static EcsComponent? DeserializeComponent(string json, JsonSerializerSettings settings)
-    {
-        var reader = new JsonTextReader(new StringReader(json));
-        reader.Read();      // StartObject or EndArray
-        if (reader.TokenType == JsonToken.EndArray)
-        {
-            return null;
-        }
-        reader.Read();      // "ComponentType"
-        reader.Read();      // <ComponentType value (i.e., typename)>
-        var typeName = ComponentNamespace + "." + reader.Value;
-        var type = Type.GetType(typeName);
-        Debug.Assert(type != null);
-
-        // Use the type to deserialize
-        return (EcsComponent?)JsonConvert.DeserializeObject(json, type, settings);
-    }
-
     private static EcsComponent? DeserializeComponent(string json)
     {
         var reader = new JsonTextReader(new StringReader(json));
@@ -249,21 +208,64 @@ internal static partial class Serialize
         Debug.Assert(type != null);
 
         // Use the type to deserialize
-        return (EcsComponent?)JsonConvert.DeserializeObject(json, type, settings);
+        return (EcsComponent?)JsonConvert.DeserializeObject(json, type, Settings);
     }
 
+    private static void MassageComponents(EntityInfo entityInfo, Dictionary<int, int> mpOldIdToNewId)
+    {
+        foreach (var cmp in entityInfo.Components)
+        {
+            switch (cmp)
+            {
+                case EquippedComponent equippedComponent:
+                    equippedComponent.RemapEquipment(mpOldIdToNewId);
+                    break;
+            }
+        }
+    }
+
+    internal static int RemapId(int originalId, Dictionary<int, int> mpOldIdToNewId)
+    {
+        return mpOldIdToNewId.GetValueOrDefault(originalId, originalId);
+    }
+
+    private static List<EcsEntity> CreateEntities(List<EntityInfo> ecsInfo, Dictionary<int, int> mpOldIdToNewId)
+    {
+        var collection = EcsApp.EntityDatabase.GetCollection();
+        var newEntities = new List<EcsEntity>();
+
+        foreach (var info in ecsInfo)
+        {
+            var entity = collection.CreateEntity();
+
+            mpOldIdToNewId[info.OriginalId] = entity.Id;
+            newEntities.Add(entity);
+        }
+
+        return newEntities;
+    }
+    #endregion
+
     #region Serialization
-    private static void SerializeEcs(JsonWriter writer, JsonSerializerSettings settings)
+
+    private static void SerializeMaps(JsonWriter writer)
+    {
+        var packed = PackBoolArray(MapGenerator.RevealMap);
+        writer.WritePropertyName("RevealMap");
+        var json = JsonConvert.SerializeObject(packed);
+        writer.WriteValue(json);
+    }
+    private static void SerializeEcs(JsonWriter writer)
     {
         writer.WriteStartArray();
         foreach (var entity in EcsApp.EntityDatabase.GetCollection())
         {
-            SerializeEntity(entity, writer, settings);
+            SerializeEntity(entity, writer);
         }
         writer.WriteEndArray();
     }
 
-    private static void SerializeEntity(EcsEntity entity, JsonWriter writer, JsonSerializerSettings settings)
+    private static void SerializeEntity(EcsEntity entity, JsonWriter writer)
     {
         writer.WriteStartObject();
         writer.WritePropertyName("OriginalId");
@@ -272,11 +274,67 @@ internal static partial class Serialize
         writer.WriteStartArray();
         foreach (var cmp in entity.Components)
         {
-            var json = JsonConvert.SerializeObject(cmp, settings);
+            var json = JsonConvert.SerializeObject(cmp, Settings);
             writer.WriteValue(json);
         }
         writer.WriteEndArray();
         writer.WriteEndObject();
+    }
+    #endregion
+
+    #region Packing/Unpacking
+    private static long[] PackBoolArray(ISettableGridView<bool> array)
+    {
+        var ret = new long[(array.Width * array.Height + 63) / 64];
+        var bitIndex = 0;
+        var arrayIndex = 0;
+        var current = 0L;
+        for (var iRow = 0; iRow < array.Height; iRow++)
+        {
+            for (var iCol = 0; iCol < array.Width; iCol++)
+            {
+                if (array[iCol, iRow])
+                {
+                    current |= 1L << bitIndex;
+                }
+                if (++bitIndex == 64)
+                {
+                    bitIndex = 0;
+                    ret[arrayIndex++] = current;
+                    current = 0;
+                }
+            }
+        }
+
+        if (bitIndex != 0)
+        {
+            ret[arrayIndex] = current;
+        }
+
+        return ret;
+    }
+
+    private static ISettableGridView<bool> UnpackBoolArray(long[] array, int width, int height)
+    {
+        var ret = new ArrayView2D<bool>(width, height);
+        var bitIndex = 0;
+        var arrayIndex = 0;
+        for (var iRow = 0; iRow < height; iRow++)
+        {
+            for (var iCol = 0; iCol < width; iCol++)
+            {
+                if ((array[arrayIndex] & (1L << bitIndex)) != 0)
+                {
+                    ret[iCol, iRow] = true;
+                }
+                if (++bitIndex == 64)
+                {
+                    bitIndex = 0;
+                    arrayIndex++;
+                }
+            }
+        }
+        return ret;
     }
     #endregion
 }

@@ -14,6 +14,9 @@ public class MapGenerator
 {
     private static readonly int[,] AgentMap = new int[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
     private static readonly List<int>?[,] EntityMap = new List<int>?[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
+    public static ISettableGridView<bool> WalkableMap { get; private set; } = null!;
+    internal static ISettableGridView<bool> RevealMap = new ArrayView2D<bool>(GameSettings.DungeonWidth, GameSettings.DungeonHeight);
+    private static ISettableGridView<bool> WallsMap { get; set; } = null!;
 
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
 
@@ -22,24 +25,20 @@ public class MapGenerator
         ClearEntityMaps();
     }
 
-    public static ISettableGridView<bool> WallFloorValues { get; private set; } = null!;
-
-    private ISettableGridView<bool> Walls { get; set; } = null!;
-    //public Area[] Areas { get; set; } = null!;
 
     public static bool IsWalkable(int x, int y)
     {
-        return WallFloorValues[x, y];
+        return WalkableMap[x, y];
     }
 
     public static bool IsWalkable(Point pt)
     {
-        return WallFloorValues[pt];
+        return WalkableMap[pt];
     }
 
     public bool Wall(int x, int y)
     {
-        return Walls[x, y];
+        return WallsMap[x, y];
     }
 
     public void Generate()
@@ -53,8 +52,8 @@ public class MapGenerator
             gen.AddStep(new RoomConnectDAP { PctMergeChance = 30 });
         });
 
-        WallFloorValues = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
-        Walls = generator.Context.GetFirst<ISettableGridView<bool>>("Walls");
+        WalkableMap = generator.Context.GetFirst<ISettableGridView<bool>>("WallFloor");
+        WallsMap = generator.Context.GetFirst<ISettableGridView<bool>>("Walls");
         //Areas = generator.Context.GetFirst<Area[]>("Areas");
         ClearEntityMaps();
     }
