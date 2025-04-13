@@ -64,7 +64,7 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
                 if (kb.IsKeyDown(Keys.LeftControl) || kb.IsKeyDown(Keys.RightControl))
                 {
                     StopQueue();
-                    Serialize.SaveGame();
+                    Serialize.Test();
                 }
                 break;
 

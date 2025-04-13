@@ -12,6 +12,9 @@ using Roguish.ECS.Systems;
 using SadConsole.SerializedTypes;
 using SadRogue.Primitives.GridViews;
 using ShaiRandom.Generators;
+using System.Security.Principal;
+using System.Data;
+using System.Runtime.Intrinsics.Wasm;
 
 // ReSharper disable IdentifierTypo
 
@@ -44,45 +47,26 @@ internal static partial class Serialize
     }
     #endregion
 
-    internal static void SaveGame()
+    public static void Test()
     {
-        var sb = new StringBuilder();
-        var sw = new StringWriter(sb);
-
-        using JsonWriter writer = new JsonTextWriter(sw);
-        SerializeEcs(writer);
-        var jsonEcs = sb.ToString();
-        var ecsInfo = DeserializeEcs(jsonEcs);
-        DeserializeEcs(ecsInfo);
+        var json = SerializeGame();
+        DeserializeGame(json);
     }
 
-    internal static void TestPacking()
+    internal static void SaveGame()
     {
-        var rng = GlobalRandom.DefaultRNG;
-        var test = new ArrayView2D<bool>(10, 10);
-        for (var iRow = 0; iRow < test.Height; iRow++)
-        {
-            for (var iCol = 0; iCol < test.Width; iCol++)
-            {
-                test[iCol, iRow] = rng.NextInt(2) == 1;
-            }
-        }
-        var packed = PackBoolArray(test);
-        var unpacked = UnpackBoolArray(packed, test.Width, test.Height);
-
-        for (var iRow = 0; iRow < test.Height; iRow++)
-        {
-            for (var iCol = 0; iCol < test.Width; iCol++)
-            {
-                if (test[iRow, iCol] != unpacked[iRow, iCol])
-                {
-                    Debugger.Break();
-                }
-            }
-        }
+        var json = SerializeGame();
     }
 
     #region Deserialization
+    public static void DeserializeGame(string json)
+    {
+        using JsonReader reader = new JsonTextReader(new StringReader(json));
+        DeserializeMaps(reader);
+        DeserializeEcs(reader);
+    }
+
+
     private static void DeserializeEcs(List<EntityInfo> ecsInfo)
     {
         NewDungeonSystem.ClearLevel();
@@ -117,6 +101,7 @@ internal static partial class Serialize
                 newEntity.AddComponent(cmp);
             }
 
+            // Do this last so MovementSystem has all the info it needs
             if (positionComponent != null)
             {
                 newEntity.AddComponent(positionComponent);
@@ -137,10 +122,9 @@ internal static partial class Serialize
         collection.RemoveEntity(EcsRxApp.Player.Id);
     }
 
-    private static List<EntityInfo> DeserializeEcs(string json)
+    private static List<EntityInfo> DeserializeEcs(JsonReader reader)
     {
         var infoList = new List<EntityInfo>();
-        var reader = new JsonTextReader(new StringReader(json));
         reader.Read();
         Debug.Assert(reader.TokenType == JsonToken.StartArray);
         var index = 0;
@@ -244,17 +228,50 @@ internal static partial class Serialize
 
         return newEntities;
     }
+    
+    private static void DeserializeMaps(JsonReader reader)
+    {
+        reader.Read();      // Start object
+
+        // The agent map and entity map are filled as a consequence of filling
+        // the ECS entities so are not serialized explicitly here.
+        DeserializeMap(MapGenerator.RevealMap, "RevealMap", reader);
+        DeserializeMap(MapGenerator.WalkableMap, "WalkableMap", reader);
+        DeserializeMap(MapGenerator.WallsMap, "WallsMap", reader);
+        reader.Read();      // End object
+    }
+
+    private static void DeserializeMap(ISettableGridView<bool> map, string property, JsonReader reader)
+    {
+        reader.Read();      // Property name
+        reader.Read();      // The map
+        //var packedString = reader.Value as string;
+        //Debug.Assert(reader.TokenType == JsonToken.PropertyName);
+        //Debug.Assert((string)reader.Value! == property);
+        var packed = JsonConvert.DeserializeObject<long[]>(reader.Value as string);
+        //var serializer = new JsonSerializer();
+        //var packed = serializer.Deserialize<long[]>(reader);
+        UnpackBoolArray(map, packed, GameSettings.DungeonWidth, GameSettings.DungeonHeight);
+    }
     #endregion
 
     #region Serialization
 
-    private static void SerializeMaps(JsonWriter writer)
+    public static string SerializeGame()
     {
-        var packed = PackBoolArray(MapGenerator.RevealMap);
-        writer.WritePropertyName("RevealMap");
-        var json = JsonConvert.SerializeObject(packed);
-        writer.WriteValue(json);
+        var sb = new StringBuilder();
+        var sw = new StringWriter(sb);
+
+        using JsonWriter writer = new JsonTextWriter(sw);
+        writer.WriteStartObject();
+        SerializeMaps(writer);
+        writer.WritePropertyName("EcsEntities");
+        SerializeEcs(writer);
+        writer.WriteEndObject();
+        var json = sb.ToString();
+        return json;
     }
+
     private static void SerializeEcs(JsonWriter writer)
     {
         writer.WriteStartArray();
@@ -279,6 +296,22 @@ internal static partial class Serialize
         }
         writer.WriteEndArray();
         writer.WriteEndObject();
+    }
+    private static void SerializeMaps(JsonWriter writer)
+    {
+        // The agent map and entity map are filled as a consequence of filling
+        // the ECS entities so are not serialized explicitly here.
+        SerializeMap(MapGenerator.RevealMap, "RevealMap", writer);
+        SerializeMap(MapGenerator.WalkableMap, "WalkableMap", writer);
+        SerializeMap(MapGenerator.WallsMap, "WallsMap", writer);
+    }
+
+    private static void SerializeMap(ISettableGridView<bool> map, string property, JsonWriter writer)
+    {
+        var packed = PackBoolArray(map);
+        writer.WritePropertyName(property);
+        var json = JsonConvert.SerializeObject(packed);
+        writer.WriteValue(json);
     }
     #endregion
 
@@ -314,7 +347,7 @@ internal static partial class Serialize
         return ret;
     }
 
-    private static ISettableGridView<bool> UnpackBoolArray(long[] array, int width, int height)
+    private static void UnpackBoolArray(ISettableGridView<bool> map, long[] array, int width, int height)
     {
         var ret = new ArrayView2D<bool>(width, height);
         var bitIndex = 0;
@@ -325,7 +358,7 @@ internal static partial class Serialize
             {
                 if ((array[arrayIndex] & (1L << bitIndex)) != 0)
                 {
-                    ret[iCol, iRow] = true;
+                    map[iCol, iRow] = true;
                 }
                 if (++bitIndex == 64)
                 {
@@ -334,7 +367,6 @@ internal static partial class Serialize
                 }
             }
         }
-        return ret;
     }
     #endregion
 }

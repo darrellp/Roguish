@@ -16,7 +16,7 @@ public class MapGenerator
     private static readonly List<int>?[,] EntityMap = new List<int>?[GameSettings.DungeonWidth, GameSettings.DungeonHeight];
     public static ISettableGridView<bool> WalkableMap { get; private set; } = null!;
     internal static ISettableGridView<bool> RevealMap = new ArrayView2D<bool>(GameSettings.DungeonWidth, GameSettings.DungeonHeight);
-    private static ISettableGridView<bool> WallsMap { get; set; } = null!;
+    internal static ISettableGridView<bool> WallsMap { get; set; } = null!;
 
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
 
