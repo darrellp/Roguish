@@ -15,9 +15,9 @@ public enum TaskType
     Equip,
     Regenerate,
     TakeStairs,
+    Drop,
 
     // Not implemented yet
-    Drop,
     Use,
     Wait,
     Attack,
@@ -39,6 +39,7 @@ internal static partial class TaskGetter
         UserEquip,
         Regenerate,
         TakeStairs,
+        UserDrop,
     ];
     #endregion
 

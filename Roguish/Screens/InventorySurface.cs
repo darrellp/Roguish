@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Security.Cryptography;
+using EcsRx.Entities;
 using EcsRx.Extensions;
 using Ninject;
 using Roguish.ECS;
@@ -94,15 +95,24 @@ internal class InventorySurface : ScreenSurface
         Surface.Print(0, index, _inventorySlots[index].name, Color.Orange);
     }
 
-    internal void Equip()
+    internal static IEntity? SelectedEntity()
     {
         if (_selectedIndex < 0)
+        {
+            return null;
+        }
+
+        return EcsApp.EntityDatabase.GetEntity(_inventorySlots[_selectedIndex].id);
+    }
+
+    internal void Equip()
+    {
+        var item = SelectedEntity();
+        if (item == null)
         {
             _log.PrintProcessedString("No inventory items selected to equip");
             return;
         }
-
-        var item = EcsApp.EntityDatabase.GetEntity(_inventorySlots[_selectedIndex].id);
         Debug.Assert(item != null);
         if (!item.HasComponent<EquipableComponent>())
         {

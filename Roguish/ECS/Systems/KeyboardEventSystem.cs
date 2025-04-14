@@ -82,6 +82,10 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
                 }
                 break;
 
+            case Keys.D:
+                task = TaskGetter.CreateDropTask();
+                break;
+
             case Keys.G:
                 task = TaskGetter.CreatePickupTask();
                 break;

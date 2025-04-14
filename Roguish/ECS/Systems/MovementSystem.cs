@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Diagnostics;
+using System.Reactive.Linq;
 using EcsRx.Extensions;
 using EcsRx.Groups;
 using EcsRx.Systems;
@@ -20,13 +21,27 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
         return observable.Select(_ => entity);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary>   Process the given entity when it's position changes </summary>
+    ///
+    /// <remarks>   As of right now the code assumes there is a DisplayComponent attached to the entity
+    ///             that is isVisible set correctly.  Darrell Plank, 4/14/2025. </remarks>
+    ///
+    /// <param name="entity">   The entity. </param>
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public void Process(EcsEntity entity)
     {
         if (entity.HasComponent<IsDestroyedComponent>())
         {
             return;
         }
+        // TODO: Do we need to worry about items without a displaycomponent?
         var scEntity = entity.GetComponent<DisplayComponent>().ScEntity;
+        if (scEntity == null)
+        {
+            Debug.Assert(false, "Moving item with no Display component");
+        }
         var type = entity.GetComponent<EntityTypeComponent>().EcsType;
         var posOld = scEntity.Position;
         var posCmp = entity.GetComponent<PositionComponent>();

@@ -10,7 +10,6 @@ using SadConsole.Entities;
 using SadConsole.Input;
 using SystemsRx.Events;
 using EcsRx.Extensions;
-using Roguish.Serialization;
 using Path = GoRogue.Pathing.Path;
 using Keys = SadConsole.Input.Keys;
 
@@ -127,6 +126,12 @@ internal class DungeonSurface : ScreenSurface
     public void RemoveScEntity(ScEntity scEntity)
     {
         _entityManager.Remove(scEntity);
+    }
+
+    public void AddScEntity(ScEntity scEntity)
+    {
+        _entityManager.Add(scEntity);
+        scEntity.IsVisible = true;
     }
 
     #endregion
