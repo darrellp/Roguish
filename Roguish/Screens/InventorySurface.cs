@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security.Cryptography;
 using EcsRx.Extensions;
 using Ninject;
 using Roguish.ECS;
@@ -39,7 +40,9 @@ internal class InventorySurface : ScreenSurface
     {
         var index = _inventorySlots.FindIndex(item => item.id == id);
         if (index < 0)
+        {
             return;
+        }
         Monitor.Enter(_lock);
         _inventorySlots.RemoveAt(index);
         for (var i = index; i < _inventorySlots.Count; i++)
@@ -51,7 +54,6 @@ internal class InventorySurface : ScreenSurface
         Surface.Print(0, _inventorySlots.Count, _clearLine);
         if (_selectedIndex > index)
         {
-
             MoveHighlightTo(--_selectedIndex);
         }
         else if (_selectedIndex == index)
@@ -59,6 +61,13 @@ internal class InventorySurface : ScreenSurface
             _selectedIndex = -1;
         }
         Monitor.Exit(_lock);
+    }
+
+    internal void Clear()
+    {
+        _inventorySlots.Clear();
+        Surface.Clear();
+        _selectedIndex = -1;
     }
 
     protected override void OnMouseLeftClicked(MouseScreenObjectState state)

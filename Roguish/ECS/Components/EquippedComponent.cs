@@ -38,4 +38,19 @@ public class EquippedComponent : EcsComponent
         Belt = Serialize.RemapId(Belt, mpOldIdToNewId);
     }
 
+    internal void Clear()
+    {
+        Headgear = -1;
+        Footwear = -1;
+        Chest = -1;
+        LRing = -1;
+        RRing = -1;
+        WeaponLeft = -1;
+        WeaponRight = -1;
+        Arms = -1;
+        Legs = -1;
+        Amulet = -1;
+        Gloves = -1;
+        Belt = -1;
+    }
 }

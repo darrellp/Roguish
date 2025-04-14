@@ -7,14 +7,10 @@ using Roguish.ECS.Components;
 using Roguish.Map_Generation;
 using Roguish.Screens;
 using EcsRx.Extensions;
-using GoRogue.Random;
 using Roguish.ECS.Systems;
 using SadConsole.SerializedTypes;
 using SadRogue.Primitives.GridViews;
-using ShaiRandom.Generators;
-using System.Security.Principal;
-using System.Data;
-using System.Runtime.Intrinsics.Wasm;
+using Roguish.ECS.Events;
 
 // ReSharper disable IdentifierTypo
 
@@ -61,19 +57,45 @@ internal static partial class Serialize
     #region Deserialization
     public static void DeserializeGame(string json)
     {
+        // Toss everything!
+        EraseLevel();
         using JsonReader reader = new JsonTextReader(new StringReader(json));
         DeserializeMaps(reader);
         DeserializeEcs(reader);
     }
 
-
-    private static void DeserializeEcs(List<EntityInfo> ecsInfo)
+    private static void EraseLevel()
     {
-        NewDungeonSystem.ClearLevel();
-        // ClearLevel clears out everything except the player but we have to
-        // remove him also
-        RemovePlayer();
+        foreach (var item in EcsApp.EntityDatabase.GetCollection().ToArray())
+        {
+            if (item.HasComponent<DisplayComponent>())
+            {
+                var displayCmp = item.GetComponent(typeof(DisplayComponent)) as DisplayComponent;
+                Dungeon.RemoveScEntity(displayCmp!.ScEntity);
+            }
+            EcsApp.EntityDatabase.GetCollection().RemoveEntity(item.Id);
+        }
+        MapGenerator.ClearEntityMaps();
+    }
 
+    private static void DeserializeEcs(JsonReader reader)
+    {
+        var infoList = new List<EntityInfo>();
+        reader.Read();
+        Debug.Assert(reader.TokenType == JsonToken.StartArray);
+        while (reader.Read())       // Start of object
+        {
+            if (reader.TokenType == JsonToken.EndArray)
+                break;
+            var entityInfo = DeserializeEntity(reader);
+            infoList.Add(entityInfo);
+        }
+
+        DeserializeFromInfo(infoList);
+    }
+
+    private static void DeserializeFromInfo(List<EntityInfo> ecsInfo)
+    {
         var mpOldIdToNewId = new Dictionary<int, int>();
         var newEntities = CreateEntities(ecsInfo, mpOldIdToNewId);
 
@@ -106,43 +128,22 @@ internal static partial class Serialize
             {
                 newEntity.AddComponent(positionComponent);
             }
+
+            // If our entity is equipped or in the backpack we don't want his sprite to appear in the dungeon
+            if (newEntity.HasComponent<DisplayComponent>() && 
+                (newEntity.HasComponent<InBackpackComponent>() || newEntity.HasComponent<IsEquippedComponent>()))
+            {
+                Dungeon.RemoveScEntity(newEntity.GetComponent<DisplayComponent>().ScEntity);
+            }
         }
 
         Dungeon.SetVisibilities();
     }
 
-    private static void RemovePlayer()
-    {
-        var playerPos = EcsApp.PlayerPos;
-        var oldPlayer = EcsRxApp.Player;
-        var collection = EcsApp.EntityDatabase.GetCollection();
-
-        MapGen.RemoveAgentAt(playerPos);
-        Dungeon.RemoveScEntity(oldPlayer.GetComponent<DisplayComponent>().ScEntity);
-        collection.RemoveEntity(EcsRxApp.Player.Id);
-    }
-
-    private static List<EntityInfo> DeserializeEcs(JsonReader reader)
-    {
-        var infoList = new List<EntityInfo>();
-        reader.Read();
-        Debug.Assert(reader.TokenType == JsonToken.StartArray);
-        var index = 0;
-        while (reader.Read())       // Start of object
-        {
-            if (reader.TokenType == JsonToken.EndArray)
-                break;
-            var entityInfo = DeserializeEntity(reader);
-            infoList.Add(entityInfo);
-        }
-
-        return infoList;
-    }
-
     private static EntityInfo DeserializeEntity(JsonReader reader)
     {
         var componentList = new List<EcsComponent>();
-        reader.Read();  // OriginalId:
+        reader.Read();  // OriginalId:https://library.umbc.edu/specialcollections/garrett/wp-content/uploads/sites/5/2024/06/What-Gef-is-pg-44-scaled.jpg
         reader.Read();  // <Id value>
         var originalId = Convert.ToInt32(reader.Value!);
         reader.Read();  // Components:
@@ -204,6 +205,14 @@ internal static partial class Serialize
                 case EquippedComponent equippedComponent:
                     equippedComponent.RemapEquipment(mpOldIdToNewId);
                     break;
+
+                case DisplayComponent displayComponent:
+                    if (entityInfo.FindComponent<InBackpackComponent>() != null ||
+                        entityInfo.FindComponent<IsEquippedComponent>() != null)
+                    {
+                        displayComponent.ScEntity.IsVisible = false;
+                    }
+                    break;
             }
         }
     }
@@ -245,18 +254,12 @@ internal static partial class Serialize
     {
         reader.Read();      // Property name
         reader.Read();      // The map
-        //var packedString = reader.Value as string;
-        //Debug.Assert(reader.TokenType == JsonToken.PropertyName);
-        //Debug.Assert((string)reader.Value! == property);
         var packed = JsonConvert.DeserializeObject<long[]>(reader.Value as string);
-        //var serializer = new JsonSerializer();
-        //var packed = serializer.Deserialize<long[]>(reader);
         UnpackBoolArray(map, packed, GameSettings.DungeonWidth, GameSettings.DungeonHeight);
     }
     #endregion
 
     #region Serialization
-
     public static string SerializeGame()
     {
         var sb = new StringBuilder();

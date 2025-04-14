@@ -114,46 +114,6 @@ internal class DungeonSurface : ScreenSurface
 
     }
 
-    public ScEntity GetScEntity(EntityInfo entityInfo)
-    {
-        var typeCmp = entityInfo.FindComponent<EntityTypeComponent>();
-        Debug.Assert(typeCmp != null);
-        var posCmp = entityInfo.FindComponent<PositionComponent>();
-        var pos = posCmp == null ? Point.Zero : posCmp.Position.Value;
-        ScEntity ret = null!;
-
-        switch (typeCmp.EcsType)
-        {
-            case EcsType.Agent:
-                var agentCmp = entityInfo.FindComponent<AgentTypeComponent>();
-                Debug.Assert(agentCmp != null);
-                var agentInfo = AgentInfo.InfoFromType(agentCmp.AgentType);
-                ret = CreateScEntity(agentInfo.Color, pos, agentInfo.Glyph, 0);
-                break;
-
-            case EcsType.Player:
-                ret = GetPlayerScEntity(pos);
-                break;
-
-            case EcsType.Weapon:
-                var weaponCmp = entityInfo.FindComponent<WeaponTypeComponent>();
-                Debug.Assert(weaponCmp != null);
-                var weaponInfo = WeaponInfo.InfoFromType(weaponCmp.WeaponType);
-                ret = CreateScEntity(weaponInfo.Color, pos, weaponInfo.Glyph, 0);
-                break;
-
-            case EcsType.Stairs:
-                ret = GetStairsEntity(pos);
-                break;
-        }
-
-        if (posCmp == null)
-        {
-            ret.IsVisible = false;
-        }
-        return ret!;
-    }
-
     public ScEntity CreateScEntity(Color foreground, Point pt, int chGlyph, int zOrder)
     {
         var scEntity = new ScEntity(new ScEntity.SingleCell(foreground, GameSettings.ClearColor, chGlyph), zOrder)
