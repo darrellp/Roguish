@@ -205,14 +205,6 @@ internal static partial class Serialize
                 case EquippedComponent equippedComponent:
                     equippedComponent.RemapEquipment(mpOldIdToNewId);
                     break;
-
-                case DisplayComponent displayComponent:
-                    if (entityInfo.FindComponent<InBackpackComponent>() != null ||
-                        entityInfo.FindComponent<IsEquippedComponent>() != null)
-                    {
-                        displayComponent.ScEntity.IsVisible = false;
-                    }
-                    break;
             }
         }
     }
