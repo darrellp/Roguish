@@ -95,14 +95,9 @@ internal class InventorySurface : ScreenSurface
         Surface.Print(0, index, _inventorySlots[index].name, Color.Orange);
     }
 
-    internal static IEntity? SelectedEntity()
+    internal static EcsEntity? SelectedEntity()
     {
-        if (_selectedIndex < 0)
-        {
-            return null;
-        }
-
-        return EcsApp.EntityDatabase.GetEntity(_inventorySlots[_selectedIndex].id);
+        return _selectedIndex < 0 ? null : EcsApp.EntityDatabase.GetEntity(_inventorySlots[_selectedIndex].id);
     }
 
     internal void Equip()

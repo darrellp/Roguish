@@ -8,7 +8,6 @@ internal partial class TaskGetter
     internal static void UserPickup(EcsEntity agent, RogueTask t)
     {
         var posCmp = agent.GetComponent<PositionComponent>();
-        var taskCmp = agent.GetComponent<TaskComponent>();
         var pos = posCmp.Position.Value;
         // TODO: Handle fMore being true here
         var (entity, fMore) = Mapgen.GetEntityAt(pos, true);
@@ -37,7 +36,6 @@ internal partial class TaskGetter
     internal static void UserDrop(EcsEntity agent, RogueTask t)
     {
         var posCmp = agent.GetComponent<PositionComponent>();
-        var taskCmp = agent.GetComponent<TaskComponent>();
         var pos = posCmp.Position.Value;
 
         var itemPosCmp = new PositionComponent(pos);
@@ -50,6 +48,7 @@ internal partial class TaskGetter
 
         // Take it off the inventory screen
         Inv.RemoveItem(item.Id);
+        item.RemoveComponent<InBackpackComponent>();
 
         if (item.HasComponent<DisplayComponent>())
         {

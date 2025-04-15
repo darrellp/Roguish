@@ -25,7 +25,8 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
     /// <summary>   Process the given entity when it's position changes </summary>
     ///
     /// <remarks>   As of right now the code assumes there is a DisplayComponent attached to the entity
-    ///             that is isVisible set correctly.  Darrell Plank, 4/14/2025. </remarks>
+    ///             and that its isVisible is set correctly.  
+    ///             Darrell Plank, 4/14/2025. </remarks>
     ///
     /// <param name="entity">   The entity. </param>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,9 +47,9 @@ internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
         var posOld = scEntity.Position;
         var posCmp = entity.GetComponent<PositionComponent>();
         var posNew = posCmp.Position.Value;
-        if (posNew == new Point())
+        if (posNew == Point.Zero)
         {
-            // Uninitialized position
+            // Uninitialized position - nothing can be placed at Point.Zero
             return;
         }
         scEntity.Position = posNew;
