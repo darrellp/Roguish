@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using EcsRx.Extensions;
 using GoRogue.MapGeneration;
 using GoRogue.Random;
@@ -24,7 +25,6 @@ public class MapGenerator
     {
         ClearEntityMaps();
     }
-
 
     public static bool IsWalkable(int x, int y)
     {
@@ -97,25 +97,23 @@ public class MapGenerator
     /// <returns>   The entity at the position and a bool indicating whether there is more than one entity there. </returns>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    internal (EcsEntity?, bool) GetEntityAt(int x, int y, bool fItem = false)
+    internal List<EcsEntity> GetEntitiesAt(int x, int y, bool fItem = false)
     {
-        int id;
-        bool fMore = false;
+        var ret = new List<EcsEntity>();
 
         if (!fItem && IsAgentAt(x, y))
         {
-            id = AgentMap[x, y];
+            ret.Add(EcsApp.EntityDatabase.GetEntity(AgentMap[x, y]));
         }
         else if (EntityMap[x, y] != null)
         {
-            id = EntityMap[x, y]![0];
-            fMore = EntityMap[x, y]!.Count > 1;
+            ret.AddRange(EntityMap[x, y]!.Select(i => EcsApp.EntityDatabase.GetEntity(i)));
         }
         else
         {
-            return (null, false);
+            ret = [];
         }
-        return (EcsApp.EntityDatabase.GetEntity(id), fMore);
+        return ret;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,9 +134,9 @@ public class MapGenerator
     /// </returns>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    internal (EcsEntity?, bool) GetEntityAt(Point pt, bool fItem = false)
+    internal List<EcsEntity> GetEntitiesAt(Point pt, bool fItem = false)
     {
-        return GetEntityAt(pt.X, pt.Y, fItem);
+        return GetEntitiesAt(pt.X, pt.Y, fItem);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,14 +222,15 @@ public class MapGenerator
 
         if (fovLevel == LevelOfFov.Lit && IsEntityAt(pt))
         {
-            var (ecsEntity, isMore) = GetEntityAt(pt);
+            var entities = GetEntitiesAt(pt);
+            var ecsEntity = entities[0];
             var type = ecsEntity.GetComponent<EntityTypeComponent>().EcsType;
             var ret = new StringBuilder();
 
             if (ecsEntity.HasComponent<DescriptionComponent>())
             {
                 var descCmp = ecsEntity.GetComponent<DescriptionComponent>();
-                var plural = isMore ? " and others" : "";
+                var plural = entities.Count > 1 ? " and others" : "";
                 ret = new StringBuilder( $"""
                         [c:r f:Yellow]{descCmp.Name} {plural}
                         [c:r f:Orange]{descCmp.Description}

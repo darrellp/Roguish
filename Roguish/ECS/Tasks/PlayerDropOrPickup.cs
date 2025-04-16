@@ -1,31 +1,42 @@
-﻿using EcsRx.Extensions;
+﻿using System.Diagnostics;
+using Coroutine;
+using EcsRx.Extensions;
 using Roguish.ECS.Components;
 using Roguish.Screens;
 
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter
 {
+    private static void OnChoose(List<int> selection)
+    {
+        var posCmp = EcsRxApp.Player.GetComponent<PositionComponent>();
+        var pos = posCmp.Position.Value;
+        var entities = Mapgen.GetEntitiesAt(pos, true);
+        foreach (var iSelected in selection)
+        {
+            MoveToBackpack(entities[iSelected], pos);
+        }
+    }
     internal static void UserPickup(EcsEntity agent, RogueTask t)
     {
         var posCmp = agent.GetComponent<PositionComponent>();
         var pos = posCmp.Position.Value;
-        // TODO: Handle fMore being true here
-        var (entity, fMore) = Mapgen.GetEntityAt(pos, true);
-        if (entity != null && !entity.HasComponent<AgentTypeComponent>())
+        var entities = Mapgen.GetEntitiesAt(pos, true);
+        if (entities.Count > 1)
         {
-            if (entity.HasComponent<DisplayComponent>())
-            {
-                var displayCmp = entity.GetComponent<DisplayComponent>();
-                displayCmp.ScEntity.IsVisible = false;
-                Dungeon.RemoveScEntity(displayCmp.ScEntity);
-                Mapgen.RemoveItemAt(pos, entity.Id);
-            }
 
-            var name = Utility.GetName(entity);
+            var names = entities
+                .Where(e => e.HasComponent<DescriptionComponent>())
+                .Select(e => e.GetComponent<DescriptionComponent>().Name)
+                .ToList();
+            var chooseDlg = new ChooseDialog("Choose an Item", names, OnChoose, true);
+            chooseDlg.ShowDialog();
+            return;
+        }
 
-            Log.PrintProcessedString($"Picked up {name}");
-            entity.RemoveComponent<PositionComponent>();
-            entity.AddComponent<InBackpackComponent>();
+        if (entities.Count != 0)
+        {
+            MoveToBackpack(entities[0], pos);
         }
         else
         {
@@ -33,10 +44,35 @@ internal partial class TaskGetter
         }
     }
 
+    private static object PickupLock = new object();
+    internal static void MoveToBackpack(EcsEntity entity, Point pos)
+    {
+        if (entity.HasComponent<DisplayComponent>())
+        {
+            var displayCmp = entity.GetComponent<DisplayComponent>();
+            displayCmp.ScEntity.IsVisible = false;
+            Dungeon.RemoveScEntity(displayCmp.ScEntity);
+            Mapgen.RemoveItemAt(pos, entity.Id);
+        }
+
+        var name = Utility.GetName(entity);
+
+        Log.PrintProcessedString($"Picked up {name}");
+        entity.RemoveComponent<PositionComponent>();
+        entity.AddComponent<InBackpackComponent>();
+    }
+
     internal static void UserDrop(EcsEntity agent, RogueTask t)
     {
         var posCmp = agent.GetComponent<PositionComponent>();
         var pos = posCmp.Position.Value;
+        var items = Mapgen.GetEntitiesAt(pos, true);
+        if (items.Count >= 1 && items[0].HasComponent<StairsComponent>())
+        {
+            Debug.Assert(items.Count == 1);
+            Log.PrintProcessedString("You can't drop items on top of stairs");
+            return;
+        }
 
         var itemPosCmp = new PositionComponent(pos);
         var item = InventorySurface.SelectedEntity();

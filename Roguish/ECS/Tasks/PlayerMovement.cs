@@ -17,7 +17,7 @@ internal partial class TaskGetter
         // Stop for any battles
         KeyboardEventSystem.StopQueue();
 
-        var (enemy,_) = Mapgen.GetEntityAt(ptDest);
+        var enemy = Mapgen.GetEntitiesAt(ptDest)[0];
         // TODO: MUCH more complicated battle algorithm here!
         var player = EcsRxApp.Player;
         var equippedCmp = player.GetComponent<EquippedComponent>();

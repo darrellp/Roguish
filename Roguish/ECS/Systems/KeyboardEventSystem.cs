@@ -71,11 +71,10 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
             case Keys.OemPeriod:
                 if (kb.IsKeyDown(Keys.LeftShift) || kb.IsKeyDown(Keys.RightShift))
                 {
-                    var (entity, fMore) = Mapgen.GetEntityAt(EcsApp.PlayerPos, true);
+                    var entities = Mapgen.GetEntitiesAt(EcsApp.PlayerPos, true);
                     // TODO: Handle fMore
-                    if (entity == null || !entity.HasComponent<StairsComponent>())
+                    if (entities.Count == 0 || !entities[0].HasComponent<StairsComponent>())
                     {
-                        
                         return;
                     }
                     task = TaskGetter.CreateTakeStairsTask(TaskGetter.Ticks);
