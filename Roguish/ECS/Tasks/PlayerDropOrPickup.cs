@@ -1,27 +1,75 @@
 ﻿using System.Diagnostics;
-using Coroutine;
+using System.Threading.Tasks;
 using EcsRx.Extensions;
+using Ninject.Infrastructure.Language;
 using Roguish.ECS.Components;
+using Roguish.ECS.Events;
 using Roguish.Screens;
 
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter
 {
-    private static void OnChoose(List<int> selection)
+    private static void OnChoose(EcsEntity entity, List<int> selection)
     {
+        if (selection.Count == 0)
+        {
+            return;
+        }
         var posCmp = EcsRxApp.Player.GetComponent<PositionComponent>();
         var pos = posCmp.Position.Value;
-        var entities = Mapgen.GetEntitiesAt(pos, true);
-        foreach (var iSelected in selection)
-        {
-            MoveToBackpack(entities[iSelected], pos);
-        }
+        var allIds = Mapgen.GetEntitiesAt(pos, true).Select(e=>e.Id).ToList();
+        var ids = selection.Select(i => allIds[i]).ToList();
+        var pickupCmp = new PickupComponent(ids);
+        entity.AddComponent(pickupCmp);
+
+        var taskCmp = entity.GetComponent<TaskComponent>();
+        taskCmp.Tasks[0] = CreatePickupTask();
+        EcsApp.EventSystem.Publish(new NewTurnEvent());
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// <summary>   User pickup. </summary>
+    ///
+    /// <remarks>   This can be called twice times in the execution of a single task.  The first time is
+    ///             when a normal pickup task is executed.  If there is only one item at the current player
+    ///             position, it is picked up and we're done.  If there are multiple items, a dialog is
+    ///             brought up to allow the user to select one or more items. The time to execute the dialog
+    ///             is adjusted to be zero (i.e., the FireOn time is set to the current time).  This ensures
+    ///             that no other tasks fire while the dialog is up.  When the dialog finishes up the
+    ///             OnChoose method is called which sets the PickupComponent on the entity and sets the FireOn
+    ///             time to the current time + the time to pick up the items.  It prepares a second pickup
+    ///             call and prepares another UserPickup task which will be the second time this method
+    ///             is called.  When it sees that PickupComponent is set, it will pick up the items in
+    ///             that component and return.  Is there a better way to achieve this?  Maybe.  If
+    ///             SadConsole had true Modal dialogs which blocked until they returned their info that
+    ///             would be by far the preferable solution but they don't so we need someway to return to 
+    ///             task processing while ensuring that no tasks actually get processed while the dialog
+    ///             is up.  That's essentially what this does.  Another possibility would be to add arguments
+    ///             to tasks but this seems problematic in terms of serialization and some other stuff.
+    ///             I may change to that sometime though if it seems like this is happening too often.
+    ///             Darrell Plank, 4/17/2025. </remarks>
+    ///
+    /// <param name="agent">    The agent. </param>
+    /// <param name="t">        A RogueTask to process. </param>
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     internal static void UserPickup(EcsEntity agent, RogueTask t)
     {
         var posCmp = agent.GetComponent<PositionComponent>();
         var pos = posCmp.Position.Value;
+        if (agent.HasComponent<PickupComponent>())
+        {
+            var pickupCmp = agent.GetComponent<PickupComponent>();
+            var ids = pickupCmp.Ids;
+
+            foreach (var id in ids)
+            {
+                MoveToBackpack(EcsApp.EntityDatabase.GetEntity(id), pos);
+            }
+            agent.RemoveComponent<PickupComponent>();
+            t.FireOn = Ticks + (ulong)(PickUpTime * ids.Count);
+            return;
+        }
         var entities = Mapgen.GetEntitiesAt(pos, true);
         if (entities.Count > 1)
         {
@@ -29,7 +77,7 @@ internal partial class TaskGetter
                 .Where(e => e.HasComponent<DescriptionComponent>())
                 .Select(e => e.GetComponent<DescriptionComponent>().Name)
                 .ToList();
-            var chooseDlg = new ChooseDialog("Choose an Item", names, OnChoose, true);
+            var chooseDlg = new ChooseDialog("Choose an Item", names, OnChoose, agent, true);
             chooseDlg.ShowDialog();
             // Don't fire any other tasks while the dialog is up
             t.FireOn = Ticks;

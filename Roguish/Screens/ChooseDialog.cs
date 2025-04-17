@@ -8,12 +8,13 @@ internal class ChooseDialog : Window
     private IList<string> _options;
     private string _title;
     private bool _canChooseMultiple;
-    private Action<List<int>> _onDismiss;
+    private Action<EcsEntity, List<int>> _onDismiss;
     private int _selectedIndex = 0;
+    private EcsEntity _entity;
     private TopContainer _topContainer;
     internal List<int> Selected { get; init; }= [];
 
-    public ChooseDialog(string title, IList<string> options, Action<List<int>> onDismiss, bool canChooseMultiple = false) 
+    public ChooseDialog(string title, IList<string> options, Action<EcsEntity, List<int>> onDismiss, EcsEntity entity, bool canChooseMultiple = false) 
         : base(Math.Max(title.Length, options.Select(s => s.Length).Max()) + 4, options.Count + 3)
     {
         var x = (GameSettings.GameWidth - Width) / 2;
@@ -23,6 +24,7 @@ internal class ChooseDialog : Window
         _options = options;
         _canChooseMultiple = canChooseMultiple;
         _onDismiss = onDismiss;
+        _entity = entity;
         Surface.UsePrintProcessor = true;
     }
 
@@ -89,7 +91,7 @@ internal class ChooseDialog : Window
         {
             if (_onDismiss != null)
             {
-                _onDismiss(Selected);
+                _onDismiss(_entity, Selected);
             }
             Close();
             Shutdown();
