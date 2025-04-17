@@ -17,6 +17,7 @@ internal partial class TaskGetter
             MoveToBackpack(entities[iSelected], pos);
         }
     }
+
     internal static void UserPickup(EcsEntity agent, RogueTask t)
     {
         var posCmp = agent.GetComponent<PositionComponent>();
@@ -24,13 +25,14 @@ internal partial class TaskGetter
         var entities = Mapgen.GetEntitiesAt(pos, true);
         if (entities.Count > 1)
         {
-
             var names = entities
                 .Where(e => e.HasComponent<DescriptionComponent>())
                 .Select(e => e.GetComponent<DescriptionComponent>().Name)
                 .ToList();
             var chooseDlg = new ChooseDialog("Choose an Item", names, OnChoose, true);
             chooseDlg.ShowDialog();
+            // Don't fire any other tasks while the dialog is up
+            t.FireOn = Ticks;
             return;
         }
 
@@ -44,7 +46,6 @@ internal partial class TaskGetter
         }
     }
 
-    private static object PickupLock = new object();
     internal static void MoveToBackpack(EcsEntity entity, Point pos)
     {
         if (entity.HasComponent<DisplayComponent>())
