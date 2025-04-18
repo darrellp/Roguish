@@ -75,7 +75,7 @@ internal partial class TaskGetter
                 .Where(e => e.HasComponent<DescriptionComponent>())
                 .Select(e => e.GetComponent<DescriptionComponent>().Name)
                 .ToList();
-            var chooseDlg = new ChooseDialog("Choose an Item", names, OnChoose, agent, true);
+            var chooseDlg = new ChooseDialog("Choose an Item", names, agent, OnChoose, true);
             chooseDlg.ShowDialog();
             // Don't fire any other tasks while the dialog is up
             t.FireOn = Ticks;

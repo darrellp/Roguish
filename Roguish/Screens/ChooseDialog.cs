@@ -8,12 +8,13 @@ internal class ChooseDialog : Window
     private IList<string> _options;
     private string _title;
     private bool _canChooseMultiple;
-    private Action<EcsEntity, List<int>> _onDismiss;
+    private Action<EcsEntity, List<int>>? _onDismiss;
     private int _selectedIndex;
     private EcsEntity _entity;
     internal List<int> Selected { get; init; }= [];
 
-    public ChooseDialog(string title, IList<string> options, Action<EcsEntity, List<int>> onDismiss, EcsEntity entity, bool canChooseMultiple = false) 
+    public ChooseDialog(string title, IList<string> options, EcsEntity entity, Action<EcsEntity, List<int>>? onDismiss = null,
+        bool canChooseMultiple = false) 
         : base(Math.Max(title.Length, options.Select(s => s.Length).Max()) + 4, options.Count + 3)
     {
         var x = (GameSettings.GameWidth - Width) / 2;
@@ -55,9 +56,13 @@ internal class ChooseDialog : Window
     {
         if (state.Mouse.LeftClicked)
         {
-            _selectedIndex = state.CellPosition.Y - 1;
-            HighlightOption();
-            SelectOption();
+            var index = state.CellPosition.Y - 1;
+            if (index >= 0 && index < _options.Count)
+            {
+                _selectedIndex = index;
+                HighlightOption();
+                SelectOption();
+            }
         }
         return base.ProcessMouse(state);
     }
