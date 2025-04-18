@@ -9,7 +9,7 @@ internal class ChooseDialog : Window
     private string _title;
     private bool _canChooseMultiple;
     private Action<EcsEntity, List<int>> _onDismiss;
-    private int _selectedIndex = 0;
+    private int _selectedIndex;
     private EcsEntity _entity;
     internal List<int> Selected { get; init; }= [];
 
@@ -49,6 +49,17 @@ internal class ChooseDialog : Window
         Hide();
         Dispose();
         Kernel.Get<DungeonSurface>().IsFocused = true;
+    }
+
+    public override bool ProcessMouse(MouseScreenObjectState state)
+    {
+        if (state.Mouse.LeftClicked)
+        {
+            _selectedIndex = state.CellPosition.Y - 1;
+            HighlightOption();
+            SelectOption();
+        }
+        return base.ProcessMouse(state);
     }
 
     public override bool ProcessKeyboard(Keyboard keyboard)
