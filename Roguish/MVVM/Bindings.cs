@@ -1,10 +1,7 @@
 ﻿using System.Diagnostics;
-using Roguish.ECS;
-using Roguish.ECS.Components;
 using Roguish.Screens;
 using SadConsole.UI;
 using SadConsole.UI.Controls;
-using EcsRx.Extensions;
 using Label = SadConsole.UI.Controls.Label;
 
 namespace Roguish.MVVM;

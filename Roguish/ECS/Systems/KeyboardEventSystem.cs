@@ -18,8 +18,7 @@ namespace Roguish.ECS.Systems;
 internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
 {
     #region Private Variables
-    private static MapGenerator Mapgen = null!;
-    private static LogScreen Log = null!;
+    private static readonly MapGenerator Mapgen;
     private static ConcurrentQueue<Keys> KeysQueue { get; } = new();
     #endregion
 
@@ -27,7 +26,7 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
     static KeyboardEventSystem()
     {
         Mapgen = Kernel.Get<MapGenerator>();
-        Log = Kernel.Get<LogScreen>();
+        Kernel.Get<LogScreen>();
     }
     #endregion
 
@@ -36,7 +35,7 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
     {
         if (keyData.RetrieveFromQueue)
         {
-            System.Threading.Tasks.Task.Factory.StartNew(ReadFromQueue);
+            Task.Factory.StartNew(ReadFromQueue);
             return;
         }
 
@@ -56,7 +55,7 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
         RogueTask? task = null;
         var player = EcsRxApp.Player;
         Debug.Assert(player != null);
-        var kb = SadConsole.Game.Instance.Keyboard;
+        var kb = Game.Instance.Keyboard;
 
         switch (key)
         {

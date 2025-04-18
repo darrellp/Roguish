@@ -12,7 +12,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
 {
     private static DungeonSurface _dungeon = null!;
     private static LogScreen _log = null!;
-    private static object Lock = new();
+    private static readonly object Lock = new();
 
     public NewTurnEventSystem(DungeonSurface dungeon, LogScreen log)
     {

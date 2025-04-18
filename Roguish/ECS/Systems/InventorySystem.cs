@@ -7,20 +7,20 @@ using Roguish.Screens;
 namespace Roguish.ECS.Systems;
 internal class InventorySystem : ISetupSystem, ITeardownSystem
 {
-    private static readonly InventorySurface _inv;
+    private static readonly InventorySurface Inv;
     static InventorySystem()
     {
-        _inv = Kernel.Get<InventorySurface>();
+        Inv = Kernel.Get<InventorySurface>();
     }
 
     public IGroup Group => new Group(typeof(InBackpackComponent));
     public void Teardown(EcsEntity entity)
     {
-        _inv.RemoveItem(entity.Id);
+        Inv.RemoveItem(entity.Id);
     }
 
     public void Setup(EcsEntity entity)
     {
-        _inv.AddItem(entity.Id);
+        Inv.AddItem(entity.Id);
     }
 }

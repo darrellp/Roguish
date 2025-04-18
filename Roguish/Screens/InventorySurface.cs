@@ -1,8 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Security.Cryptography;
-using EcsRx.Entities;
 using EcsRx.Extensions;
-using Ninject;
 using Roguish.ECS;
 using Roguish.ECS.Components;
 using SadConsole.Input;
@@ -11,11 +8,11 @@ using SadConsole.Input;
 namespace Roguish.Screens;
 internal class InventorySurface : ScreenSurface
 {
-    private static List<InventoryItem> _inventorySlots = new List<InventoryItem>(GameSettings.InvHeight);
+    private static List<InventoryItem> _inventorySlots = new(GameSettings.InvHeight);
     private static int _selectedIndex = -1;
     private static LogScreen _log = null!;
     private static EquipSurface _equip = null!;
-    private static object _lock = new object();
+    private static object _lock = new();
     private static string _clearLine = "".PadRight(GameSettings.InvWidth);
 
     public InventorySurface(EquipSurface equip, LogScreen log) : base(GameSettings.InvWidth, GameSettings.InvHeight)
@@ -39,7 +36,7 @@ internal class InventorySurface : ScreenSurface
     
     internal void RemoveItem(int id)
     {
-        var index = _inventorySlots.FindIndex(item => item.id == id);
+        var index = _inventorySlots.FindIndex(item => item.Id == id);
         if (index < 0)
         {
             return;
@@ -48,7 +45,7 @@ internal class InventorySurface : ScreenSurface
         _inventorySlots.RemoveAt(index);
         for (var i = index; i < _inventorySlots.Count; i++)
         {
-            var name = _inventorySlots[i].name.PadRight(GameSettings.InvWidth);
+            var name = _inventorySlots[i].Name.PadRight(GameSettings.InvWidth);
             Surface.Print(0, i, name, Color.White);
         }
 
@@ -88,16 +85,16 @@ internal class InventorySurface : ScreenSurface
 
         if (_selectedIndex >= 0)
         {
-            var name = _inventorySlots[_selectedIndex].name;
+            var name = _inventorySlots[_selectedIndex].Name;
             Surface.Print(0, _selectedIndex, name, Color.White);
         }
         _selectedIndex = index;
-        Surface.Print(0, index, _inventorySlots[index].name, Color.Orange);
+        Surface.Print(0, index, _inventorySlots[index].Name, Color.Orange);
     }
 
     internal static EcsEntity? SelectedEntity()
     {
-        return _selectedIndex < 0 ? null : EcsApp.EntityDatabase.GetEntity(_inventorySlots[_selectedIndex].id);
+        return _selectedIndex < 0 ? null : EcsApp.EntityDatabase.GetEntity(_inventorySlots[_selectedIndex].Id);
     }
 
     internal void Equip()
@@ -119,7 +116,7 @@ internal class InventorySurface : ScreenSurface
         var equipableCmp = item.GetComponent<EquipableComponent>();
         var equippedCmp = EcsRxApp.Player.GetComponent<EquippedComponent>();
         var id = item.Id;
-        var oldId = -1;
+        int oldId;
         var oldIdAlt = -1;
 
         item.RemoveComponent<InBackpackComponent>();
@@ -232,5 +229,5 @@ internal class InventorySurface : ScreenSurface
         _equip.Update(equippedCmp);
     }
 
-    private record InventoryItem(int id, string name);
+    private record InventoryItem(int Id, string Name);
 }

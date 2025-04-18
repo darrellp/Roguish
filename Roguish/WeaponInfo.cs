@@ -7,8 +7,7 @@ using ShaiRandom.Generators;
 
 namespace Roguish;
 using ECS.Components;
-using Roguish.Screens;
-using static Roguish.AgentInfo;
+using Screens;
 
 internal enum WeaponType
 {

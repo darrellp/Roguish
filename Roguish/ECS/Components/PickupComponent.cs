@@ -1,9 +1,5 @@
 ﻿namespace Roguish.ECS.Components;
-internal class PickupComponent : EcsComponent
+internal class PickupComponent(List<int> ids) : EcsComponent
 {
-    internal List<int> Ids { get; set; } = new List<int>();
-    public PickupComponent(List<int> ids)
-    {
-        Ids = ids;
-    }
+    internal List<int> Ids { get; set; } = ids;
 }

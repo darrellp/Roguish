@@ -11,7 +11,6 @@ internal class ChooseDialog : Window
     private Action<EcsEntity, List<int>> _onDismiss;
     private int _selectedIndex = 0;
     private EcsEntity _entity;
-    private TopContainer _topContainer;
     internal List<int> Selected { get; init; }= [];
 
     public ChooseDialog(string title, IList<string> options, Action<EcsEntity, List<int>> onDismiss, EcsEntity entity, bool canChooseMultiple = false) 
@@ -70,8 +69,7 @@ internal class ChooseDialog : Window
             case Keys.Space:
                 if (_canChooseMultiple)
                 {
-                    Selected.Add(_selectedIndex);
-                    HighlightOption();
+                    SelectOption();
                 }
                 return true;
         }
@@ -114,6 +112,25 @@ internal class ChooseDialog : Window
         {
             var color = i == _selectedIndex ? Color.Yellow : Color.White;
             Surface.Print(1, i + 1, _options[i], color);
+        }
+    }
+
+    private void SelectOption()
+    {
+        var newlySelected = !Selected.Contains(_selectedIndex);
+        var bg = Color.DarkCyan;
+        if (!newlySelected)
+        {
+            bg = Color.Transparent;
+        }
+        Surface.Print(1, _selectedIndex + 1,  _options[_selectedIndex], Color.Yellow, bg);
+        if (newlySelected)
+        {
+            Selected.Add(_selectedIndex);
+        }
+        else
+        {
+            Selected.Remove(_selectedIndex);
         }
     }
 }

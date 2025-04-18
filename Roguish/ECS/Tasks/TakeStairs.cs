@@ -1,6 +1,4 @@
-﻿using Ninject;
-using Roguish.ECS.Components;
-using Roguish.Screens;
+﻿using Roguish.ECS.Components;
 
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter

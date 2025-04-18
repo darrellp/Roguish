@@ -1,4 +1,2 @@
 ﻿namespace Roguish.ECS.Events;
-internal class NewTurnEvent
-{
-}
+internal class NewTurnEvent;

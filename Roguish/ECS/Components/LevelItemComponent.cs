@@ -1,12 +1,7 @@
 ﻿namespace Roguish.ECS.Components;
 
 // Marks items that need to be deleted or attended to on a level change
-public class LevelItemComponent : EcsComponent
+public class LevelItemComponent(int level) : EcsComponent
 {
-    public int Level { get; set; }
-
-    public LevelItemComponent(int level)
-    {
-        Level = level;
-    }
+    public int Level { get; set; } = level;
 }

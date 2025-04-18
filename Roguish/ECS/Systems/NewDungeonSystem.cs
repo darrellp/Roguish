@@ -1,22 +1,20 @@
-﻿using System.Diagnostics;
-using Roguish.ECS.Components;
+﻿using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using Roguish.Map_Generation;
 using SystemsRx.Systems.Conventional;
 using EcsRx.Extensions;
 using Roguish.Screens;
+// ReSharper disable IdentifierTypo
 
 namespace Roguish.ECS.Systems;
 
 // ReSharper disable once UnusedType.Global
 internal class NewDungeonSystem : IReactToEventSystem<NewDungeonEvent>
 {
-    private readonly MapGenerator _mapgen;
     static DungeonSurface _dungeon = null!;
 
-    public NewDungeonSystem(MapGenerator mapgen, DungeonSurface dungeon)
+    public NewDungeonSystem(DungeonSurface dungeon)
     {
-        _mapgen = mapgen;
         _dungeon = dungeon;
     }
 

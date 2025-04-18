@@ -31,7 +31,7 @@ internal static partial class TaskGetter
     #region Action Table
     // Parallels TaskType enum above...
     internal static readonly List<Action<EcsEntity, RogueTask>> ActionTable =[
-        null,
+        null!,
         MovePlayer,
         DefaultAgentMove,
         AgentPursue,

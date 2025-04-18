@@ -1,9 +1,5 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices.Marshalling;
-using Newtonsoft.Json;
-using Roguish.ECS.Events;
+﻿using Newtonsoft.Json;
 using Roguish.ECS.Tasks;
-using Roguish.Map_Generation;
 
 namespace Roguish.ECS.Components;
 
@@ -28,7 +24,7 @@ public class TaskComponent : EcsComponent
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     [JsonConstructor]
-    public TaskComponent(ulong fireOn, TaskType taskType, Point ptArg = default(Point))
+    public TaskComponent(ulong fireOn, TaskType taskType, Point ptArg = default)
     {
         Tasks = [new RogueTask(fireOn, taskType, ptArg)];
     }
@@ -56,16 +52,18 @@ public class TaskComponent : EcsComponent
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>   A task. </summary>
 ///
-/// <remarks>   A task is a timed action which occurs when the clock ticks have reached
-///             or surpassed FireOn.  When a task fires it is it's own responsibility
-///             to update itself with a new action/FireOn time
-///             Darrell Plank, 4/5/2025. </remarks>
+/// <remarks>
+/// A task is a timed action which occurs when the clock ticks have reached or surpassed FireOn.
+/// When a task fires it is it's own responsibility to update itself with a new action/FireOn
+/// time Darrell Plank, 4/5/2025.
+/// </remarks>
 ///
 /// <param name="fireOn">   The fire on. </param>
-/// <param name="action">   The action. </param>
+/// <param name="taskType"> The action. </param>
+/// <param name="ptArg">    The point argument. </param>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-public class RogueTask(ulong fireOn, TaskType taskType, Point ptArg = default(Point))
+public class RogueTask(ulong fireOn, TaskType taskType, Point ptArg = default)
 {
     public ulong FireOn { get; set; } = fireOn;
     public TaskType TaskType { get; set; } = taskType;

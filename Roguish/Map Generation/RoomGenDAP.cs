@@ -11,10 +11,10 @@ internal class RoomGenDAP : GenerationStep
     private readonly IEnhancedRandom _rng = GlobalRandom.DefaultRNG;
     public int MinRoomHeight = 5;
     public int MinRoomWidth = 5;
-    private string? RectRoomsComponentTag;
+    private readonly string? _rectRoomsComponentTag;
     public int SuperCellHeight = 15;
     public int SuperCellWidth = 15;
-    private string? WallFloorComponentTag;
+    private readonly string? _wallFloorComponentTag;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public RoomGenDAP(
@@ -23,8 +23,8 @@ internal class RoomGenDAP : GenerationStep
         string? rectRoomsComponentTag = "RectRooms")
         : base(name)
     {
-        WallFloorComponentTag = wallFloorComponentTag;
-        RectRoomsComponentTag = rectRoomsComponentTag;
+        _wallFloorComponentTag = wallFloorComponentTag;
+        _rectRoomsComponentTag = rectRoomsComponentTag;
     }
 
     protected override IEnumerator<object?> OnPerform(GenerationContext context)
@@ -50,12 +50,12 @@ internal class RoomGenDAP : GenerationStep
         // Get or create/add a wall-floor context component
         context.GetFirstOrNew<ISettableGridView<bool>>(
             () => wallFloor,
-            WallFloorComponentTag
+            _wallFloorComponentTag
         );
 
         context.GetFirstOrNew(
             () => rooms,
-            RectRoomsComponentTag
+            _rectRoomsComponentTag
         );
 
         yield return null;

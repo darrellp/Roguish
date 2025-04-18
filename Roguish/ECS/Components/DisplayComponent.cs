@@ -1,15 +1,8 @@
-﻿using Newtonsoft.Json;
-
-namespace Roguish.ECS.Components;
+﻿namespace Roguish.ECS.Components;
 
 // Contains the ScEntity that is displayed for this entity
 // 
-internal class DisplayComponent : EcsComponent
+internal class DisplayComponent(ScEntity scEntity) : EcsComponent
 {
-    public DisplayComponent(ScEntity scEntity)
-    {
-        ScEntity = scEntity;
-    }
-
-    public ScEntity ScEntity{ get; set; }
+    public ScEntity ScEntity{ get; set; } = scEntity;
 }

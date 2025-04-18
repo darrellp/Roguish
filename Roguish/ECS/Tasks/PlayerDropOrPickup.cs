@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Threading.Tasks;
 using EcsRx.Extensions;
-using Ninject.Infrastructure.Language;
 using Roguish.ECS.Components;
 using Roguish.ECS.Events;
 using Roguish.Screens;

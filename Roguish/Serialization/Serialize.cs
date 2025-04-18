@@ -7,10 +7,8 @@ using Roguish.ECS.Components;
 using Roguish.Map_Generation;
 using Roguish.Screens;
 using EcsRx.Extensions;
-using Roguish.ECS.Systems;
 using SadConsole.SerializedTypes;
 using SadRogue.Primitives.GridViews;
-using Roguish.ECS.Events;
 
 // ReSharper disable IdentifierTypo
 
@@ -20,7 +18,6 @@ internal static partial class Serialize
     #region private fields
     private static readonly string ComponentNamespace = typeof(HealthComponent).Namespace!;
     private static readonly DungeonSurface Dungeon = Kernel.Get<DungeonSurface>();
-    private static readonly MapGenerator MapGen = Kernel.Get<MapGenerator>();
     private static readonly JsonSerializerSettings Settings;
     #endregion
 
@@ -29,7 +26,7 @@ internal static partial class Serialize
     {
         Settings = new JsonSerializerSettings
         {
-            ContractResolver = new CustomResolver("EcsComponent"),
+            ContractResolver = new CustomResolver(),
             Formatting = Formatting.Indented,
             Converters = new List<JsonConverter>
             {
@@ -236,17 +233,17 @@ internal static partial class Serialize
 
         // The agent map and entity map are filled as a consequence of filling
         // the ECS entities so are not serialized explicitly here.
-        DeserializeMap(MapGenerator.RevealMap, "RevealMap", reader);
-        DeserializeMap(MapGenerator.WalkableMap, "WalkableMap", reader);
-        DeserializeMap(MapGenerator.WallsMap, "WallsMap", reader);
+        DeserializeMap(MapGenerator.RevealMap, reader);
+        DeserializeMap(MapGenerator.WalkableMap, reader);
+        DeserializeMap(MapGenerator.WallsMap, reader);
         reader.Read();      // End object
     }
 
-    private static void DeserializeMap(ISettableGridView<bool> map, string property, JsonReader reader)
+    private static void DeserializeMap(ISettableGridView<bool> map, JsonReader reader)
     {
         reader.Read();      // Property name
         reader.Read();      // The map
-        var packed = JsonConvert.DeserializeObject<long[]>(reader.Value as string);
+        var packed = JsonConvert.DeserializeObject<long[]>((reader.Value as string)!)!;
         UnpackBoolArray(map, packed, GameSettings.DungeonWidth, GameSettings.DungeonHeight);
     }
     #endregion

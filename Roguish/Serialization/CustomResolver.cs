@@ -5,15 +5,9 @@ namespace Roguish.Serialization;
 
 internal static partial class Serialize
 {
-    private class CustomResolver : DefaultContractResolver
+    private class CustomResolver() : DefaultContractResolver
     {
-        private string customTypePropertyName;
-        private IValueProvider valueProvider = new SimpleTypeNameProvider();
-
-        public CustomResolver(string customTypePropertyName)
-        {
-            this.customTypePropertyName = customTypePropertyName;
-        }
+        private readonly IValueProvider _valueProvider = new SimpleTypeNameProvider();
 
         protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
         {
@@ -29,7 +23,7 @@ internal static partial class Serialize
                     DeclaringType = type,
                     PropertyType = typeof(string),
                     PropertyName = "ComponentType",
-                    ValueProvider = valueProvider,
+                    ValueProvider = _valueProvider,
                     Readable = true,
                     Writable = false
                 });
@@ -46,9 +40,8 @@ internal static partial class Serialize
             return target.GetType().Name;
         }
 
-        public void SetValue(object target, object value)
+        void IValueProvider.SetValue(object target, object? value)
         {
-            return;
         }
     }
 

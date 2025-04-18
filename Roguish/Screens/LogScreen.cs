@@ -45,8 +45,10 @@ internal class LogScreen : ControlsConsole
         Renderer.Steps.RemoveAll(p => p.Name == SadConsole.Renderers.Constants.RenderStepNames.Tint);
 
         // Handle the scroll bar control
-        _scrollBar = new ScrollBar(Orientation.Vertical, Height);
-        _scrollBar.IsEnabled = false;
+        _scrollBar = new ScrollBar(Orientation.Vertical, Height)
+        {
+            IsEnabled = false
+        };
         _scrollBar.ValueChanged += (sender, e) => MessageBuffer.ViewPosition = (0, _scrollBar.Value);
         _scrollBar.Position = (Width - 1, 0);
         Controls.Add(_scrollBar);

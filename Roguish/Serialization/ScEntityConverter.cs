@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Diagnostics;
+using Newtonsoft.Json;
 using Roguish.Screens;
 
 namespace Roguish.Serialization;
@@ -6,7 +7,9 @@ internal class ScEntityConverter(DungeonSurface dungeon) : JsonConverter<ScEntit
 {
     public override void WriteJson(JsonWriter writer, ScEntity? value, JsonSerializer serializer)
     {
+        Debug.Assert(value != null, nameof(value) + " != null");
         var singleCellGlyph = value.AppearanceSingle;
+        Debug.Assert(singleCellGlyph != null, nameof(singleCellGlyph) + " != null");
         var position = value.AbsolutePosition;
         var fg = singleCellGlyph.Appearance.Foreground;
         var glyph = singleCellGlyph.Appearance.Glyph;
@@ -23,7 +26,7 @@ internal class ScEntityConverter(DungeonSurface dungeon) : JsonConverter<ScEntit
         writer.WriteEndObject();
     }
 
-    public override ScEntity? ReadJson(JsonReader reader, Type objectType, ScEntity? existingValue, bool hasExistingValue,
+    public override ScEntity ReadJson(JsonReader reader, Type objectType, ScEntity? existingValue, bool hasExistingValue,
         JsonSerializer serializer)
     {
         reader.Read();      // PropertyName "Foreground"

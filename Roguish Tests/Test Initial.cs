@@ -1,5 +1,4 @@
 ﻿using GoRogue.Random;
-using Roguish;
 using ShaiRandom.Generators;
 
 namespace Roguish_Tests;

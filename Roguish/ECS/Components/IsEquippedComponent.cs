@@ -1,4 +1,2 @@
 ﻿namespace Roguish.ECS.Components;
-internal class IsEquippedComponent : EcsComponent
-{
-}
+internal class IsEquippedComponent : EcsComponent;

@@ -31,8 +31,8 @@ internal class EquipSurface : ScreenSurface
         for (var i = 0; i < equipSlots.Count; i++)
         {
             var slot = equipSlots[i];
-            var id = slot.getter(equipped);
-            var name = slot.name.PadRight(LeftColumnWidth, '.');
+            var id = slot.Getter(equipped);
+            var name = slot.Name.PadRight(LeftColumnWidth, '.');
             var value = id == -1 ? 
                 "None" : 
                 EcsApp.EntityDatabase.GetEntity(id).GetComponent<DescriptionComponent>().Name;
@@ -41,5 +41,5 @@ internal class EquipSurface : ScreenSurface
         }
     }
 
-    private record EquipSlotInfo(string name, Func<EquippedComponent, int> getter);
+    private record EquipSlotInfo(string Name, Func<EquippedComponent, int> Getter);
 }

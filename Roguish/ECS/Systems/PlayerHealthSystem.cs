@@ -6,7 +6,7 @@ using Roguish.ECS.Components;
 using Roguish.Screens;
 
 namespace Roguish.ECS.Systems;
-internal class PlayerHealthSystem(StatusBar statusBar) : IReactToEntitySystem
+internal class PlayerHealthSystem : IReactToEntitySystem
 {
     public IGroup Group => new Group(typeof(HealthComponent), typeof(IsPlayerControlledComponent));
     public IObservable<EcsEntity> ReactToEntity(EcsEntity entity)

@@ -1,7 +1,5 @@
-﻿using System.Reactive.Linq;
-using EcsRx.Extensions;
+﻿using EcsRx.Extensions;
 using EcsRx.Groups;
-using EcsRx.Groups.Observable;
 using EcsRx.Systems;
 using Roguish.ECS.Components;
 using Roguish.Screens;

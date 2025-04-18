@@ -1,5 +1,4 @@
 ﻿using Ninject;
-using Roguish.ECS.Systems;
 using SadConsole.UI.Controls;
 using SystemsRx.ReactiveData;
 
