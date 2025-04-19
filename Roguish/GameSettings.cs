@@ -75,8 +75,10 @@ internal static class GameSettings
     public static Color ClearColor = Color.Black;
     public static Color FloorColor = Color.Orange;
     public static Color WallColor = Color.Blue;
+    public static Color StairsColor = Color.Pink;
 
     public static int PursueRadius = 7;
 
     #endregion
+
 }

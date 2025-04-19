@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using EcsRx.Extensions;
 using GoRogue.MapGeneration;
 using GoRogue.Random;
@@ -96,7 +97,7 @@ public class MapGenerator
     /// <returns>   The entity at the position and a bool indicating whether there is more than one entity there. </returns>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    internal List<EcsEntity> GetEntitiesAt(int x, int y, bool fItem = false)
+    internal static List<EcsEntity> GetEntitiesAt(int x, int y, bool fItem = false)
     {
         var ret = new List<EcsEntity>();
 
@@ -195,6 +196,10 @@ public class MapGenerator
 
     internal static int BaseGlyphAt(int iX, int iY)
     {
+        if (IsEntityAt(iX, iY) && GetEntitiesAt(iX, iY).Any(e => e.HasComponent<StairsComponent>()))
+        {
+            return '>';
+        }
         return IsWalkable(iX, iY) ? '.' : 0;
     }
 

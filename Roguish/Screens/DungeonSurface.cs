@@ -43,8 +43,10 @@ internal class DungeonSurface : ScreenSurface
 
     private static readonly Color WallColor = GameSettings.WallColor;
     private static readonly Color FloorColor = GameSettings.FloorColor;
+    private static readonly Color StairsColor = GameSettings.StairsColor;
     private static readonly Color DimWallColor = Utility.DimmedColor(WallColor);
     private static readonly Color DimFloorColor = Utility.DimmedColor(FloorColor);
+    private static readonly Color DimStairsColor = Utility.DimmedColor(StairsColor);
 
     private static Dictionary<int, ColoredGlyph> _mpIndexToGlyph = new()
     {
@@ -216,6 +218,10 @@ internal class DungeonSurface : ScreenSurface
     private void CreateStairs()
     {
         var stairsPos = Mapgen.FindRandomEmptyPoint();
+
+        var stairsAppearance = new ColoredGlyph(Color.Transparent, Color.Black, '>');
+        DrawGlyph(stairsAppearance, stairsPos);
+
         var scEntityStairs = GetStairsEntity(stairsPos);
         var stairs = EcsApp.EntityDatabase.GetCollection().CreateEntity();
         var displayCmp = new DisplayComponent(scEntityStairs);
@@ -351,6 +357,7 @@ internal class DungeonSurface : ScreenSurface
         var offMapAppearance = new ColoredGlyph(Color.Black, Color.Black, 0x00);
         var wallAppearance = new ColoredGlyph(Color.Black, DrawFov ? DimWallColor : WallColor, 0x00);
         var floorAppearance = new ColoredGlyph(DrawFov ? DimFloorColor : FloorColor, Color.Black, '.');
+        var stairsAppearance = new ColoredGlyph(DrawFov ? DimStairsColor : StairsColor, Color.Black, '>');
         for (var iX = 0; iX < Width; iX++)
         {
             for (var iY = 0; iY < Height; iY++)
@@ -361,10 +368,13 @@ internal class DungeonSurface : ScreenSurface
                     DrawGlyph(appearance, iX, iY);
                     continue;
                 }
-
                 if (Mapgen.Wall(iX, iY))
                 {
                     DrawGlyph(wallAppearance, iX, iY);
+                }
+                else if (MapGenerator.GetEntitiesAt(iX, iY).Any(e => e.HasComponent<StairsComponent>()))
+                {
+                    DrawGlyph(stairsAppearance, iX, iY);
                 }
                 else if (MapGenerator.IsWalkable(iX, iY))
                 {
@@ -383,7 +393,7 @@ internal class DungeonSurface : ScreenSurface
         }
     }
 
-
+#if OLD
     private void InscribePath(Point prev, Point cur, Point next)
     {
         var index = ConnectValue(cur, prev) | ConnectValue(cur, next);
@@ -405,7 +415,8 @@ internal class DungeonSurface : ScreenSurface
 
         return pt.X < ptConnect.X ? 2 : 8;
     }
-    #endregion
+#endif
+#endregion
 
     #region FOV
     public static LevelOfFov GetFov(Point pt)
@@ -434,7 +445,8 @@ internal class DungeonSurface : ScreenSurface
         {
             return;
         }
-        var (clrWall, clrFloor) = fSeen ? (WallColor, FloorColor) : (DimWallColor, DimFloorColor);
+
+        var (clrWall, clrFloor, clrStairs) = fSeen ? (WallColor, FloorColor, StairsColor) : (DimWallColor, DimFloorColor, DimStairsColor);
 
         var glyph = this.GetCellAppearance(pt.X, pt.Y) as ColoredGlyph;
         Debug.Assert(glyph != null);
@@ -447,6 +459,7 @@ internal class DungeonSurface : ScreenSurface
         {
             glyph.Foreground = glyph.Glyph switch
             {
+                '>' => clrStairs,
                 '.' => clrFloor,
                 _ => glyph.Foreground // Leave things alone if not specifically handled above
             };
@@ -495,6 +508,5 @@ internal class DungeonSurface : ScreenSurface
         }
 
     }
-
     #endregion
 }

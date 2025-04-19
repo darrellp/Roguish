@@ -9,9 +9,8 @@ using Roguish.Screens;
 
 namespace Roguish.ECS.Systems;
 
-internal class MovementSystem(DungeonSurface dungeon) : IReactToEntitySystem
+internal class MovementSystem : IReactToEntitySystem
 {
-    public DungeonSurface Dungeon { get; } = dungeon;
     public IGroup Group => new Group(typeof(PositionComponent), typeof(DisplayComponent));
 
     public IObservable<EcsEntity> ReactToEntity(EcsEntity entity)
