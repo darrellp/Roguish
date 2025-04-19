@@ -11,13 +11,14 @@ using Screens;
 
 internal enum WeaponType
 {
+    Fists,
     Axe,
     Axe2H,
     Sword,
     Sword2H,
     Staff,
     Club,
-    Fists
+    Dagger
 }
 internal class WeaponInfo
 {

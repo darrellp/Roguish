@@ -102,7 +102,7 @@ internal class NewTurnEventSystem : IReactToEventSystem<NewTurnEvent>
                 scEntity.IsVisible = Fov.CurrentFOV.Contains(scEntity.Position);
                 if (scEntity.IsVisible && ecsEntity.HasComponent<AgentTypeComponent>() && ecsEntity.Id != EcsRxApp.Player.Id && KeyboardEventSystem.HasQueue())
                 {
-                    var name = Utility.GetName(ecsEntity);
+                    var name = Utility.GetColoredName(ecsEntity);
                     _log.PrintProcessedString($"Stopping since [c:r f:Yellow]{name}[c:undo] came into view");
                     // Stopping the player because another agent is in view
                     KeyboardEventSystem.StopQueue();

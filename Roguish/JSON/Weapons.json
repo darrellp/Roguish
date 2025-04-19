@@ -26,6 +26,19 @@
     }
   },
   {
+    "WeaponType": "Dagger",
+    "Name": "Dagger",
+    "Description": "Sneaky backstabber",
+    "Slot": "OneHand",
+    "StartLevel": 0,
+    "EndLevel": 10,
+    "Glyph": 100,
+    "Damage": "1d5+1",
+    "Color": {
+      "_packedValue": 0xffffff80
+    }
+  },
+  {
     "WeaponType": "Fists",
     "Name": "Fists!",
     "Description": "Your own fists!",

@@ -29,7 +29,7 @@ internal static class Utility
         return IsVowel(str[0]) ? "an " + colorCode: "a " + colorCode;
     }
 
-    internal static string GetName(EcsEntity item)
+    internal static string GetColoredName(EcsEntity item)
     {
         var name = item.HasComponent<DescriptionComponent>()
             ? Utility.PrefixWithAorAnColored(item.GetComponent<DescriptionComponent>().Name, "Yellow")
@@ -37,4 +37,9 @@ internal static class Utility
         return name;
     }
 
+    public static string EntityName(int id)
+    {
+        var entity = EcsApp.EntityDatabase.GetEntity(id);
+        return entity.HasComponent<DescriptionComponent>() ? entity.GetComponent<DescriptionComponent>().Name : "Unknown";
+    }
 }

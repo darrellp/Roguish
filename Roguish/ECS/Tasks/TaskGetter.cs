@@ -13,6 +13,8 @@ public enum TaskType
     AgentPursue,
     PickUp,
     Equip,
+    Unequip,
+    UnequipDialog,
     Regenerate,
     TakeStairs,
     Drop,
@@ -37,6 +39,8 @@ internal static partial class TaskGetter
         AgentPursue,
         UserPickup,
         UserEquip,
+        Unequip,
+        UnequipDialog,
         Regenerate,
         TakeStairs,
         UserDrop,
@@ -54,7 +58,8 @@ internal static partial class TaskGetter
     #region Task Times
     internal const int StdMovementTime = 100;
     internal const int PickUpTime = 10;
-    internal const int EquipTime = 10;
+    internal const int EquipTime = 50;
+    internal const int UnequipTime = 50;
     #endregion
 
     #region (static) Constructor

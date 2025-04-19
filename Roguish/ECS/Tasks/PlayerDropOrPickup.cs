@@ -7,7 +7,7 @@ using Roguish.Screens;
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter
 {
-    private static void OnChoose(EcsEntity entity, List<int> selection)
+    private static void OnChoosePickup(EcsEntity entity, List<int> selection)
     {
         if (selection.Count == 0)
         {
@@ -17,7 +17,7 @@ internal partial class TaskGetter
         var pos = posCmp.Position.Value;
         var allIds = Mapgen.GetEntitiesAt(pos, true).Select(e=>e.Id).ToList();
         var ids = selection.Select(i => allIds[i]).ToList();
-        var pickupCmp = new PickupComponent(ids);
+        var pickupCmp = new SelectedIdsComponent(ids);
         entity.AddComponent(pickupCmp);
 
         var taskCmp = entity.GetComponent<TaskComponent>();
@@ -55,16 +55,16 @@ internal partial class TaskGetter
     {
         var posCmp = agent.GetComponent<PositionComponent>();
         var pos = posCmp.Position.Value;
-        if (agent.HasComponent<PickupComponent>())
+        if (agent.HasComponent<SelectedIdsComponent>())
         {
-            var pickupCmp = agent.GetComponent<PickupComponent>();
+            var pickupCmp = agent.GetComponent<SelectedIdsComponent>();
             var ids = pickupCmp.Ids;
 
             foreach (var id in ids)
             {
                 MoveToBackpack(EcsApp.EntityDatabase.GetEntity(id), pos);
             }
-            agent.RemoveComponent<PickupComponent>();
+            agent.RemoveComponent<SelectedIdsComponent>();
             t.FireOn = Ticks + (ulong)(PickUpTime * ids.Count);
             return;
         }
@@ -75,7 +75,7 @@ internal partial class TaskGetter
                 .Where(e => e.HasComponent<DescriptionComponent>())
                 .Select(e => e.GetComponent<DescriptionComponent>().Name)
                 .ToList();
-            var chooseDlg = new ChooseDialog("Choose an Item", names, agent, OnChoose, true);
+            var chooseDlg = new ChooseDialog("Choose an Item", names, agent, OnChoosePickup, true);
             chooseDlg.ShowDialog();
             // Don't fire any other tasks while the dialog is up
             t.FireOn = Ticks;
@@ -102,9 +102,9 @@ internal partial class TaskGetter
             Mapgen.RemoveItemAt(pos, entity.Id);
         }
 
-        var name = Utility.GetName(entity);
-
+        var name = Utility.GetColoredName(entity);
         Log.PrintProcessedString($"Picked up {name}");
+
         entity.RemoveComponent<PositionComponent>();
         entity.AddComponent<InBackpackComponent>();
     }
@@ -140,7 +140,7 @@ internal partial class TaskGetter
         }
         item.AddComponent(itemPosCmp);
 
-        var name = Utility.GetName(item);
+        var name = Utility.GetColoredName(item);
         Log.PrintProcessedString($"Dropped {name}");
     }
 

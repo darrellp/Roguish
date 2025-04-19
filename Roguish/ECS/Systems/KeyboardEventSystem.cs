@@ -92,6 +92,10 @@ internal class KeyboardEventSystem() : IReactToEventSystem<KeyboardEvent>
                 task = TaskGetter.CreateEquipTask();
                 break;
 
+            case Keys.U:
+                task = TaskGetter.CreateUnequipDialogTask();
+                break;
+
             case Keys.D5:
                 ptMove = new Point(0, 0);
                 break;

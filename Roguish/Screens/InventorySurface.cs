@@ -108,7 +108,7 @@ internal class InventorySurface : ScreenSurface
         Debug.Assert(item != null);
         if (!item.HasComponent<EquipableComponent>())
         {
-            var name = Utility.GetName(item);
+            var name = Utility.GetColoredName(item);
             _log.PrintProcessedString($"We can't equip {name}");
             return;
         }
@@ -122,6 +122,7 @@ internal class InventorySurface : ScreenSurface
         item.RemoveComponent<InBackpackComponent>();
         item.AddComponent<IsEquippedComponent>();
 
+        // WARNING: THIS NEEDS TO TRACK THE FIELDS IN EQUIPPEDCOMPONENT!
         switch (equipableCmp.EquipSlot)
         {
             case EquipSlots.Gloves:
@@ -225,7 +226,7 @@ internal class InventorySurface : ScreenSurface
             replaced.AddComponent<InBackpackComponent>();
             replaced.RemoveComponent<IsEquippedComponent>();
         }
-        _log.PrintProcessedString($"Equipped {Utility.GetName(item)}");
+        _log.PrintProcessedString($"Equipped {Utility.GetColoredName(item)}");
         _equip.Update(equippedCmp);
     }
 
