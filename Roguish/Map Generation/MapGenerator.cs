@@ -179,7 +179,7 @@ public class MapGenerator
         return AgentMap[x, y] >= 0;
     }
 
-    internal bool IsAgentAt(Point pt)
+    internal static bool IsAgentAt(Point pt)
     {
         return IsAgentAt(pt.X, pt.Y);
     }

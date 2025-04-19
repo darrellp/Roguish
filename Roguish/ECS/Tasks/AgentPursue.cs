@@ -36,7 +36,7 @@ internal partial class TaskGetter
 
     private static bool Movable(Point pt)
     {
-        return MapGenerator.IsWalkable(pt) && (!Mapgen.IsAgentAt(pt) || pt == EcsApp.PlayerPos);
+        return MapGenerator.IsWalkable(pt) && (!MapGenerator.IsAgentAt(pt) || pt == EcsApp.PlayerPos);
     }
 
     private static bool AgentBattleCheck(EcsEntity enemy, Point ptDest)

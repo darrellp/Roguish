@@ -9,7 +9,7 @@ internal partial class TaskGetter
 {
     private static bool BattleCheck(Point ptDest)
     {
-        if (!Mapgen.IsAgentAt(ptDest) || ptDest == EcsApp.PlayerPos)
+        if (!MapGenerator.IsAgentAt(ptDest) || ptDest == EcsApp.PlayerPos)
         {
             // Takes two to tango...
             return false;

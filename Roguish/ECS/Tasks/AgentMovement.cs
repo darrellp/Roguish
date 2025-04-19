@@ -13,7 +13,7 @@ internal partial class TaskGetter
         var agentCmp = agent.GetComponent<AgentTypeComponent>();
         var pos = posCmp.Position.Value;
         var moves = pos.Neighbors(GameSettings.DungeonWidth, GameSettings.DungeonHeight, false)
-            .Where(MapGenerator.IsWalkable).ToArray();
+            .Where(p => MapGenerator.IsWalkable(p) && !MapGenerator.IsAgentAt(p)).ToArray();
         posCmp.Position.Value = moves[GlobalRandom.DefaultRNG.NextInt(moves.Length)];
         task.FireOn += agentCmp.MoveTime;
         if (posCmp.Position.Value.Manhattan(EcsApp.PlayerPos) < GameSettings.PursueRadius)
