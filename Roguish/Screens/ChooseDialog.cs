@@ -1,6 +1,8 @@
 ﻿using Ninject;
+using SadConsole.Components;
 using SadConsole.Input;
 using SadConsole.UI;
+using SadConsole.UI.Controls;
 
 namespace Roguish.Screens;
 internal class ChooseDialog : Window
@@ -13,9 +15,10 @@ internal class ChooseDialog : Window
     private EcsEntity _entity;
     internal List<int> Selected { get; init; }= [];
 
+    private const int ButtonsLength = 23;
     public ChooseDialog(string title, IList<string> options, EcsEntity entity, Action<EcsEntity, List<int>>? onDismiss = null,
         bool canChooseMultiple = false) 
-        : base(Math.Max(title.Length, options.Select(s => s.Length).Max()) + 4, options.Count + 3)
+        : base(Math.Max(ButtonsLength, Math.Max(title.Length, options.Select(s => s.Length).Max()) + 4), options.Count + 4)
     {
         var x = (GameSettings.GameWidth - Width) / 2;
         var y = (GameSettings.GameHeight - Height) / 2;
@@ -26,6 +29,46 @@ internal class ChooseDialog : Window
         _onDismiss = onDismiss;
         _entity = entity;
         Surface.UsePrintProcessor = true;
+        var btnOkay = new Button(4)
+        {
+            Text = "Ok",
+            Position = new Point(2, Height - 2),
+            FocusOnMouseClick = false
+        };
+        btnOkay.Click += (sender, args) =>
+        {
+            if (_onDismiss != null)
+            {
+                _onDismiss(_entity, Selected);
+            }
+            Close();
+            Shutdown();
+        };
+        var btnCancel = new Button(8)
+        {
+            Text = "Cancel",
+            Position = new Point(7, Height - 2),
+            FocusOnMouseClick = false
+        };
+        btnCancel.Click += (sender, args) =>
+        {
+            Close();
+            Shutdown();
+        };
+        var btnAll = new Button(5)
+        {
+            Text = "All",
+            Position = new Point(16, Height - 2),
+            FocusOnMouseClick = false
+        };
+        btnAll.Click += (sender, args) =>
+        {
+            SelectAll();
+        };
+        var host = _canChooseMultiple ?
+            new ControlHost { btnOkay, btnCancel, btnAll } :
+            new ControlHost { btnOkay, btnCancel };
+        SadComponents.Add(host);
     }
 
     public void ShowDialog()
@@ -83,10 +126,7 @@ internal class ChooseDialog : Window
                 return true;
 
             case Keys.Space:
-                if (_canChooseMultiple)
-                {
-                    SelectOption();
-                }
+                SelectOption();
                 return true;
         }
         if (keyboard.IsKeyPressed(Keys.Up))
@@ -131,14 +171,33 @@ internal class ChooseDialog : Window
         }
     }
 
+    private void SelectAll()
+    {
+        var oldSelected = _selectedIndex;
+        for (int index = 0; index < _options.Count; index++)
+        {
+            if (!Selected.Contains(index))
+            {
+                _selectedIndex = index;
+                SelectOption();
+            }
+        }
+        _selectedIndex = oldSelected;
+        HighlightOption();
+    }
+
     private void SelectOption()
     {
-        var newlySelected = !Selected.Contains(_selectedIndex);
-        var bg = Color.DarkCyan;
-        if (!newlySelected)
+        if (!_canChooseMultiple)
         {
-            bg = Color.Transparent;
+            foreach (var index in Selected)
+            {
+                Surface.Print(1, index + 1, _options[index], Color.White, Color.Transparent);
+            }
+            Selected.Clear();
         }
+        var newlySelected = !Selected.Contains(_selectedIndex);
+        var bg = newlySelected ? Color.DarkCyan : Color.Transparent;
         Surface.Print(1, _selectedIndex + 1,  _options[_selectedIndex], Color.Yellow, bg);
         if (newlySelected)
         {

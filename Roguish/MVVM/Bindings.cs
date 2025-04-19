@@ -96,7 +96,10 @@ internal static class Bindings
             }
         }
 
-        foreach (var keyValue in controlHosts) keyValue.Key.SadComponents.Add(keyValue.Value);
+        foreach (var keyValue in controlHosts)
+        {
+            keyValue.Key.SadComponents.Add(keyValue.Value);
+        }
     }
 
     // Common handlers
