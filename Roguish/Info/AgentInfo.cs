@@ -1,14 +1,14 @@
 ﻿using System.Diagnostics;
 using EcsRx.Blueprints;
-using GoRogue.Random;
-using Roguish.ECS.Components;
-using ShaiRandom.Generators;
 using EcsRx.Extensions;
+using GoRogue.Random;
 using Newtonsoft.Json;
-using Roguish.Screens;
+using Roguish.ECS.Components;
 using Roguish.ECS.Tasks;
+using Roguish.Screens;
+using ShaiRandom.Generators;
 
-namespace Roguish;
+namespace Roguish.Info;
 
 #region Enums
 internal enum AgentType

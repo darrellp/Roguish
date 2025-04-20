@@ -5,7 +5,7 @@ using GoRogue.Random;
 using Newtonsoft.Json;
 using ShaiRandom.Generators;
 
-namespace Roguish;
+namespace Roguish.Info;
 using ECS.Components;
 using Screens;
 
@@ -33,13 +33,13 @@ internal class WeaponInfo
     public Color Color { get; set; }
     public string Damage { get; set; } = null!;
     #endregion
-    
+
     #region Private fields
     private static readonly Dictionary<WeaponType, WeaponInfo> MpTypeToInfo = new();
     private static readonly Dictionary<int, List<WeaponInfo>> MpLevelToWeapons = new();
     private static readonly IEnhancedRandom Rng = GlobalRandom.DefaultRNG;
     #endregion
-    
+
     #region Constructors
     static WeaponInfo()
     {
@@ -66,7 +66,7 @@ internal class WeaponInfo
         }
     }
     #endregion
-    
+
     #region Queries
     internal static WeaponInfo PickWeaponForLevel(int iLevel)
     {

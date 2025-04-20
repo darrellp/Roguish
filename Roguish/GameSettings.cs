@@ -71,6 +71,9 @@ internal static class GameSettings
     public static int WeaponsPerLevel => GlobalRandom.DefaultRNG.NextInt(WeaponsPerLevelMin, WeaponsPerLevelMax + 1);
     public const int WeaponsPerLevelMin = 5;
     public const int WeaponsPerLevelMax = 10;
+    public static int ArmorPerLevel => GlobalRandom.DefaultRNG.NextInt(ArmorPerLevelMin, ArmorPerLevelMax + 1);
+    public const int ArmorPerLevelMin = 3;
+    public const int ArmorPerLevelMax = 7;
     public static bool FAllowResize => false;
     public static Color ClearColor = Color.Black;
     public static Color FloorColor = Color.Orange;

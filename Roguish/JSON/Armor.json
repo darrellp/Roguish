@@ -1,0 +1,15 @@
+﻿[
+  {
+    "ArmorType": "Chest",
+    "Name": "Cloth shirt",
+    "Description": "Just a simple peasant's shirt",
+    "Slot": "Chest",
+    "StartLevel": 0,
+    "EndLevel": 10,
+    "Glyph": 99,
+    "ArmorCount": 1,
+    "Color": {
+      "_packedValue": 0xffffff80
+    }
+  }
+]

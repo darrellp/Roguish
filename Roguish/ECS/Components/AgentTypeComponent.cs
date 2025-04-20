@@ -1,4 +1,6 @@
-﻿namespace Roguish.ECS.Components;
+﻿using Roguish.Info;
+
+namespace Roguish.ECS.Components;
 
 // Used to flag enemies
 

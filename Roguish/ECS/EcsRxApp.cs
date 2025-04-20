@@ -5,6 +5,7 @@ using EcsRx.Infrastructure;
 using EcsRx.Plugins.Views;
 using Ninject;
 using Roguish.ECS.Components;
+using Roguish.Info;
 using Roguish.Screens;
 using SystemsRx.Infrastructure.Dependencies;
 using SystemsRx.Infrastructure.Ninject;

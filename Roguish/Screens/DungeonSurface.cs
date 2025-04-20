@@ -10,6 +10,7 @@ using SadConsole.Entities;
 using SadConsole.Input;
 using SystemsRx.Events;
 using EcsRx.Extensions;
+using Roguish.Info;
 using Path = GoRogue.Pathing.Path;
 using Keys = SadConsole.Input.Keys;
 
@@ -206,6 +207,13 @@ internal class DungeonSurface : ScreenSurface
         {
             var weaponBlueprint = WeaponInfo.GetBlueprint(iLevel, this);
             EcsApp.EntityDatabase.GetCollection().CreateEntity(weaponBlueprint);
+        }
+
+        // Armor
+        for (var iArmor = 0; iArmor < GameSettings.ArmorPerLevel; iArmor++)
+        {
+            var armorBlueprint = ArmorInfo.GetBlueprint(iLevel, this);
+            EcsApp.EntityDatabase.GetCollection().CreateEntity(armorBlueprint);
         }
 
         // Stairs
