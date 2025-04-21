@@ -94,7 +94,7 @@ public class MapGenerator
     /// <param name="y">        The y coordinate. </param>
     /// <param name="fItem">    (Optional) True to only return an item. </param>
     ///
-    /// <returns>   The entity at the position and a bool indicating whether there is more than one entity there. </returns>
+    /// <returns>   A list of entities at the position </returns>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     internal static List<EcsEntity> GetEntitiesAt(int x, int y, bool fItem = false)
@@ -128,10 +128,7 @@ public class MapGenerator
     /// <param name="pt">       The point. </param>
     /// <param name="fItem">    (Optional) True to only return an item. </param>
     ///
-    /// <returns>
-    ///     The entity at the position and a bool indicating whether there is more than one entity
-    ///     there.
-    /// </returns>
+    /// <returns>   A list of entities at the position </returns>
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     internal List<EcsEntity> GetEntitiesAt(Point pt, bool fItem = false)
@@ -166,6 +163,21 @@ public class MapGenerator
             EntityMap[pt.X, pt.Y] = null;
         }
         return true;
+    }
+
+    internal EcsEntity? GetAgentAt(int x, int y)
+    {
+        var id = AgentMap[x, y];
+        if (id < 0)
+        {
+            return null;
+        }
+        return EcsApp.EntityDatabase.GetEntity(id);
+    }
+
+    internal EcsEntity? GetAgentAt(Point pt)
+    {
+        return GetAgentAt(pt.X, pt.Y);
     }
 
     internal void RemoveAgentAt(Point pt)

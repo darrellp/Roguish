@@ -1,6 +1,9 @@
 ﻿using EcsRx.Extensions;
 using Roguish.ECS.Components;
+using Roguish.Info;
 using Roguish.Map_Generation;
+using System;
+using System.Diagnostics;
 
 namespace Roguish.ECS.Tasks;
 internal partial class TaskGetter
@@ -16,7 +19,7 @@ internal partial class TaskGetter
             .Where(Movable)
             .MinBy(p => p.Manhattan(EcsApp.PlayerPos));
         task.FireOn += agentCmp.MoveTime;
-        if (AgentBattleCheck(agent, ptMove))
+        if (BattleCheck(agent, ptMove))
         {
             return;
         }
@@ -38,29 +41,6 @@ internal partial class TaskGetter
     {
         return MapGenerator.IsWalkable(pt) && (!MapGenerator.IsAgentAt(pt) || pt == EcsApp.PlayerPos);
     }
-
-    private static bool AgentBattleCheck(EcsEntity enemy, Point ptDest)
-    {
-        if (EcsApp.PlayerPos != ptDest)
-        {
-            // Takes two to tango...
-            return false;
-        }
-        // TODO: MUCH more complicated battle algorithm here!
-        var enemyHealthCmp = EcsRxApp.Player.GetComponent<HealthComponent>();
-        var enemyName = enemy.GetComponent<DescriptionComponent>().Name;
-        var newHealth = Math.Max(0, enemyHealthCmp.CurrentHealth.Value - 3);
-        Log.PrintProcessedString($"The [c:r f:Yellow]{enemyName}[c:undo] hits you for [c:r f:orange]3[c:undo] damage!");
-        if (newHealth == 0)
-        {
-            Log.PrintProcessedString("[c:r f:Red]*** Y O U   D I E D ! ! ! ***");
-            Log.PrintProcessedString("[c:r f:Red]But you rise to life like a phoenix!");
-            newHealth = 20;
-        }
-        enemyHealthCmp.CurrentHealth.SetValueAndForceNotify(newHealth);
-        return true;
-    }
-
 
     internal static TaskComponent CreateAgentPursueTask(ulong currentTicks = ulong.MaxValue)
     {

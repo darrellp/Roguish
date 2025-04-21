@@ -1,30 +1,104 @@
 ﻿using EcsRx.Extensions;
+using Roguish.Info;
 using Roguish.Serialization;
 // ReSharper disable IdentifierTypo
 
 
 namespace Roguish.ECS.Components;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>   An equipped component. </summary>
+///
+/// <remarks>   This is WAY fatter than I'd like to make it but it's pretty much devoted to either
+///             readonly queries or recalculating the armor count.  I want to keep most of this stuff
+///             in here so that if new equip slots are added in there is one place where changes to
+///             accommodate the new slots properly.
+///             Darrell Plank, 4/21/2025. </remarks>
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 public class EquippedComponent : EcsComponent
 {
+    private int _headgear = -1;
+    private int _footwear = -1;
+    private int _chest = -1;
+    private int _arms = -1;
+    private int _legs = -1;
+    private int _gloves = -1;
+    private int _belt = -1;
+
+    public int ArmorCount = 0;
+
+
     // TODO: Think about making access routines so the following comment is unnecessary...
     // For instance, one routine that returns all names of the slots and another which
     // takes a name and returns or sets the value of the corresponding slot.  Perhaps one
     // which returns names of filled slots and their values 
-    
+
     // WARNING: this needs to track the code in UnequipDialog() and
     // InventorySurface.Equip()! 
-    public int Headgear { get; set; } = -1;
-    public int Footwear { get; set; } = -1;
-    public int Chest { get; set; } = -1;
+    public int Headgear
+    {
+        get => _headgear;
+        set { _headgear = value; CalcAc(); }
+    }
+
+    public int Footwear
+    {
+        get => _footwear;
+        set { _footwear = value; CalcAc(); }
+    }
+
+    public int Chest
+    {
+        get => _chest;
+        set { _chest = value; CalcAc(); }
+    }
+
     public int LRing { get; set; } = -1;
     public int RRing { get; set; } = -1;
     public int WeaponLeft { get; set; } = -1;
     public int WeaponRight { get; set; } = -1;
-    public int Arms { get; set; } = -1;
-    public int Legs { get; set; } = -1;
+
+    public int Arms
+    {
+        get => _arms;
+        set { _arms = value; CalcAc(); }
+    }
+
+    public int Legs
+    {
+        get => _legs;
+        set { _legs = value; CalcAc(); }
+    }
+
     public int Amulet { get; set; } = -1;
-    public int Gloves { get; set; } = -1;
-    public int Belt { get; set; } = -1;
+
+    public int Gloves
+    {
+        get => _gloves;
+        set { _gloves = value; CalcAc(); }
+    }
+
+    public int Belt
+    {
+        get => _belt;
+        set { _belt = value; CalcAc(); }
+    }
+
+    public void CalcAc()
+    {
+        ArmorCount = 0;
+        foreach (var slot in GetFilledSlots())
+        {
+            var entity = EcsApp.EntityDatabase.GetEntity(slot.id);
+            if (entity.HasComponent<ArmorTypeComponent>())
+            {
+                var type = entity.GetComponent<ArmorTypeComponent>();
+                var info = ArmorInfo.InfoFromType(type.ArmorType);
+                ArmorCount += info.ArmorCount;
+            }
+        }
+    }
 
     internal void RemapEquipment(Dictionary<int, int> mpOldIdToNewId)
     {

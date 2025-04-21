@@ -42,4 +42,9 @@ internal static class Utility
         var entity = EcsApp.EntityDatabase.GetEntity(id);
         return entity.HasComponent<DescriptionComponent>() ? entity.GetComponent<DescriptionComponent>().Name : "Unknown";
     }
+
+    public static T? GetOrDefault<T>(EcsEntity entity) where T : class, EcsComponent
+    {
+        return entity.HasComponent<T>() ? entity.GetComponent<T>() : null;
+    }
 }
