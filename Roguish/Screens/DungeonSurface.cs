@@ -10,6 +10,7 @@ using SadConsole.Entities;
 using SadConsole.Input;
 using SystemsRx.Events;
 using EcsRx.Extensions;
+using Roguish.ECS.Tasks;
 using Roguish.Info;
 using Path = GoRogue.Pathing.Path;
 using Keys = SadConsole.Input.Keys;
@@ -189,17 +190,23 @@ internal class DungeonSurface : ScreenSurface
     public void Populate(int iLevel)
     {
         // Place player
+        var axeBp = WeaponInfo.GetBlueprint(WeaponInfo.InfoFromType(WeaponType.Axe), this);
+        var axe = EcsApp.EntityDatabase.GetCollection().CreateEntity(axeBp);
         var player = EcsRxApp.Player;
+        InventorySurface.Equip(axe, player);
         var posCmp = player.GetComponent<PositionComponent>();
         Debug.Assert(posCmp != null, nameof(posCmp) + " != null");
         posCmp.FDrawFullFov = true;
         posCmp.Position.SetValueAndForceNotify(Mapgen.FindRandomEmptyPoint());
 
+        var daggerBp = WeaponInfo.GetBlueprint(WeaponInfo.InfoFromType(WeaponType.Dagger), this);
         // Other agents
         for (var iAgent = 0; iAgent < GameSettings.AgentsPerLevel; iAgent++)
         {
             var bp = AgentInfo.GetBlueprint(iLevel, this);
-            EcsApp.EntityDatabase.GetCollection().CreateEntity(bp);
+            var agent = EcsApp.EntityDatabase.GetCollection().CreateEntity(bp);
+            var dagger = EcsApp.EntityDatabase.GetCollection().CreateEntity(daggerBp);
+            InventorySurface.Equip(dagger, agent);
         }
 
         // Weapons

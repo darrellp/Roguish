@@ -23,6 +23,7 @@ internal partial class TaskGetter
         {
             return false;
         }
+        // Nobody attacks themselves
         Debug.Assert(!(attackerIsPlayer && defenderIsPlayer));
 
         // TODO: MUCH more complicated battle algorithm here!
@@ -30,7 +31,8 @@ internal partial class TaskGetter
         var attackerName = attacker.GetComponent<DescriptionComponent>().Name;
         var defenderName = defender.GetComponent<DescriptionComponent>().Name;
         var equippedCmpDefender = Utility.GetOrDefault<EquippedComponent>(defender);
-        var damage = attackerIsPlayer ? PlayerAttackDamage(attacker) : Math.Max(0, 3 - equippedCmpDefender!.ArmorCount);
+        //var damage = attackerIsPlayer ? AttackDamage(attacker) : Math.Max(0, 3 - equippedCmpDefender!.ArmorCount);
+        var damage =AttackDamage(attacker) - equippedCmpDefender!.ArmorCount;
         var newHealth = Math.Max(0, defenderHealthCmp.CurrentHealth.Value - damage);
         var hitMsg = defenderIsPlayer
             ? $"The [c:r f:Yellow]{attackerName}[c:undo] hits you for [c:r f:orange]{damage}[c:undo] damage!"
@@ -53,7 +55,7 @@ internal partial class TaskGetter
         return true;
     }
 
-    private static int PlayerAttackDamage(EcsEntity player)
+    private static int AttackDamage(EcsEntity player)
     {
         var equippedCmp = player.GetComponent<EquippedComponent>();
         var hitDamage = 0;

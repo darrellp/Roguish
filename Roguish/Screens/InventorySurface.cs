@@ -118,7 +118,7 @@ internal class InventorySurface : ScreenSurface
         Equip(item, EcsRxApp.Player);
     }
 
-    internal void Equip(EcsEntity item, EcsEntity agent)
+    internal static void Equip(EcsEntity item, EcsEntity agent)
     {
         var isPlayer = agent == EcsRxApp.Player;
         if (!item.HasComponent<EquipableComponent>())

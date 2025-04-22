@@ -3,6 +3,7 @@ using EcsRx.Blueprints;
 using EcsRx.Extensions;
 using GoRogue.Random;
 using Newtonsoft.Json;
+using Ninject;
 using ShaiRandom.Generators;
 
 namespace Roguish.Info;
@@ -38,11 +39,13 @@ internal class WeaponInfo
     private static readonly Dictionary<WeaponType, WeaponInfo> MpTypeToInfo = new();
     private static readonly Dictionary<int, List<WeaponInfo>> MpLevelToWeapons = new();
     private static readonly IEnhancedRandom Rng = GlobalRandom.DefaultRNG;
+    private static readonly DungeonSurface _dungeon;
     #endregion
 
     #region Constructors
     static WeaponInfo()
     {
+        _dungeon = Kernel.Get<DungeonSurface>();
         var jsonWeapons = File.ReadAllText("JSON/weapons.json");
         var weaponsList = JsonConvert.DeserializeObject<List<WeaponInfo>>(jsonWeapons);
 
@@ -81,6 +84,11 @@ internal class WeaponInfo
     internal static IBlueprint GetBlueprint(int iLevel, DungeonSurface dungeon)
     {
         var info = PickWeaponForLevel(iLevel);
+        return GetBlueprint(info, dungeon);
+    }
+
+    internal static IBlueprint GetBlueprint(WeaponInfo info, DungeonSurface dungeon)
+    {
         var pos = dungeon.Mapgen.FindRandomEmptyPoint();
         var scEntity = dungeon.CreateScEntity(info.Color, pos, info.Glyph, 0);
 
