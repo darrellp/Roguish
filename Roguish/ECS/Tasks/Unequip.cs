@@ -17,7 +17,7 @@ internal partial class TaskGetter
         }
         var equipped = entity.GetComponent<EquippedComponent>();
         var slots = equipped.GetFilledSlots();
-        var ids = selection.Select(i => slots[i].id).ToList();
+        var ids = selection.Select(i => slots[i].Id).ToList();
         var selectedCmp = new SelectedIdsComponent(ids);
         entity.AddComponent(selectedCmp);
 
@@ -49,7 +49,7 @@ internal partial class TaskGetter
             Log.Cursor.Print("You have nothing equipped!").NewLine();
             return;
         }
-        var names = slots.Select(slot => Utility.EntityName(slot.id)).ToList();
+        var names = slots.Select(slot => Utility.EntityName(slot.Id)).ToList();
         var chooseDlg = new ChooseDialog("Choose an Item", names, agent, OnChooseUnequip, true);
         chooseDlg.ShowDialog();
     }
@@ -71,12 +71,12 @@ internal partial class TaskGetter
         var equippedSlots = equippedCmp.GetFilledSlots();
         foreach (var slot in equippedSlots)
         {
-            if (!selectedIds.Ids.Contains(slot.id))
+            if (!selectedIds.Ids.Contains(slot.Id))
             {
                 continue;
             }
             equippedCmp.UnequipSlot(slot);
-            var entity = EcsApp.EntityDatabase.GetEntity(slot.id);
+            var entity = EcsApp.EntityDatabase.GetEntity(slot.Id);
             UnequipEntity(entity);
         }
         agent.RemoveComponent<SelectedIdsComponent>();

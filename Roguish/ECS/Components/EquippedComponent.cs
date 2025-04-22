@@ -18,6 +18,7 @@ namespace Roguish.ECS.Components;
 
 public class EquippedComponent : EcsComponent
 {
+    #region Private Fields
     private int _headgear = -1;
     private int _footwear = -1;
     private int _chest = -1;
@@ -25,17 +26,19 @@ public class EquippedComponent : EcsComponent
     private int _legs = -1;
     private int _gloves = -1;
     private int _belt = -1;
+    #endregion
 
-    public int ArmorCount = 0;
+    #region Public Properties
+    public int ArmorCount { get; set; }
+    #endregion
 
-
+    #region Equipment
     // TODO: Think about making access routines so the following comment is unnecessary...
     // For instance, one routine that returns all names of the slots and another which
     // takes a name and returns or sets the value of the corresponding slot.  Perhaps one
     // which returns names of filled slots and their values 
 
-    // WARNING: this needs to track the code in UnequipDialog() and
-    // InventorySurface.Equip()! 
+    // WARNING: this needs to track the code in InventorySurface.Equip()! 
     public int Headgear
     {
         get => _headgear;
@@ -84,13 +87,15 @@ public class EquippedComponent : EcsComponent
         get => _belt;
         set { _belt = value; CalcAc(); }
     }
+    #endregion
 
+    #region Miscellaneous
     public void CalcAc()
     {
         ArmorCount = 0;
         foreach (var slot in GetFilledSlots())
         {
-            var entity = EcsApp.EntityDatabase.GetEntity(slot.id);
+            var entity = EcsApp.EntityDatabase.GetEntity(slot.Id);
             if (entity.HasComponent<ArmorTypeComponent>())
             {
                 var type = entity.GetComponent<ArmorTypeComponent>();
@@ -102,155 +107,92 @@ public class EquippedComponent : EcsComponent
 
     internal void RemapEquipment(Dictionary<int, int> mpOldIdToNewId)
     {
-        Headgear = Serialize.RemapId(Headgear, mpOldIdToNewId);
-        Footwear = Serialize.RemapId(Footwear, mpOldIdToNewId);
-        Chest = Serialize.RemapId(Chest, mpOldIdToNewId);
-        LRing = Serialize.RemapId(LRing, mpOldIdToNewId);
-        RRing = Serialize.RemapId(RRing, mpOldIdToNewId);
-        WeaponLeft = Serialize.RemapId(WeaponLeft, mpOldIdToNewId);
-        WeaponRight = Serialize.RemapId(WeaponRight, mpOldIdToNewId);
-        Arms = Serialize.RemapId(Arms, mpOldIdToNewId);
-        Legs = Serialize.RemapId(Legs, mpOldIdToNewId);
-        Amulet = Serialize.RemapId(Amulet, mpOldIdToNewId);
-        Gloves = Serialize.RemapId(Gloves, mpOldIdToNewId);
-        Belt = Serialize.RemapId(Belt, mpOldIdToNewId);
+        foreach (var slot in GetFilledSlots())
+        {
+            slot.SetId(Serialize.RemapId(slot.Id, mpOldIdToNewId));
+        }
     }
 
     internal void Clear()
     {
-        Headgear = -1;
-        Footwear = -1;
-        Chest = -1;
-        LRing = -1;
-        RRing = -1;
-        WeaponLeft = -1;
-        WeaponRight = -1;
-        Arms = -1;
-        Legs = -1;
-        Amulet = -1;
-        Gloves = -1;
-        Belt = -1;
+        foreach (var slot in GetFilledSlots())
+        {
+            slot.SetId(-1);
+        }
     }
 
-    internal record FilledSlot(string name, int id);
+    internal void UnequipSlot(FilledSlot slot)
+    {
+        slot.SetId(-1);
+    }
+    #endregion
+
+    #region GetFilledSlots
+    internal record FilledSlot(string Name, int Id, Action<int> SetId);
     internal List<FilledSlot> GetFilledSlots()
     {
         var filledSlots = new List<FilledSlot>();
         if (Headgear >= 0)
         {
-            filledSlots.Add(new FilledSlot("Headgear", Headgear));
+            filledSlots.Add(new FilledSlot("Headgear", Headgear, i => Headgear = i));
         }
         if (Footwear >= 0)
         {
-            filledSlots.Add(new FilledSlot("Footwear", Footwear));
+            filledSlots.Add(new FilledSlot("Footwear", Footwear, i => Footwear = i));
         }
         if (Chest >= 0)
         {
-            filledSlots.Add(new FilledSlot("Chest", Chest));
+            filledSlots.Add(new FilledSlot("Chest", Chest, i => Chest = i));
         }
         if (LRing >= 0)
         {
-            filledSlots.Add(new FilledSlot("Left Ring", LRing));
+            filledSlots.Add(new FilledSlot("Left Ring", LRing, i => LRing = i));
         }
         if (RRing >= 0)
         {
-            filledSlots.Add(new FilledSlot("Right Ring", RRing));
+            filledSlots.Add(new FilledSlot("Right Ring", RRing, i => RRing = i));
         }
 
         if (WeaponLeft == WeaponRight && WeaponLeft >= 0)
         {
-            filledSlots.Add(new FilledSlot("Two Handed", WeaponLeft));
+            filledSlots.Add(new FilledSlot("Two Handed", WeaponLeft, i =>
+            {
+                WeaponLeft = i;
+                WeaponRight = i;
+            }));
         }
         else
         {
             if (WeaponLeft >= 0)
             {
-                filledSlots.Add(new FilledSlot("Left Hand", WeaponLeft));
+                filledSlots.Add(new FilledSlot("Left Hand", WeaponLeft, i => WeaponLeft = i));
             }
             if (WeaponRight >= 0)
             {
-                filledSlots.Add(new FilledSlot("Right Hand", WeaponRight));
+                filledSlots.Add(new FilledSlot("Right Hand", WeaponRight, i => WeaponRight = i));
             }
         }
         if (Arms >= 0)
         {
-            filledSlots.Add(new FilledSlot("Arms", Arms));
+            filledSlots.Add(new FilledSlot("Arms", Arms, i => Arms = i));
         }
         if (Legs >= 0)
         {
-            filledSlots.Add(new FilledSlot("Legs", Legs));
+            filledSlots.Add(new FilledSlot("Legs", Legs, i => Legs = i));
         }
         if (Amulet >= 0)
         {
-            filledSlots.Add(new FilledSlot("Amulet", Amulet));
+            filledSlots.Add(new FilledSlot("Amulet", Amulet, i => Amulet = i));
         }
         if (Gloves >= 0)
         {
-            filledSlots.Add(new FilledSlot("Gloves", Gloves));
+            filledSlots.Add(new FilledSlot("Gloves", Gloves, i => Gloves = i));
         }
         if (Belt >= 0)
         {
-            filledSlots.Add(new FilledSlot("Belt", Belt));
+            filledSlots.Add(new FilledSlot("Belt", Belt, i => Belt = i));
         }
         return filledSlots;
     }
-
-    internal void UnequipSlot(FilledSlot slot)
-    {
-        switch (slot.name)
-        {
-            case "Left Hand":
-                WeaponLeft = -1;
-                break;
-
-            case "Right Hand":
-                WeaponRight = -1;
-                break;
-
-            case "Headgear":
-                Headgear = -1;
-                break;
-
-            case "Footwear":
-                Footwear = -1;
-                break;
-
-            case "Chest":
-                Chest = -1;
-                break;
-
-            case "Left Ring":
-                LRing = -1;
-                break;
-
-            case "Right Ring":
-                RRing = -1;
-                break;
-
-            case "Arms":
-                Arms = -1;
-                break;
-
-            case "Legs":
-                Legs = -1;
-                break;
-
-            case "Amulet":
-                Amulet = -1;
-                break;
-
-            case "Gloves":
-                Gloves = -1;
-                break;
-
-            case "Belt":
-                Belt = -1;
-                break;
-
-            case "Two Handed":
-                WeaponLeft = -1;
-                WeaponRight = -1;
-                break;
-        }
-    }
+    #endregion
 }
