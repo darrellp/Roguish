@@ -130,6 +130,7 @@ internal class AgentInfo
             entity.AddComponent(new DisplayComponent(ScEntity));
             entity.AddComponent(new LevelItemComponent(CurrentLevel));
             entity.AddComponent(new PositionComponent(ScEntity.Position));
+            entity.AddComponent<EquippedComponent>();
             if (Task != null)
             {
                 entity.AddComponent(Task);
@@ -158,7 +159,6 @@ internal class AgentInfo
         {
             entity.AddComponent(new EntityTypeComponent(EcsType.Player));
             entity.AddComponent<IsPlayerControlledComponent>();
-            entity.AddComponent<EquippedComponent>();
             // base Apply does position which calls movement system which requires EntityType
             // so it has to come after the EntityTypeComponent add in this routine
             base.Apply(entity);
