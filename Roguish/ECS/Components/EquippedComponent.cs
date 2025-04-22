@@ -1,6 +1,7 @@
 ﻿using EcsRx.Extensions;
 using Roguish.Info;
 using Roguish.Serialization;
+using System.Security.Cryptography;
 // ReSharper disable IdentifierTypo
 
 
@@ -121,78 +122,105 @@ public class EquippedComponent : EcsComponent
         }
     }
 
-    internal void UnequipSlot(FilledSlot slot)
+    internal void UnequipSlot(SlotInfo slotInfo)
     {
-        slot.SetId(-1);
+        slotInfo.SetId(-1);
     }
     #endregion
 
     #region GetFilledSlots
-    internal record FilledSlot(string Name, int Id, Action<int> SetId);
-    internal List<FilledSlot> GetFilledSlots()
+    internal record SlotInfo(string Name, int Id, Action<int> SetId);
+    internal List<SlotInfo> GetFilledSlots(bool getAll = false)
     {
-        var filledSlots = new List<FilledSlot>();
-        if (Headgear >= 0)
+        var filledSlots = new List<SlotInfo>();
+        if (getAll || Headgear >= 0)
         {
-            filledSlots.Add(new FilledSlot("Headgear", Headgear, i => Headgear = i));
+            filledSlots.Add(new SlotInfo("Headgear", Headgear, i => Headgear = i));
         }
-        if (Footwear >= 0)
+        if (getAll || Footwear >= 0)
         {
-            filledSlots.Add(new FilledSlot("Footwear", Footwear, i => Footwear = i));
+            filledSlots.Add(new SlotInfo("Footwear", Footwear, i => Footwear = i));
         }
-        if (Chest >= 0)
+        if (getAll || Chest >= 0)
         {
-            filledSlots.Add(new FilledSlot("Chest", Chest, i => Chest = i));
+            filledSlots.Add(new SlotInfo("Chest", Chest, i => Chest = i));
         }
-        if (LRing >= 0)
+        if (getAll || LRing >= 0)
         {
-            filledSlots.Add(new FilledSlot("Left Ring", LRing, i => LRing = i));
+            filledSlots.Add(new SlotInfo("Left Ring", LRing, i => LRing = i));
         }
-        if (RRing >= 0)
+        if (getAll || RRing >= 0)
         {
-            filledSlots.Add(new FilledSlot("Right Ring", RRing, i => RRing = i));
+            filledSlots.Add(new SlotInfo("Right Ring", RRing, i => RRing = i));
         }
 
-        if (WeaponLeft == WeaponRight && WeaponLeft >= 0)
+        if (getAll)
         {
-            filledSlots.Add(new FilledSlot("Two Handed", WeaponLeft, i =>
+            filledSlots.Add(new SlotInfo("Two Handed", WeaponLeft, i =>
             {
                 WeaponLeft = i;
                 WeaponRight = i;
             }));
+            filledSlots.Add(new SlotInfo("Left Hand", WeaponLeft, i => WeaponLeft = i));
+            filledSlots.Add(new SlotInfo("Right Hand", WeaponRight, i => WeaponRight = i));
         }
         else
         {
-            if (WeaponLeft >= 0)
+            if (WeaponLeft == WeaponRight && WeaponLeft >= 0)
             {
-                filledSlots.Add(new FilledSlot("Left Hand", WeaponLeft, i => WeaponLeft = i));
+                filledSlots.Add(new SlotInfo("Two Handed", WeaponLeft, i =>
+                {
+                    WeaponLeft = i;
+                    WeaponRight = i;
+                }));
             }
-            if (WeaponRight >= 0)
+            else
             {
-                filledSlots.Add(new FilledSlot("Right Hand", WeaponRight, i => WeaponRight = i));
-            }
+                if (WeaponLeft >= 0)
+                {
+                    filledSlots.Add(new SlotInfo("Left Hand", WeaponLeft, i => WeaponLeft = i));
+                }
+                if (WeaponRight >= 0)
+                {
+                    filledSlots.Add(new SlotInfo("Right Hand", WeaponRight, i => WeaponRight = i));
+                }
         }
-        if (Arms >= 0)
-        {
-            filledSlots.Add(new FilledSlot("Arms", Arms, i => Arms = i));
         }
-        if (Legs >= 0)
+        if (getAll || Arms >= 0)
         {
-            filledSlots.Add(new FilledSlot("Legs", Legs, i => Legs = i));
+            filledSlots.Add(new SlotInfo("Arms", Arms, i => Arms = i));
         }
-        if (Amulet >= 0)
+        if (getAll || Legs >= 0)
         {
-            filledSlots.Add(new FilledSlot("Amulet", Amulet, i => Amulet = i));
+            filledSlots.Add(new SlotInfo("Legs", Legs, i => Legs = i));
         }
-        if (Gloves >= 0)
+        if (getAll || Amulet >= 0)
         {
-            filledSlots.Add(new FilledSlot("Gloves", Gloves, i => Gloves = i));
+            filledSlots.Add(new SlotInfo("Amulet", Amulet, i => Amulet = i));
         }
-        if (Belt >= 0)
+        if (getAll || Gloves >= 0)
         {
-            filledSlots.Add(new FilledSlot("Belt", Belt, i => Belt = i));
+            filledSlots.Add(new SlotInfo("Gloves", Gloves, i => Gloves = i));
+        }
+        if (getAll || Belt >= 0)
+        {
+            filledSlots.Add(new SlotInfo("Belt", Belt, i => Belt = i));
         }
         return filledSlots;
+    }
+
+    internal SlotInfo AvailableSlotFromSlotType(EquipSlots equipSlot)
+    {
+        var availableSlotName = (equipSlot switch
+        {
+            EquipSlots.TwoHands => "Two Handed",
+            EquipSlots.OneHand when WeaponRight >= 0 || WeaponLeft < 0 => "Left Hand",
+            EquipSlots.OneHand => "Right Hand",
+            EquipSlots.Ring when RRing >= 0 || LRing < 0 => "LRing",
+            EquipSlots.Ring => "RRing",
+            _ => Enum.GetName(equipSlot)
+        })!;
+        return GetFilledSlots(true).First(s => s.Name == availableSlotName);
     }
     #endregion
 }
