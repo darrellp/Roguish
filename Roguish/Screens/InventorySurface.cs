@@ -115,17 +115,24 @@ internal class InventorySurface : ScreenSurface
             _log.PrintProcessedString("No inventory items selected to equip");
             return;
         }
-        Debug.Assert(item != null);
+        Equip(item, EcsRxApp.Player);
+    }
+
+    internal void Equip(EcsEntity item, EcsEntity agent)
+    {
+        var isPlayer = agent == EcsRxApp.Player;
         if (!item.HasComponent<EquipableComponent>())
         {
-            var name = Utility.GetColoredName(item);
-            _log.PrintProcessedString($"We can't equip {name}");
+            if (isPlayer)
+            {
+                var name = Utility.GetColoredName(item);
+                _log.PrintProcessedString($"We can't equip {name}");
+            }
             return;
         }
 
         var equipableCmp = item.GetComponent<EquipableComponent>();
-        var equippedCmp = EcsRxApp.Player.GetComponent<EquippedComponent>();
-        var id = item.Id;
+        var equippedCmp = agent.GetComponent<EquippedComponent>();
         var oldIdAlt = -1;
 
         item.RemoveComponent<InBackpackComponent>();
@@ -159,8 +166,11 @@ internal class InventorySurface : ScreenSurface
         }
 
         slotInfo.SetId(item.Id);
-        _log.PrintProcessedString($"Equipped {Utility.GetColoredName(item)}");
-        _equip.Update(equippedCmp);
+        if (isPlayer)
+        {
+            _log.PrintProcessedString($"Equipped {Utility.GetColoredName(item)}");
+            _equip.Update(equippedCmp);
+        }
     }
     #endregion
 
