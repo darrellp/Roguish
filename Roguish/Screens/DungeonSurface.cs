@@ -10,7 +10,6 @@ using SadConsole.Entities;
 using SadConsole.Input;
 using SystemsRx.Events;
 using EcsRx.Extensions;
-using Roguish.ECS.Tasks;
 using Roguish.Info;
 using Path = GoRogue.Pathing.Path;
 using Keys = SadConsole.Input.Keys;

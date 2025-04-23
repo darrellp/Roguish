@@ -7,6 +7,7 @@ using Roguish.ECS.Components;
 using Roguish.Map_Generation;
 using Roguish.Screens;
 using EcsRx.Extensions;
+using EcsRx.Groups;
 using SadConsole.SerializedTypes;
 using SadRogue.Primitives.GridViews;
 
@@ -57,8 +58,16 @@ internal static partial class Serialize
         // Toss everything!
         EraseLevel();
         using JsonReader reader = new JsonTextReader(new StringReader(json));
+        DeserializeCurrentLevel(reader);
         DeserializeMaps(reader);
         DeserializeEcs(reader);
+    }
+
+    private static void DeserializeCurrentLevel(JsonReader reader)
+    {
+        reader.Read();
+        reader.Read();      // Property name
+        CurrentLevel = (int)reader.ReadAsInt32()!;
     }
 
     private static void EraseLevel()
@@ -134,6 +143,14 @@ internal static partial class Serialize
             }
         }
 
+        // Figure out armor counts.  We have to wait till everything has been deserialized - otherwise the
+        // equipped objects we need to look at in CalcArmourCount() may have not had their components deserialized
+        // yet and so we won't be able to determine whether they're armor or not.
+        var group = new Group(typeof(EquippedComponent));
+        foreach (var agent in EcsApp.EntityDatabase.GetEntitiesFor(group))
+        {
+            agent.GetComponent<EquippedComponent>().CalcArmourCount();
+        }
         Dungeon.SetVisibilities();
     }
 
@@ -229,8 +246,6 @@ internal static partial class Serialize
     
     private static void DeserializeMaps(JsonReader reader)
     {
-        reader.Read();      // Start object
-
         // The agent map and entity map are filled as a consequence of filling
         // the ECS entities so are not serialized explicitly here.
         DeserializeMap(MapGenerator.RevealMap, reader);
@@ -256,12 +271,19 @@ internal static partial class Serialize
 
         using JsonWriter writer = new JsonTextWriter(sw);
         writer.WriteStartObject();
+        SerializeCurrentLevel(writer);
         SerializeMaps(writer);
         writer.WritePropertyName("EcsEntities");
         SerializeEcs(writer);
         writer.WriteEndObject();
         var json = sb.ToString();
         return json;
+    }
+
+    private static void SerializeCurrentLevel(JsonWriter writer)
+    {
+        writer.WritePropertyName("Level");
+        writer.WriteValue(Program.CurrentLevel);
     }
 
     private static void SerializeEcs(JsonWriter writer)

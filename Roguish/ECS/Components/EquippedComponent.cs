@@ -43,19 +43,19 @@ public class EquippedComponent : EcsComponent
     public int Headgear
     {
         get => _headgear;
-        set { _headgear = value; CalcAc(); }
+        set { _headgear = value; CalcArmourCount(); }
     }
 
     public int Footwear
     {
         get => _footwear;
-        set { _footwear = value; CalcAc(); }
+        set { _footwear = value; CalcArmourCount(); }
     }
 
     public int Chest
     {
         get => _chest;
-        set { _chest = value; CalcAc(); }
+        set { _chest = value; CalcArmourCount(); }
     }
 
     public int LRing { get; set; } = -1;
@@ -66,13 +66,13 @@ public class EquippedComponent : EcsComponent
     public int Arms
     {
         get => _arms;
-        set { _arms = value; CalcAc(); }
+        set { _arms = value; CalcArmourCount(); }
     }
 
     public int Legs
     {
         get => _legs;
-        set { _legs = value; CalcAc(); }
+        set { _legs = value; CalcArmourCount(); }
     }
 
     public int Amulet { get; set; } = -1;
@@ -80,23 +80,28 @@ public class EquippedComponent : EcsComponent
     public int Gloves
     {
         get => _gloves;
-        set { _gloves = value; CalcAc(); }
+        set { _gloves = value; CalcArmourCount(); }
     }
 
     public int Belt
     {
         get => _belt;
-        set { _belt = value; CalcAc(); }
+        set { _belt = value; CalcArmourCount(); }
     }
     #endregion
 
     #region Miscellaneous
-    public void CalcAc()
+    public void CalcArmourCount()
     {
         ArmorCount = 0;
         foreach (var slot in GetFilledSlots())
         {
             var entity = EcsApp.EntityDatabase.GetEntity(slot.Id);
+            if (entity == null)
+            {
+                // This happens in deserialization
+                return;
+            }
             if (entity.HasComponent<ArmorTypeComponent>())
             {
                 var type = entity.GetComponent<ArmorTypeComponent>();
