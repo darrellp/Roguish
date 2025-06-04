@@ -131,6 +131,7 @@ internal class AgentInfo
             entity.AddComponent(new LevelItemComponent(CurrentLevel));
             entity.AddComponent(new PositionComponent(ScEntity.Position));
             entity.AddComponent<EquippedComponent>();
+            entity.AddComponent<BackpackComponent>();
             if (Task != null)
             {
                 entity.AddComponent(Task);

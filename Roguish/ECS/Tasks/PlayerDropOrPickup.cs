@@ -62,7 +62,7 @@ internal partial class TaskGetter
 
             foreach (var id in ids)
             {
-                MoveToBackpack(EcsApp.EntityDatabase.GetEntity(id), pos);
+                MoveToBackpack(agent, EcsApp.EntityDatabase.GetEntity(id), pos);
             }
             agent.RemoveComponent<SelectedIdsComponent>();
             t.FireOn = Ticks + (ulong)(PickUpTime * ids.Count);
@@ -84,7 +84,7 @@ internal partial class TaskGetter
 
         if (entities.Count != 0)
         {
-            MoveToBackpack(entities[0], pos);
+            MoveToBackpack(agent, entities[0], pos);
         }
         else
         {
@@ -92,7 +92,7 @@ internal partial class TaskGetter
         }
     }
 
-    internal static void MoveToBackpack(EcsEntity entity, Point pos)
+    internal static void MoveToBackpack(EcsEntity agent, EcsEntity entity, Point pos)
     {
         if (entity.HasComponent<DisplayComponent>())
         {
@@ -101,6 +101,10 @@ internal partial class TaskGetter
             Dungeon.RemoveScEntity(displayCmp.ScEntity);
             Mapgen.RemoveItemAt(pos, entity.Id);
         }
+        // Every agent should have a backpack
+        Debug.Assert(agent.HasComponent<BackpackComponent>());
+        var backpackCmp = agent.GetComponent<BackpackComponent>();
+        backpackCmp.AddToBackpack(entity);
 
         var name = Utility.GetColoredName(entity);
         Log.PrintProcessedString($"Picked up {name}");
@@ -139,6 +143,12 @@ internal partial class TaskGetter
             Dungeon.AddScEntity(scEntity);
         }
         item.AddComponent(itemPosCmp);
+
+        // Every agent should have a backpack
+        Debug.Assert(agent.HasComponent<BackpackComponent>());
+        var backpackCmp = agent.GetComponent<BackpackComponent>();
+        backpackCmp.RemoveFromBackpack(item.Id);
+
 
         var name = Utility.GetColoredName(item);
         Log.PrintProcessedString($"Dropped {name}");

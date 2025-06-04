@@ -1,5 +1,4 @@
 ﻿using Ninject;
-using SadConsole.Components;
 using SadConsole.Input;
 using SadConsole.UI;
 using SadConsole.UI.Controls;
@@ -35,7 +34,7 @@ internal class ChooseDialog : Window
             Position = new Point(2, Height - 2),
             FocusOnMouseClick = false
         };
-        btnOkay.Click += (sender, args) =>
+        btnOkay.Click += (_, _) =>
         {
             if (_onDismiss != null)
             {
@@ -50,7 +49,7 @@ internal class ChooseDialog : Window
             Position = new Point(7, Height - 2),
             FocusOnMouseClick = false
         };
-        btnCancel.Click += (sender, args) =>
+        btnCancel.Click += (_, _) =>
         {
             Close();
             Shutdown();
@@ -61,7 +60,7 @@ internal class ChooseDialog : Window
             Position = new Point(16, Height - 2),
             FocusOnMouseClick = false
         };
-        btnAll.Click += (sender, args) =>
+        btnAll.Click += (_, _) =>
         {
             SelectAll();
         };
