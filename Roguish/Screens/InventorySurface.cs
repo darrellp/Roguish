@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using EcsRx.Extensions;
 using Roguish.ECS;
 using Roguish.ECS.Components;
@@ -10,6 +11,7 @@ internal class InventorySurface : ScreenSurface
 {
     #region private fields
     private static List<InventoryItem> _inventorySlots = new(GameSettings.InvHeight);
+    private static List<InventoryItemNew> _inventorySlotsNew = new(GameSettings.InvHeight);
     private static int _selectedIndex = -1;
     private static LogScreen _log = null!;
     private static EquipSurface _equip = null!;
@@ -37,7 +39,22 @@ internal class InventorySurface : ScreenSurface
         Monitor.Enter(_lock);
         Surface.Print(0, _inventorySlots.Count, name, Color.White);
         _inventorySlots.Add(new InventoryItem(id, name));
+        AddItem(name);
         Monitor.Exit(_lock);
+    }
+
+    private void AddItem(string name)
+    {
+        var iSlot = _inventorySlotsNew.FindIndex(item => item.Name == name);
+        if (iSlot <= 0)
+        {
+            _inventorySlotsNew.Add(new InventoryItemNew(name, 1));
+        }
+        else
+        {
+            var isNew = _inventorySlotsNew[iSlot];
+            _inventorySlotsNew[iSlot] = new InventoryItemNew(name, isNew.Count + 1);
+        }
     }
     
     internal void RemoveItem(int id)
@@ -54,6 +71,24 @@ internal class InventorySurface : ScreenSurface
             var name = _inventorySlots[i].Name.PadRight(GameSettings.InvWidth);
             Surface.Print(0, i, name, Color.White);
         }
+
+        Surface.Print(0, _inventorySlots.Count, _clearLine);
+        if (_selectedIndex > index)
+        {
+            MoveHighlightTo(--_selectedIndex);
+        }
+        else if (_selectedIndex == index)
+        {
+            _selectedIndex = -1;
+        }
+        Monitor.Exit(_lock);
+    }
+
+    internal void RemoveItem(string name)
+    {
+        var index = _inventorySlotsNew.FindIndex(item => item.Name == name);
+        var isNew = _inventorySlotsNew[index];
+        Monitor.Enter(_lock);
 
         Surface.Print(0, _inventorySlots.Count, _clearLine);
         if (_selectedIndex > index)
@@ -175,4 +210,6 @@ internal class InventorySurface : ScreenSurface
     #endregion
 
     private record InventoryItem(int Id, string Name);
+
+    private record InventoryItemNew(string Name, int Count);
 }
