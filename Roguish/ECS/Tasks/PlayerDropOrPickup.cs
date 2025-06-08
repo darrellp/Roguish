@@ -116,6 +116,7 @@ internal partial class TaskGetter
     internal static void UserDrop(EcsEntity agent, RogueTask t)
     {
         var posCmp = agent.GetComponent<PositionComponent>();
+
         var pos = posCmp.Position.Value;
         var items = Mapgen.GetEntitiesAt(pos, true);
         if (items.Count >= 1 && items[0].HasComponent<StairsComponent>())
@@ -126,16 +127,21 @@ internal partial class TaskGetter
         }
 
         var itemPosCmp = new PositionComponent(pos);
-        var item = InventorySurface.SelectedEntity();
-        if (item == null)
+        var itemName = InventorySurface.SelectedEntity();
+        if (itemName == null)
         {
             Log.PrintProcessedString("Select an item to drop first");
             return;
         }
 
+        // Every agent should have a backpack
+        Debug.Assert(agent.HasComponent<BackpackComponent>());
+        var backpackCmp = agent.GetComponent<BackpackComponent>();
+        // Default in following call is to also remove from the backpack
+        var item = backpackCmp.EntityFromName(itemName);
+
         // Take it off the inventory screen
-        Inv.RemoveItem(item.Id);
-        item.RemoveComponent<InBackpackComponent>();
+        Inv.RemoveItem(itemName);
 
         if (item.HasComponent<DisplayComponent>())
         {
@@ -143,12 +149,6 @@ internal partial class TaskGetter
             Dungeon.AddScEntity(scEntity);
         }
         item.AddComponent(itemPosCmp);
-
-        // Every agent should have a backpack
-        Debug.Assert(agent.HasComponent<BackpackComponent>());
-        var backpackCmp = agent.GetComponent<BackpackComponent>();
-        backpackCmp.RemoveFromBackpack(item.Id);
-
 
         var name = Utility.GetColoredName(item);
         Log.PrintProcessedString($"Dropped {name}");

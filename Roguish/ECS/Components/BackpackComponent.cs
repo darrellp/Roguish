@@ -30,6 +30,31 @@ internal class BackpackComponent : EcsComponent
         _itemIdStacks[name].Add(entity.Id);
     }
 
+    internal EcsEntity EntityFromName(string name, bool fRemove = true)
+    {
+        if (!_itemIdStacks.TryGetValue(name, out var stack))
+        {
+            throw new InvalidOperationException($"Item '{name}' not found in backpack.");
+        }
+
+        Debug.Assert(stack.Count > 0, $"Item '{name}' with has zero items in it.");
+        int id = stack[0];
+
+        if (fRemove)
+        {
+            if (_itemIdStacks[name].Count <= 1)
+            {
+                _itemIdStacks.Remove(name);
+            }
+            else
+            {
+                _itemIdStacks[name].RemoveAt(0);
+            }
+        }
+
+        return EcsApp.EntityDatabase.GetEntity(id); ;
+    }
+
     internal EcsEntity RemoveFromBackpack(int id)
     {
         var name = "Unknown item";
@@ -40,12 +65,18 @@ internal class BackpackComponent : EcsComponent
             name = entity.GetComponent<DescriptionComponent>().Name;
         }
 
-        if (!_itemIdStacks.ContainsKey(name))
+        return RemoveFromBackpack(name);
+    }
+
+    internal EcsEntity RemoveFromBackpack(string name)
+    {
+        if (!_itemIdStacks.TryGetValue(name, out var idStack))
         {
             throw new InvalidOperationException($"Item '{name}' not found in backpack.");
         }
-        Debug.Assert(_itemIdStacks[name].Count > 0, $"Item '{name}' with id {id} has zero items in it.");
+        Debug.Assert(idStack.Count > 0, $"Item '{name}' has zero items in it.");
 
+        var entity = EcsApp.EntityDatabase.GetEntity(idStack[0]);
         if (_itemIdStacks[name].Count <= 1)
         {
             _itemIdStacks.Remove(name);
@@ -55,6 +86,5 @@ internal class BackpackComponent : EcsComponent
             _itemIdStacks[name].RemoveAt(0);
         }
         return entity;
-
     }
 }

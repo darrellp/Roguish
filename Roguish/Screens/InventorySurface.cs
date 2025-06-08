@@ -3,6 +3,7 @@ using System.Diagnostics;
 using EcsRx.Extensions;
 using Roguish.ECS;
 using Roguish.ECS.Components;
+using SadConsole;
 using SadConsole.Input;
 // ReSharper disable IdentifierTypo
 
@@ -10,7 +11,6 @@ namespace Roguish.Screens;
 internal class InventorySurface : ScreenSurface
 {
     #region private fields
-    private static List<InventoryItem> _inventorySlots = new(GameSettings.InvHeight);
     private static List<InventoryItemNew> _inventorySlotsNew = new(GameSettings.InvHeight);
     private static int _selectedIndex = -1;
     private static LogScreen _log = null!;
@@ -30,19 +30,6 @@ internal class InventorySurface : ScreenSurface
 
     #region Equipping
     #region Adding/Removing
-    internal void AddItem(int id)
-    {
-        var entity = EcsApp.EntityDatabase.GetEntity(id);
-        var name = entity.HasComponent<DescriptionComponent>()
-            ? entity.GetComponent<DescriptionComponent>().Name
-            : "Unnamed Object";
-        Monitor.Enter(_lock);
-        Surface.Print(0, _inventorySlots.Count, name, Color.White);
-        _inventorySlots.Add(new InventoryItem(id, name));
-        AddItem(name);
-        Monitor.Exit(_lock);
-    }
-
     private void AddItem(string name)
     {
         var iSlot = _inventorySlotsNew.FindIndex(item => item.Name == name);
@@ -57,40 +44,30 @@ internal class InventorySurface : ScreenSurface
         }
     }
     
-    internal void RemoveItem(int id)
-    {
-        var index = _inventorySlots.FindIndex(item => item.Id == id);
-        if (index < 0)
-        {
-            return;
-        }
-        Monitor.Enter(_lock);
-        _inventorySlots.RemoveAt(index);
-        for (var i = index; i < _inventorySlots.Count; i++)
-        {
-            var name = _inventorySlots[i].Name.PadRight(GameSettings.InvWidth);
-            Surface.Print(0, i, name, Color.White);
-        }
-
-        Surface.Print(0, _inventorySlots.Count, _clearLine);
-        if (_selectedIndex > index)
-        {
-            MoveHighlightTo(--_selectedIndex);
-        }
-        else if (_selectedIndex == index)
-        {
-            _selectedIndex = -1;
-        }
-        Monitor.Exit(_lock);
-    }
-
     internal void RemoveItem(string name)
     {
         var index = _inventorySlotsNew.FindIndex(item => item.Name == name);
-        var isNew = _inventorySlotsNew[index];
-        Monitor.Enter(_lock);
 
-        Surface.Print(0, _inventorySlots.Count, _clearLine);
+        // If we're trying to remove it then it better be in here!
+        Debug.Assert(index >= 0);
+
+        var slotSelected = _inventorySlotsNew[index];
+        var count = slotSelected.Count;
+        var newSlot = new InventoryItemNew(slotSelected.Name, count - 1);
+        Monitor.Enter(_lock);
+        if (count == 1)
+        {
+            _inventorySlotsNew.RemoveAt(index);
+
+            for (var i = index; i < _inventorySlotsNew.Count; i++)
+            {
+                Surface.Print(0, i, _inventorySlotsNew[i].ToString(), Color.White);
+            }
+
+            return;
+        }
+
+        Surface.Print(0, index, newSlot.ToString());
         if (_selectedIndex > index)
         {
             MoveHighlightTo(--_selectedIndex);
@@ -104,7 +81,7 @@ internal class InventorySurface : ScreenSurface
 
     internal void Clear()
     {
-        _inventorySlots.Clear();
+        _inventorySlotsNew.Clear();
         Surface.Clear();
         _selectedIndex = -1;
     }
@@ -114,7 +91,7 @@ internal class InventorySurface : ScreenSurface
     protected override void OnMouseLeftClicked(MouseScreenObjectState state)
     {
         var (x, y) = state.CellPosition;
-        if (y >= _inventorySlots.Count)
+        if (y >= _inventorySlotsNew.Count)
             return;
         MoveHighlightTo(y);
     }
@@ -128,28 +105,33 @@ internal class InventorySurface : ScreenSurface
 
         if (_selectedIndex >= 0)
         {
-            var name = _inventorySlots[_selectedIndex].Name;
-            Surface.Print(0, _selectedIndex, name, Color.White);
+            var slot = _inventorySlotsNew[_selectedIndex];
+            Surface.Print(0, _selectedIndex, slot.ToString(), Color.White);
         }
         _selectedIndex = index;
-        Surface.Print(0, index, _inventorySlots[index].Name, Color.Orange);
+        Surface.Print(0, index, _inventorySlotsNew[index].ToString(), Color.Orange);
     }
 
-    internal static EcsEntity? SelectedEntity()
+    internal static string SelectedEntity()
     {
-        return _selectedIndex < 0 ? null : EcsApp.EntityDatabase.GetEntity(_inventorySlots[_selectedIndex].Id);
+        var user = EcsRxApp.Player;
+        Debug.Assert(user.HasComponent<BackpackComponent>());
+        var bp = user.GetComponent<BackpackComponent>();
+        
+        return _selectedIndex < 0 ? null : _inventorySlotsNew[_selectedIndex].Name;
     }
     #endregion
 
 
     internal void Equip()
     {
-        var item = SelectedEntity();
-        if (item == null)
+        var itemName = SelectedEntity();
+        if (itemName == null)
         {
             _log.PrintProcessedString("No inventory items selected to equip");
             return;
         }
+        var item = EcsRxApp.Player.GetComponent<BackpackComponent>().EntityFromName(itemName);
         Equip(item, EcsRxApp.Player);
     }
 
@@ -211,5 +193,11 @@ internal class InventorySurface : ScreenSurface
 
     private record InventoryItem(int Id, string Name);
 
-    private record InventoryItemNew(string Name, int Count);
+    private record InventoryItemNew(string Name, int Count)
+    {
+        public override string ToString()
+        {
+            return Count > 1 ? $"{Name}({Count})" : Name;
+        }
+    };
 }
